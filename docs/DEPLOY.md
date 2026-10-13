@@ -312,6 +312,13 @@ Major upgrades (v16 → v17) are a project: test on a copy of each site first.
 
 ## 13. New client in under 2 hours
 
+**Shortcut:** steps 0:25 to 0:45 (wizard, warehouses, delivery-fee account, COD Settings, courier, no VAT) are one command:
+
+```bash
+bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
+  --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine'}"
+```
+
 | Time | Step |
 |------|------|
 | 0:00 | Client sends: company name, logo, domain, list of products with prices and stock, courier(s) and their rate card, users (names, emails, roles). |
