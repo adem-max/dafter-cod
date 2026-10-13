@@ -79,6 +79,8 @@ Newest decisions are added at the bottom of each section.
 - **Reports use plain SQL**: easier to read for someone who knows Oracle SQL than Frappe's query builder.
 - **Reports default to the COD Settings company** when the company filter is empty.
 - **A "COD" module sidebar** groups orders, settlements, reports and settings. No desktop icon: the icon grid is being retired in v16.
+- **The COD sidebar is mounted on ERPNext's left rail** (`dz_cod/dock/dz_cod/dz_cod.json`, a v16 "Dock" with `mount_on: erpnext`): a truck icon next to Vente/Stock. Without it a normal user had no way to reach the COD menu (it only opened from a direct link). Mounting rather than adding a separate "COD" app tile keeps one app and one rail for the client.
+- **No VAT by default**: ERPNext's setup wizard makes "Algeria TVA 19%" the default sales tax template, which the order form adds to every order typed by hand. The demo loader unticks it; for a client site it is a step of the new-client checklist (docs/DEPLOY.md, section 13), not code, so a VAT-registered client can keep it.
 
 ## Demo data
 

@@ -318,6 +318,7 @@ Major upgrades (v16 → v17) are a project: test on a copy of each site first.
 | 0:10 | DNS A record for the client domain → server (section 7). |
 | 0:15 | `bench new-site … --install-app erpnext`, `install-app dz_cod`, `enable-scheduler`, `setup nginx`, `setup lets-encrypt` (section 7). |
 | 0:25 | Setup wizard: Français / Algeria / DZD / Africa/Algiers, company name and abbreviation. |
+| 0:28 | **No VAT**: the wizard makes *Algeria TVA 19%* the default sales tax template, and the order form then adds 19 % to every order typed by hand. Search *Sales Taxes and Charges Template* → open *Algeria TVA 19% - XX* → untick **Default** → save. (Skip only if the client is VAT-registered.) |
 | 0:30 | Warehouses: create **Stock principal** and **Retours** (Stock → Warehouse). |
 | 0:35 | Account for delivery fees: Accounting → Chart of Accounts → under income accounts, add **Frais de livraison facturés**. |
 | 0:40 | **Paramètres COD**: company, main warehouse, returns warehouse, delivery-fee account, max calls (3), stock blocking (on/off), tolerance. |
