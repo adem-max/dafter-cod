@@ -4,6 +4,8 @@ Everything here is safe to run many times: it creates what is missing and
 never overwrites data the user changed (rates, webhook URLs, settings).
 """
 
+import os
+
 import frappe
 
 from dz_cod.setup.custom_fields import setup_custom_fields
@@ -26,6 +28,7 @@ def setup_all():
 	setup_wilayas()
 	setup_webhooks()
 	setup_selling_settings()
+	setup_home_block()
 	frappe.db.commit()
 
 
@@ -64,3 +67,24 @@ def setup_selling_settings():
 	"""A returned order must not keep stock reserved (belt and braces: we also
 	close returned orders)."""
 	frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 1)
+
+
+def setup_home_block():
+	"""The "life of an order" overview on the COD home page (Accueil).
+
+	A Custom HTML Block cannot be shipped as a file like the rest of the page,
+	so it is created here from setup/home_block/. It is ours: always refreshed.
+	"""
+	folder = os.path.join(os.path.dirname(__file__), "home_block")
+	with open(os.path.join(folder, "home.html")) as f:
+		html = f.read()
+	with open(os.path.join(folder, "home.css")) as f:
+		style = f.read()
+
+	if frappe.db.exists("Custom HTML Block", "COD Home"):
+		block = frappe.get_doc("Custom HTML Block", "COD Home")
+	else:
+		block = frappe.new_doc("Custom HTML Block")
+		block.name = "COD Home"
+	block.update({"html": html, "style": style, "private": 0})
+	block.save(ignore_permissions=True)

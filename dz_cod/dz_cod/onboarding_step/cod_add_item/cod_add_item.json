@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Ajouter un article",
+ "creation": "2026-10-14 12:00:00.000000",
+ "description": "Un article par produit (ou un modèle avec des variantes taille / couleur), avec son prix de vente.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "COD Add Item",
+ "owner": "Administrator",
+ "reference_document": "Item",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Ajoutez vos articles",
+ "validate_action": 1
+}

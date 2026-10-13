@@ -1,0 +1,64 @@
+{
+ "allow_roles": [
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "creation": "2026-10-14 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "DZ COD",
+ "name": "COD Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "COD Review Settings",
+   "is_optional": 0
+  },
+  {
+   "step": "COD Wilaya Rates",
+   "is_optional": 0
+  },
+  {
+   "step": "COD Add Courier",
+   "is_optional": 0
+  },
+  {
+   "step": "COD Add Item",
+   "is_optional": 0
+  },
+  {
+   "step": "COD Opening Stock",
+   "is_optional": 0
+  },
+  {
+   "step": "COD First Order",
+   "is_optional": 0
+  },
+  {
+   "step": "COD First Settlement",
+   "is_optional": 1
+  },
+  {
+   "step": "COD Check Outstanding",
+   "is_optional": 1
+  }
+ ],
+ "title": "Lancez votre boutique COD"
+}
