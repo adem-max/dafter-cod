@@ -333,7 +333,7 @@ bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
 | 0:50 | **Wilayas et tarifs**: list view → edit *Tarif domicile*, *Tarif stop desk* and the courier costs from the client's rate card; untick *Livrable* where the courier does not go. (Report view allows editing many rows quickly.) |
 | 1:05 | Products: Item Attributes Taille/Couleur exist? create them; import items with Data Import (Item, then Item Price), or create templates + variants. |
 | 1:25 | Opening stock: Stock Reconciliation (or Stock Entry "Material Receipt") into Stock principal. |
-| 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français. |
+| 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français (or English for someone who prefers it: the whole COD app follows). |
 | 1:45 | Webhooks: if the client uses n8n, paste the URLs and enable (docs/WEBHOOKS.md). |
 | 1:50 | Smoke test with the client: one order Nouvelle → Confirmer → Préparer → Expédier → Marquer livrée, then cancel/delete it. Check the delivery note and stock. |
 | 1:55 | Add the site to the backup check (it is automatic: the script backs up every site) and note the admin password in your password manager. |

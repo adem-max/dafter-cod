@@ -31,7 +31,7 @@ def execute(filters=None):
 def get_columns(group_by):
 	unit = _("pièces") if group_by != BY_WILAYA else _("commandes")
 	return [
-		{"fieldname": "name", "label": group_by, "fieldtype": "Data", "width": 220},
+		{"fieldname": "name", "label": _(group_by), "fieldtype": "Data", "width": 220},
 		{"fieldname": "label", "label": _("Désignation"), "fieldtype": "Data", "width": 220},
 		{
 			"fieldname": "delivered",

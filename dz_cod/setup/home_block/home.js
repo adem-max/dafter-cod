@@ -19,6 +19,11 @@ function save(state) {
 	frappe.xcall("dz_cod.cod.home.set_guide_state", { state });
 }
 
+// English guide for users whose language is English (en, en-US, en-GB...)
+if ((frappe.boot.lang || "").startsWith("en")) {
+	box.classList.add("lang-en");
+}
+
 show(frappe.defaults.get_user_default(KEY) || "open");
 
 toggle.addEventListener("click", () => {

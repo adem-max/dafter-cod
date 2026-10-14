@@ -76,6 +76,7 @@ Newest decisions are added at the bottom of each section.
 
 - **Doctype names in English, user-facing labels in French**: code stays English (rule 6), and `translations/fr.csv` shows "Versement", "Paramètres COD", "Commande", etc.
 - **Sales Order is relabelled "Commande"** and Delivery Note "Bon de livraison" in French through the same CSV.
+- **English as a second language, by translation, not by rewriting**: the app stays written in French and `translations/en.csv` gives the English version of each text (about 250). Frappe's usual way is the opposite (English source, French translation), but switching would mean renaming every label and changing the workflow state values already stored in clients' orders. With a translation file nothing stored changes: an order stays "Livrée" in the database and is shown as "Delivered" to English users. Each user picks their language (User → Language). `tests/test_translations.py` fails when a new French text has no English line. The welcome guide (plain HTML) holds both versions. "Client" is deliberately not translated: Frappe uses "Client" as an English word too (OAuth Client), and the CSV applies to the whole site. Account names, item names and other data stay as entered.
 - **Reports use plain SQL**: easier to read for someone who knows Oracle SQL than Frappe's query builder.
 - **Reports default to the COD Settings company** when the company filter is empty.
 - **A "COD" module sidebar** groups orders, settlements, reports and settings. No desktop icon: the icon grid is being retired in v16.

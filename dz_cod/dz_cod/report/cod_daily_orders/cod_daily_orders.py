@@ -22,7 +22,7 @@ def execute(filters=None):
 def get_columns():
 	columns = [{"fieldname": "date", "label": _("Date"), "fieldtype": "Date", "width": 110}]
 	for state in S.ALL_STATES:
-		columns.append({"fieldname": scrub(state), "label": state, "fieldtype": "Int", "width": 95})
+		columns.append({"fieldname": scrub(state), "label": _(state), "fieldtype": "Int", "width": 95})
 	columns += [
 		{"fieldname": "total", "label": _("Total"), "fieldtype": "Int", "width": 80},
 		{"fieldname": "amount", "label": _("Montant (hors annulées)"), "fieldtype": "Currency", "width": 140},
@@ -78,7 +78,7 @@ def get_chart(rows):
 		"data": {
 			"labels": [str(row["date"]) for row in rows],
 			"datasets": [
-				{"name": state, "values": [row.get(scrub(state), 0) for row in rows]}
+				{"name": _(state), "values": [row.get(scrub(state), 0) for row in rows]}
 				for state in S.ALL_STATES
 			],
 		},

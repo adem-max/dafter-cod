@@ -2,7 +2,6 @@
 .cod-home h3 { font-size: 18px; font-weight: 600; margin: 0; }
 .cod-home .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .cod-home .buttons { display: flex; gap: 6px; flex-shrink: 0; }
-.cod-home.collapsed .body { display: none; }
 .cod-home.collapsed .head { margin-bottom: 0; }
 .cod-home .lead { color: var(--text-muted, #6b7280); font-size: 13px; margin: 0 0 16px; max-width: 760px; }
 .cod-home .flow { display: flex; align-items: stretch; gap: 4px; margin-bottom: 14px; }
@@ -21,3 +20,8 @@
 .cod-home .side > div { padding: 8px 10px; border-radius: 8px; background: var(--subtle-fg, #f8f8f8); }
 .cod-home .routine { border-left: 3px solid var(--primary, #2490ef); padding: 4px 12px; }
 .cod-home .routine div + div { margin-top: 4px; }
+/* Language: French by default; home.js adds .lang-en for English users */
+.cod-home [lang="en"] { display: none; }
+.cod-home.lang-en [lang="en"] { display: block; }
+.cod-home.lang-en [lang="fr"] { display: none; }
+.cod-home.collapsed .body { display: none !important; }

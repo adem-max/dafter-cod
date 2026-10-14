@@ -150,7 +150,7 @@ def get_detail_columns():
 		{"fieldname": "dz_tracking_number", "label": _("N° de suivi"), "fieldtype": "Data", "width": 190},
 		{"fieldname": "customer_name", "label": _("Client"), "fieldtype": "Data", "width": 160},
 		{"fieldname": "wilaya", "label": _("Wilaya"), "fieldtype": "Data", "width": 130},
-		{"fieldname": "state", "label": _("État"), "fieldtype": "Data", "width": 90},
+		{"fieldname": "state_label", "label": _("État"), "fieldtype": "Data", "width": 90},
 		{"fieldname": "dz_delivered_on", "label": _("Livrée le"), "fieldtype": "Date", "width": 100},
 		{"fieldname": "days", "label": _("Jours"), "fieldtype": "Int", "width": 70},
 		{"fieldname": "dz_cod_amount", "label": _("À encaisser"), "fieldtype": "Currency", "width": 120},
@@ -169,6 +169,7 @@ def get_detail_columns():
 def get_detail_rows(orders):
 	for order in orders:
 		order.days = date_diff(today(), order.dz_delivered_on or order.dz_shipped_on)
+		order.state_label = _(order.state)  # shown in the user's language
 	return orders
 
 

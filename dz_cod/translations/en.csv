@@ -1,0 +1,248 @@
+Nouvelle,New
+Injoignable,Unreachable
+Confirmée,Confirmed
+Préparée,Packed
+Expédiée,Shipped
+Livrée,Delivered
+Réglée,Settled
+Retournée,Returned
+Annulée,Cancelled
+Annulée après confirmation,Cancelled after confirmation
+Annuler,Cancel
+Confirmer,Confirm
+Marquer livrée,Mark delivered
+Pas de réponse,No answer
+Préparer,Pack
+Marquer retournée,Mark returned
+Marquer réglée,Mark settled
+Expédier,Ship
+Commande COD,COD Order
+Stock insuffisant :,Not enough stock:
+Confirmation impossible,Cannot confirm
+Attention,Warning
+un numéro de téléphone valide (ex. 0555123456),a valid phone number (e.g. 0555123456)
+la wilaya,the wilaya
+la commune et l'adresse (livraison à domicile),the commune and address (home delivery)
+"Impossible de confirmer, il manque : {0}","Cannot confirm, missing: {0}"
+Choisissez le transporteur avant d'expédier.,Choose the courier before shipping.
+Saisissez le n° de suivi du colis avant d'expédier.,Enter the parcel tracking number before shipping.
+La commande doit être à l'état {0}.,The order must be in state {0}.
+Choisissez le compte des frais de livraison dans les Paramètres COD.,Choose the delivery fee account in COD Settings.
+"{0} : besoin {1}, disponible {2}","{0}: need {1}, available {2}"
+Pas de bon de livraison pour la commande {0}.,No delivery note for order {0}.
+La commande {0} n'est pas retournée.,Order {0} is not returned.
+Le retour de la commande {0} est déjà inspecté.,The return of order {0} has already been inspected.
+Les quantités inspectées doivent correspondre exactement aux quantités retournées.,Inspected quantities must exactly match the returned quantities.
+"Retour inspecté : {0} remis en stock, {1} mis au rebut.","Return inspected: {0} back in stock, {1} written off."
+Connecteur inconnu pour le transporteur {0}.,Unknown connector for courier {0}.
+Le connecteur Yalidine n'est pas encore implémenté (documentation officielle non vérifiée).,The Yalidine connector is not implemented yet (official documentation not verified).
+Où en sont les commandes des 30 derniers jours.,Where the orders of the last 30 days stand.
+Le nombre de commandes saisies chaque jour.,The number of orders entered each day.
+Réafficher le guide d'accueil,Show the welcome guide again
+Le guide est de retour sur la page Accueil COD.,The guide is back on the COD home page.
+Société,Company
+Entrepôt principal,Main warehouse
+Entrepôt d'où partent les commandes.,Warehouse orders are shipped from.
+Entrepôt des retours,Returns warehouse
+"Les colis retournés arrivent ici, en attente d'inspection.","Returned parcels arrive here, waiting for inspection."
+Compte des frais de livraison,Delivery fee account
+Compte de produits où sont enregistrés les frais de livraison facturés aux clients.,Income account where delivery fees charged to customers are recorded.
+Bloquer la confirmation si stock insuffisant,Block confirmation when stock is short
+"Si coché, une commande ne peut pas être confirmée sans stock disponible. Sinon, un simple avertissement s'affiche (utile si vous imprimez à la demande).","If ticked, an order cannot be confirmed without available stock. Otherwise a warning is shown (useful if you print on demand)."
+Commandes et versements,Orders and settlements
+Nombre maximum d'appels,Maximum number of calls
+"Après ce nombre d'appels sans réponse, le bouton « Pas de réponse » disparaît : il faut confirmer ou annuler.","After this many unanswered calls, the ""No answer"" button disappears: the order must be confirmed or cancelled."
+Tolérance d'écart (DA),Difference tolerance (DA)
+Écart accepté automatiquement entre le montant attendu et le montant versé par le transporteur.,Difference accepted automatically between the expected amount and the amount paid by the courier.
+Transporteur par défaut,Default courier
+Synchroniser les statuts automatiquement,Sync statuses automatically
+"Chaque heure, demander au transporteur le statut des colis expédiés et passer automatiquement les commandes en Livrée ou Retournée.","Every hour, ask the courier for the status of shipped parcels and move orders to Delivered or Returned automatically."
+L'entrepôt {0} n'appartient pas à la société {1}.,Warehouse {0} does not belong to company {1}.
+L'entrepôt des retours doit être différent de l'entrepôt principal.,The returns warehouse must be different from the main warehouse.
+Veuillez d'abord remplir les Paramètres COD.,Please fill in COD Settings first.
+Charger les commandes livrées,Load delivered orders
+Date du versement,Settlement date
+Référence transporteur,Courier reference
+Référence du relevé ou du virement du transporteur.,Reference of the courier's statement or transfer.
+Montant reçu,Amount received
+"Argent réellement reçu (virement, chèque ou espèces).","Money actually received (transfer, cheque or cash)."
+Colis du relevé,Parcels in the statement
+"Une ligne par colis du relevé du transporteur. Bouton « Charger les commandes livrées » pour pré-remplir, ou « Téléverser » pour importer un fichier CSV.","One line per parcel in the courier's statement. Use ""Load delivered orders"" to pre-fill, or ""Upload"" to import a CSV file."
+Lignes,Lines
+Résumé,Summary
+Colis réglés,Parcels paid
+Montant réglé,Amount paid
+Colis en litige,Parcels in dispute
+"Lignes avec un écart non accepté, un n° inconnu ou une commande invalide.","Lines with an unaccepted difference, an unknown number or an invalid order."
+Montant en litige,Amount in dispute
+Colis livrés manquants,Missing delivered parcels
+Commandes livrées par ce transporteur jusqu'à la date du versement mais absentes de ce relevé et pas encore réglées.,Orders delivered by this courier up to the settlement date but missing from this statement and not yet paid.
+Montant manquant,Amount missing
+Totaux du relevé,Statement totals
+Total encaissé,Total collected
+Total des frais,Total fees
+Total net du relevé,Statement net total
+Écart reçu / relevé,Difference received / statement
+Montant reçu moins total net du relevé. Doit être 0.,Amount received minus the statement net total. Should be 0.
+Remarques,Remarks
+Versement {0} annulé : retour à l'état {1}.,Settlement {0} cancelled: back to state {1}.
+Ligne {0} : la commande {1} apparaît deux fois.,Line {0}: order {1} appears twice.
+Commande,Order
+Laisser vide : retrouvée automatiquement par le n° de suivi.,Leave empty: found automatically from the tracking number.
+Encaissé,Collected
+Montant que le transporteur dit avoir encaissé auprès du client.,Amount the courier says it collected from the customer.
+Frais,Fees
+Frais retenus par le transporteur pour ce colis.,Fees the courier kept for this parcel.
+Net versé,Net paid
+Montant attendu,Expected amount
+Frais prévus,Expected fees
+Écart,Difference
+Net versé moins net attendu. Négatif = il manque de l'argent.,Net paid minus net expected. Negative = money is missing.
+Statut,Status
+Inconnue,Unknown
+Déjà réglée,Already settled
+Invalide,Invalid
+Accepter,Accept
+Cocher pour accepter l'écart : la commande sera quand même marquée Réglée.,Tick to accept the difference: the order will still be marked Settled.
+Nom de la wilaya,Wilaya name
+Wilaya d'origine,Original wilaya
+Pour les wilayas créées en 2026 : wilaya d'origine (certains transporteurs utilisent encore l'ancien découpage).,For wilayas created in 2026: the wilaya they came from (some couriers still use the old map).
+Livrable,Deliverable
+Décocher si vous ne livrez pas dans cette wilaya.,Untick if you do not deliver to this wilaya.
+Zone tarifaire,Rate zone
+Tarifs de livraison (DA),Delivery rates (DA)
+Tarif domicile,Home rate
+Prix facturé au client pour une livraison à domicile.,Price charged to the customer for home delivery.
+Tarif stop desk,Stop desk rate
+Prix facturé au client pour un retrait au bureau du transporteur.,Price charged to the customer for pick-up at the courier's office.
+Stop desk disponible,Stop desk available
+Coût transporteur domicile,"Courier cost, home"
+Ce que le transporteur vous retient par colis livré à domicile.,What the courier keeps per parcel delivered to the door.
+Coût transporteur stop desk,"Courier cost, stop desk"
+Ce que le transporteur vous retient par colis livré en stop desk.,What the courier keeps per parcel delivered to a stop desk.
+La wilaya {0} n'est pas livrable.,Wilaya {0} is not deliverable.
+Pas de stop desk disponible dans la wilaya {0}.,No stop desk available in wilaya {0}.
+Lancez votre boutique COD,Get your COD shop ready
+Ajoutez votre transporteur,Add your courier
+Un transporteur est un fournisseur avec la case *Est un transporteur* cochée. Choisissez le connecteur *Manuel* si vous saisissez le n° de suivi à la main.,A courier is a supplier with *Is Transporter* ticked. Choose the *Manuel* (manual) connector if you type the tracking number yourself.
+Ajouter un transporteur,Add a courier
+Ajoutez vos articles,Add your items
+"Un article par produit (ou un modèle avec des variantes taille / couleur), avec son prix de vente.","One item per product (or a template with size / colour variants), with its selling price."
+Ajouter un article,Add an item
+Suivez l'argent chez les transporteurs,Track the money held by couriers
+"Le rapport *Encours transporteurs* montre, pour chaque transporteur, ce qu'il vous doit encore.",The *Courier outstanding* report shows what each courier still owes you.
+Voir l'encours,See outstanding
+Argent encaissé par les transporteurs et pas encore versé.,Money collected by couriers and not paid to you yet.
+Saisissez votre première commande,Enter your first order
+"Client, téléphone, wilaya, adresse, articles. Enregistrez : les frais de livraison s'ajoutent. Puis suivez le bouton *Actions* : Confirmer, Préparer, Expédier, Marquer livrée.","Customer, phone, wilaya, address, items. Save: the delivery fee is added. Then follow the *Actions* button: Confirm, Pack, Ship, Mark delivered."
+Nouvelle commande,New order
+Enregistrez un versement,Record a settlement
+"Quand le transporteur vous paie, créez un Versement et cliquez *Charger les commandes livrées* : les commandes payées passent en Réglée, les écarts sont signalés.","When the courier pays you, create a Settlement and click *Load delivered orders*: paid orders move to Settled and differences are flagged."
+Nouveau versement,New settlement
+Entrez votre stock de départ,Enter your opening stock
+"Une *Réception de matériel* dans l'entrepôt principal, avec la quantité et le prix d'achat de chaque article.","A *Material Receipt* into the main warehouse, with the quantity and purchase price of each item."
+Entrer le stock,Enter stock
+Vérifiez les Paramètres COD,Check COD Settings
+"Société, entrepôt principal, entrepôt des retours, compte des frais de livraison, nombre d'appels avant d'abandonner. Tout le reste en dépend.","Company, main warehouse, returns warehouse, delivery fee account, number of calls before giving up. Everything else depends on it."
+Ouvrir les Paramètres COD,Open COD Settings
+Ajustez les tarifs par wilaya,Adjust rates per wilaya
+"Les 69 wilayas sont créées avec des tarifs d'exemple. Mettez les prix Domicile et Stop desk de votre transporteur, et décochez *Livrable* là où il ne va pas.","The 69 wilayas are created with sample rates. Enter your courier's home and stop desk prices, and untick *Deliverable* where it does not go."
+Ouvrir les wilayas,Open wilayas
+Détail par commande,Detail per order
+Livrées non réglées,"Delivered, not settled"
+Montant dû (net),Amount owed (net)
+Dont en litige,Of which in dispute
+Plus ancienne livraison,Oldest delivery
+Jours d'attente,Days waiting
+Sur la route,On the road
+Montant sur la route,Amount on the road
+État,State
+Jours,Days
+À encaisser,To collect
+Net dû,Net owed
+En litige (versement),In dispute (settlement)
+Du,From
+Au,To
+Montant (hors annulées),Amount (excluding cancelled)
+Taux de confirmation,Confirmation rate
+Taux d'annulation,Cancellation rate
+Vide = société des Paramètres COD,Empty = company in COD Settings
+Expédiées du,Shipped from
+Grouper par,Group by
+Produit,Product
+pièces,pieces
+commandes,orders
+Désignation,Name
+Livrées ({0}),Delivered ({0})
+Retournées ({0}),Returned ({0})
+En transit ({0}),In transit ({0})
+Taux de retour (%),Return rate (%)
+Accueil,Home
+Commandes,Orders
+Versements,Settlements
+Clients,Customers
+Articles,Items
+Bons de livraison,Delivery notes
+Rapports,Reports
+Commandes par jour,Orders per day
+Taux de retour,Return rate
+Encours transporteurs,Courier outstanding
+Stock par entrepôt,Stock per warehouse
+Paramètres,Settings
+Wilayas et tarifs,Wilayas and rates
+Transporteurs,Couriers
+Paramètres COD,COD Settings
+Au quotidien,Day to day
+À confirmer,To confirm
+À expédier,To ship
+En transit,In transit
+Argent à recevoir,Money to receive
+Commandes par état (30 j),Orders by state (30 d)
+Inspecter le retour,Inspect return
+Expédier la commande,Ship the order
+Laissez vide si le transporteur est connecté (le numéro sera demandé automatiquement).,Leave empty if the courier is connected (the number will be requested automatically).
+Inspection du retour,Return inspection
+Indiquez pour chaque article combien de pièces sont en bon état (remises en stock) et combien sont abîmées (mises au rebut).,"For each item, enter how many pieces are in good condition (back to stock) and how many are damaged (written off)."
+Article,Item
+Bon état,Good
+Abîmé,Damaged
+Valider l'inspection,Confirm inspection
+Coordonnées COD,COD contact details
+Téléphone,Phone
+Adresse,Address
+Livraison COD,COD delivery
+Téléphone 2,Phone 2
+Source de la commande,Order source
+Site web,Website
+Autre,Other
+Type de livraison,Delivery type
+Domicile,Home
+Tarif de livraison manuel,Manual delivery fee
+"Cochez pour saisir vous-même les frais (livraison offerte, remise...).","Tick to enter the fee yourself (free delivery, discount...)."
+Frais de livraison,Delivery fee
+Montant à encaisser,Amount to collect
+Total que le livreur doit encaisser auprès du client (articles + livraison).,Total the delivery person must collect from the customer (items + delivery).
+Suivi COD,COD tracking
+Appels sans réponse,Unanswered calls
+Transporteur,Courier
+N° de suivi,Tracking number
+Frais transporteur prévus,Expected courier fee
+Montant que le transporteur devrait retenir (d'après la grille de la wilaya).,Amount the courier should keep (from the wilaya rate table).
+Bon de livraison,Delivery note
+Bon de retour,Return note
+Retour inspecté,Return inspected
+Versement,Settlement
+Confirmée le,Confirmed on
+Expédiée le,Shipped on
+Livrée le,Delivered on
+Retournée le,Returned on
+Réglée le,Settled on
+Commande (retour),Order (return)
+Commande retournée dont ce mouvement traite l'inspection.,Returned order whose inspection this entry records.
+Intégration transporteur (COD),Courier integration (COD)
+Connecteur,Connector
+Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests.,Manuel: you type the tracking number. Mock: offline simulation for tests.
+Manuel,Manual
+Afficher,Show
+Réduire,Collapse
+Masquer ce guide ? Vous pourrez le réafficher depuis Paramètres COD.,Hide this guide? You can show it again from COD Settings.

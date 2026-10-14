@@ -38,6 +38,7 @@ and chapter 4 (stock). Everything else hangs off those three.
 12. [Production: processes, backups, updates](#12-production)
 13. [How to read an error](#13-how-to-read-an-error)
 14. [A four-week learning plan](#14-a-four-week-learning-plan)
+15. [Two languages: French and English](#15-two-languages-french-and-english)
 
 ---
 
@@ -76,6 +77,7 @@ dz_cod/
   tests/                   <- automated tests
   public/js/sales_order.js <- extra buttons on the order form
   translations/fr.csv      <- French names for our doctypes
+  translations/en.csv      <- English version of every French text of the app
 ```
 
 ### The lines that matter
@@ -819,3 +821,59 @@ name, and compare the number of orders. Time it. That number is your
 | 2 | Chapters 1, 2, 5, 7: do every "break it" and "rebuild it". Run the tests after each change. |
 | 3 | Chapters 6, 8, 9, 10, 11. Build one small n8n workflow that receives "Expédiée" and sends you a Telegram/WhatsApp message. |
 | 4 | DEPLOY.md on a cheap test VPS from zero, including a real restore. Time the "new client in under 2 hours" checklist. Then you are ready for your friend's shop. |
+
+---
+
+## 15. Two languages: French and English
+
+Read `dz_cod/translations/en.csv`, then `dz_cod/tests/test_translations.py`.
+
+### Mental model
+
+The app is **written in French**: field labels, workflow states, buttons,
+messages. English is a **lookup table** laid on top, like a translated
+item description: `en.csv` pairs each French text with its English text.
+When a user's language is English, Frappe swaps every text it finds in the
+table. The data does not change: an order is still stored as "Livrée", it is
+only *shown* as "Delivered".
+
+Each user picks their language (**User → Language**). On the same site, one
+person can work in French and another in English.
+
+### The lines that matter
+
+```python
+frappe.throw(_("La wilaya {0} n'est pas livrable.").format(self.name))   # Python: _()
+```
+```javascript
+frm.add_custom_button(__("Inspecter le retour"), ...)                     // JavaScript: __()
+```
+```
+La wilaya {0} n'est pas livrable.,Wilaya {0} is not deliverable.          # en.csv
+```
+
+A text that is not wrapped in `_()` / `__()` is never translated. Labels in
+JSON files (fields, menu, home page) and in `setup/custom_fields.py` are
+translated automatically.
+
+The welcome guide on the home page is plain HTML, which Frappe does not
+translate: `setup/home_block/home.html` holds both versions, and `home.js`
+shows the one matching the user's language.
+
+### Break it on purpose
+
+Add a new button label in `public/js/sales_order.js`, e.g. `__("Rappeler")`,
+and run `bench --site test.localhost run-tests --module dz_cod.tests.test_translations`.
+The test fails and names the text and the file: add `Rappeler,Call back` to
+`en.csv` and run it again. Undo.
+
+### Rebuild it yourself
+
+List what is missing at any time:
+`bench --site test.localhost execute dz_cod.tests.i18n_strings.print_missing`.
+
+### Failure modes
+
+- **A text stays French for an English user**: it is not wrapped in `_()` / `__()`, or its line in `en.csv` does not match exactly (accents, punctuation, final full stop).
+- **A text from ERPNext changes too**: `en.csv` applies to the whole site. Never translate a French word that is also an English word used by Frappe or ERPNext (that is why "Client" is left alone).
+- **Change not visible**: `bench --site <site> clear-cache`, then Ctrl+Shift+R in the browser.
