@@ -80,11 +80,13 @@ def setup_home_block():
 		html = f.read()
 	with open(os.path.join(folder, "home.css")) as f:
 		style = f.read()
+	with open(os.path.join(folder, "home.js")) as f:
+		script = f.read()
 
 	if frappe.db.exists("Custom HTML Block", "COD Home"):
 		block = frappe.get_doc("Custom HTML Block", "COD Home")
 	else:
 		block = frappe.new_doc("Custom HTML Block")
 		block.name = "COD Home"
-	block.update({"html": html, "style": style, "private": 0})
+	block.update({"html": html, "style": style, "script": script, "private": 0})
 	block.save(ignore_permissions=True)

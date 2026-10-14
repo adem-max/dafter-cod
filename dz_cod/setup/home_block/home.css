@@ -1,5 +1,9 @@
 .cod-home { color: var(--text-color, #1f272e); font-size: 13px; line-height: 1.5; }
-.cod-home h3 { font-size: 18px; font-weight: 600; margin: 0 0 6px; }
+.cod-home h3 { font-size: 18px; font-weight: 600; margin: 0; }
+.cod-home .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.cod-home .buttons { display: flex; gap: 6px; flex-shrink: 0; }
+.cod-home.collapsed .body { display: none; }
+.cod-home.collapsed .head { margin-bottom: 0; }
 .cod-home .lead { color: var(--text-muted, #6b7280); font-size: 13px; margin: 0 0 16px; max-width: 760px; }
 .cod-home .flow { display: flex; align-items: stretch; gap: 4px; margin-bottom: 14px; }
 @media (max-width: 900px) { .cod-home .flow { flex-wrap: wrap; } .cod-home .arrow { display: none; } .cod-home .step { flex-basis: 45%; } }
