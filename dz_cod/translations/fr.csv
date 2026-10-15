@@ -14,3 +14,8 @@ COD Return Rate,Taux de retour (COD)
 COD Courier Outstanding,Encours transporteurs (COD)
 COD Orders Per Day,Commandes
 COD Orders By State,Commandes
+DZ Commune,Commune
+DZ Commune List,Liste des communes
+DZ Stop Desk,Bureau stop desk
+DZ Stop Desk List,Bureaux stop desk
+Courier Webhook Event,Événement webhook transporteur

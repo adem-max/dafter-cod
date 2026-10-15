@@ -35,7 +35,6 @@ Le retour de la commande {0} est déjà inspecté.,The return of order {0} has a
 Les quantités inspectées doivent correspondre exactement aux quantités retournées.,Inspected quantities must exactly match the returned quantities.
 "Retour inspecté : {0} remis en stock, {1} mis au rebut.","Return inspected: {0} back in stock, {1} written off."
 Connecteur inconnu pour le transporteur {0}.,Unknown connector for courier {0}.
-Le connecteur Yalidine n'est pas encore implémenté (documentation officielle non vérifiée).,The Yalidine connector is not implemented yet (official documentation not verified).
 Où en sont les commandes des 30 derniers jours.,Where the orders of the last 30 days stand.
 Le nombre de commandes saisies chaque jour.,The number of orders entered each day.
 Réafficher le guide d'accueil,Show the welcome guide again
@@ -244,8 +243,64 @@ Commande (retour),Order (return)
 Commande retournée dont ce mouvement traite l'inspection.,Returned order whose inspection this entry records.
 Intégration transporteur (COD),Courier integration (COD)
 Connecteur,Connector
-Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests.,Manuel: you type the tracking number. Mock: offline simulation for tests.
 Manuel,Manual
 Afficher,Show
 Réduire,Collapse
 Masquer ce guide ? Vous pourrez le réafficher depuis Paramètres COD.,Hide this guide? You can show it again from COD Settings.
+Yalidine ne répond pas ({0}). Réessayez plus tard.,Yalidine is not answering ({0}). Try again later.
+"Yalidine : quota d'appels dépassé, réessayez dans {0} s.","Yalidine: call quota exceeded, try again in {0} s."
+Yalidine refuse les clés API du transporteur {0} (API ID / API Token).,Yalidine refuses the API keys of courier {0} (API ID / API Token).
+Yalidine a répondu par une erreur {0} : {1},Yalidine answered with error {0}: {1}
+Renseignez l'API ID et l'API Token du transporteur {0}.,Fill in the API ID and API Token of courier {0}.
+Commune « {0} » inconnue de Yalidine dans la wilaya {1}. Choisissez-la dans la liste.,"Commune ""{0}"" is unknown to Yalidine in wilaya {1}. Pick it from the list."
+Yalidine ne livre pas la commune {0}.,Yalidine does not deliver to commune {0}.
+Yalidine a refusé le colis : {0},Yalidine refused the parcel: {0}
+réponse inattendue,unexpected answer
+Expédition impossible,Cannot ship
+Choisissez le bureau stop desk de la commande avant d'expédier.,Choose the order's stop desk office before shipping.
+Yalidine accepte un montant à encaisser de 0 à {0} DA.,Yalidine accepts an amount to collect from 0 to {0} DA.
+Import inconnu.,Unknown import.
+Un import est déjà en cours pour ce transporteur.,An import is already running for this courier.
+Import lancé en arrière-plan. Un message s'affichera à la fin (1 à 2 minutes).,Import started in the background. A message will show when it is done (1 to 2 minutes).
+Le connecteur du transporteur {0} n'est pas Yalidine.,The connector of courier {0} is not Yalidine.
+L'import des tarifs Yalidine a échoué : voir le journal des erreurs.,The Yalidine price import failed: see the Error Log.
+Tarifs Yalidine importés pour {0} wilayas (coûts transporteur seulement).,Yalidine prices imported for {0} wilayas (courier costs only).
+Renseignez la wilaya de départ du transporteur {0}.,Fill in the departure wilaya of courier {0}.
+L'import des communes Yalidine a échoué : voir le journal des erreurs.,The Yalidine communes import failed: see the Error Log.
+{0} communes et {1} bureaux stop desk importés de Yalidine.,{0} communes and {1} stop desk offices imported from Yalidine.
+ID de l'événement,Event ID
+Type d'événement,Event type
+Survenu le,Occurred on
+Traitement,Processing
+En attente,Pending
+Traité,Processed
+Ignoré,Ignored
+Erreur,Error
+Données reçues,Received data
+Remarque,Remark
+Nom de la commune,Commune name
+Stop desk dans la commune,Stop desk in the commune
+ID Yalidine,Yalidine ID
+Identifiant de la commune chez Yalidine.,The commune's identifier at Yalidine.
+Wilaya chez Yalidine,Wilaya at Yalidine
+Nom de la wilaya tel que Yalidine l'écrit.,The wilaya name as Yalidine spells it.
+Nom du bureau,Office name
+ID du bureau,Office ID
+Identifiant du bureau chez le transporteur (envoyé avec le colis).,The office's identifier at the courier (sent with the parcel).
+Coordonnées GPS,GPS coordinates
+Importer les tarifs Yalidine,Import Yalidine prices
+Les coûts transporteur de chaque wilaya seront remplacés par les tarifs de votre compte Yalidine. Les tarifs facturés aux clients ne changent pas. Continuer ?,The courier costs of every wilaya will be replaced by the prices of your Yalidine account. The prices charged to customers do not change. Continue?
+Importer communes et bureaux Yalidine,Import Yalidine communes and offices
+Bureau stop desk,Stop desk office
+Bureau du transporteur où le client retire son colis.,The courier's office where the customer collects the parcel.
+Étiquette du transporteur,Courier label
+Statut chez le transporteur,Status at the courier
+"Ex. « Retour vers vendeur » : le colis revient, mais n'est pas encore arrivé.","E.g. ""Retour vers vendeur"": the parcel is coming back but has not arrived yet."
+Statut transporteur mis à jour le,Courier status updated on
+Paiement chez le transporteur,Payment at the courier
+N° de paiement transporteur,Courier payment no.
+"Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. Yalidine : colis, statuts et tarifs par l'API Yalidine.","Manuel: you type the tracking number. Mock: offline simulation for tests. Yalidine: parcels, statuses and prices through the Yalidine API."
+Wilaya de départ,Departure wilaya
+Wilaya où vous remettez les colis au transporteur.,Wilaya where you hand the parcels to the courier.
+Clé secrète webhook,Webhook secret key
+Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).,Copied from the courier's Webhooks dashboard (see docs/COURIER_INTEGRATION.md).
