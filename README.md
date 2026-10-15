@@ -11,12 +11,12 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 |---|---|
 | **Target version** | **ERPNext v16.50.0 on Frappe v16.51.0** (branch `version-16`, latest stable major in October 2026) |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
-| **Automated tests** | 62 tests (22 unit + 40 integration on a real ERPNext site), all passing, on the development site and on a brand-new site. |
+| **Automated tests** | 84 tests (25 unit + 59 integration on a real ERPNext site), all passing on the test site. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |
 | **Not run** | production mode (nginx, supervisor, Let's Encrypt, firewall), off-site copy to a real cloud storage (the backup script was run with a local rclone remote), the Fedora/distrobox commands — they need a public server or a Fedora machine. Marked *(not run here)* in the docs. |
-| **Not implemented** | real courier API connector: `couriers/yalidine.py` is a documented stub (`# UNTESTED`, raises "not implemented"). The Yalidine and ZR Express APIs have since been researched; the implementation plan is in docs/COURIER_INTEGRATION.md. |
+| **Not implemented** | a connector checked against a real courier account. The Yalidine connector is built from a verbatim copy of Yalidine's docs and tested with a fake HTTP layer only: run the checklist in docs/COURIER_INTEGRATION.md §4 with a client's keys before using it. ZR Express is not built (waiting for its official docs). |
 
 ## What you get
 
@@ -45,7 +45,7 @@ and **missing**; submitting marks paid orders "Réglée".
 
 **Courier connectors** — one interface (create shipment, get status, get
 tracking); **Manuel** (default), **Mock** (offline, for tests and demos),
-**Yalidine** (stub). Optional hourly status sync.
+**Yalidine** (parcels, labels, statuses, price / commune / stop-desk import, signed webhooks; not yet checked on a real account). Optional hourly status sync.
 
 **Webhooks for n8n** — on Confirmée, Expédiée, Livrée, Retournée, with a
 documented JSON payload (docs/WEBHOOKS.md). Created disabled.
@@ -113,9 +113,9 @@ dz_cod/
     shipping.py               shipping fee from the wilaya rate table
     settlement.py             settlement matching rules (pure functions)
     phone.py                  Algerian phone numbers
-  couriers/                 courier connectors: base, mock, yalidine (stub), hourly sync
+  couriers/                 courier connectors: base, mock, yalidine (+ imports, webhook), hourly sync
   setup/                    created on install/migrate: custom fields, workflow, wilayas, webhooks
-  dz_cod/doctype/           DZ Wilaya, COD Settings, Courier Settlement (+ Item)
+  dz_cod/doctype/           DZ Wilaya, COD Settings, Courier Settlement (+ Item), DZ Commune, DZ Stop Desk, Courier Webhook Event
   dz_cod/report/            the 3 reports
   dz_cod/sidebar/           the "COD" menu
   demo/                     demo shop loader and wipe

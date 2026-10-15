@@ -108,13 +108,13 @@ Check which site is shown: `grep default_site sites/common_site_config.json`.
 In a second terminal (`distrobox enter erp`, `cd ~/frappe-bench`):
 
 ```bash
-bench --site test.localhost run-tests --app dz_cod                         # all 62 tests (~30 s)
+bench --site test.localhost run-tests --app dz_cod                         # all 84 tests (~40 s)
 bench --site test.localhost run-tests --module dz_cod.tests.test_rules     # only the fast rule tests
 bench --site test.localhost run-tests --module dz_cod.tests.test_order_flow --test test_confirm_reserves_stock
                                                                            # one single test
 ```
 
-Expected end of output: `OK` after "Ran 22 tests" and after "Ran 40 tests".
+Expected end of output: `OK` after "Ran 25 tests" and after "Ran 59 tests".
 
 ## 7. Change the code and see the result
 
