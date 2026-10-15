@@ -1,4 +1,5 @@
 """Integration tests: courier connectors, hourly status sync, webhooks, reports.
+(The Yalidine connector has its own file: test_yalidine.py.)
 
 Run: bench --site <site> run-tests --module dz_cod.tests.test_couriers_and_webhooks
 """
@@ -14,7 +15,6 @@ from dz_cod.couriers import get_adapter
 from dz_cod.couriers.base import DELIVERED, RETURNED
 from dz_cod.couriers.mock import set_mock_status
 from dz_cod.couriers.sync import sync_shipped_orders
-from dz_cod.couriers.yalidine import YalidineAdapter
 from dz_cod.setup.webhooks import webhook_name
 from dz_cod.tests import helpers as h
 
@@ -43,11 +43,6 @@ class TestCourierSync(IntegrationTestCase):
 		self.assertEqual(state(delivered), S.DELIVERED)
 		self.assertEqual(state(returned), S.RETURNED)
 		self.assertEqual(state(travelling), S.SHIPPED)
-
-	def test_yalidine_stub_says_it_is_not_implemented(self):
-		adapter = YalidineAdapter(frappe.get_doc("Supplier", h.MOCK_COURIER))
-		with self.assertRaises(NotImplementedError):
-			adapter.get_status("ABC")
 
 	def test_manual_adapter_gives_no_tracking(self):
 		self.assertIsNone(get_adapter(h.MANUAL_COURIER).create_shipment(h.make_order()))
