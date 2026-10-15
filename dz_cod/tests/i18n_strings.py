@@ -1,12 +1,12 @@
 """Collect every text of the app that a user can see on screen.
 
-The app is written in French (labels, workflow states, messages). English
-comes from dz_cod/translations/en.csv, which pairs each French text with its
-English version. test_translations.py uses this list to make sure no text is
-forgotten in en.csv.
+The app is written in French (labels, workflow states, messages). Each other
+language has a file in dz_cod/translations/ (en.csv, ar.csv) that pairs each
+French text with its translation. test_translations.py uses this list to make
+sure no text is forgotten in any of them.
 
-Run by hand to list the texts still missing from en.csv:
-    bench --site <site> execute dz_cod.tests.i18n_strings.print_missing
+Run by hand to list the texts still missing from a language file:
+    bench --site <site> execute dz_cod.tests.i18n_strings.print_missing --kwargs "{'lang': 'ar'}"
 """
 
 import csv
@@ -17,38 +17,49 @@ import re
 
 APP = os.path.dirname(os.path.dirname(__file__))  # .../dz_cod/dz_cod (the Python package)
 
+# The languages we translate into (French is the language of the code)
+LANGUAGES = ("en", "ar")
+
 # _("...") in Python and __("...") in JavaScript, single or double quotes
 PY_CALL = re.compile(r"""(?<![\w.])_\(\s*(["'])((?:\\.|(?!\1).)+)\1""")
 JS_CALL = re.compile(r"""__\(\s*(["'`])((?:\\.|(?!\1).)+)\1""")
 # Choices of a Select filter in a report: options: "Produit\nArticle\nWilaya"
 JS_SELECT = re.compile(r'options:\s*"([^"]*\\n[^"]*)"')
 
-# Texts that are the same in both languages (names, brands, codes)
-SAME_IN_ENGLISH = {
+# Never in our language files, whatever the language
+NOT_TRANSLATED = {
+	# Names, brands, codes
 	"COD",
-	"Wilaya",
-	"Wilayas",
-	"Stop desk",
 	"Instagram",
 	"Facebook",
 	"WhatsApp",
 	"TikTok",
 	"Mock",
 	"Yalidine",
-	"Zone",
-	"Code",
-	"Commune",
 	"API ID",
-	"Webhooks (n8n)",
-	# Already English (or the same word in English)
-	"Amended From",
 	"API Token",
+	"Webhooks (n8n)",
+	# English words that Frappe itself already translates into every language.
+	# Our files apply to the whole site: a line here would also rename Frappe's own.
+	"Amended From",
 	"OK",
 	"Total",
 	"Date",
 	"Note",
-	"Client",  # also an English word in Frappe (OAuth Client): must not be renamed
+	"Client",  # Frappe's "Client" (OAuth Client)
+	"Code",
 }
+
+# Words that are the same in English, but need translating into Arabic
+SAME_IN_ENGLISH = {
+	"Wilaya",
+	"Stop desk",
+	"Commune",
+}
+
+
+def skipped(lang):
+	return NOT_TRANSLATED | (SAME_IN_ENGLISH if lang == "en" else set())
 
 DOCTYPE_TEXT_KEYS = ("label", "description")
 STEP_TEXT_KEYS = ("title", "description", "action_label", "report_description")
@@ -61,7 +72,7 @@ def read_json(path):
 
 def add(found, text, where):
 	text = (text or "").strip()
-	if text and text not in SAME_IN_ENGLISH:
+	if text:
 		found.setdefault(text, where)
 
 
@@ -78,8 +89,8 @@ def from_field(found, field, where):
 		add_select_options(found, field.get("options"), where)
 
 
-def collect():
-	"""Return {text: where it was found} for every user-facing text of the app."""
+def collect(lang="en"):
+	"""Return {text: where it was found} for every text `lang` must translate."""
 	from dz_cod.cod import states
 	from dz_cod.setup import custom_fields, workflow
 
@@ -140,31 +151,39 @@ def collect():
 		for match in JS_SELECT.finditer(source):
 			add_select_options(found, unescape(match.group(1)), os.path.relpath(path, APP))
 
-	return found
+	# Names of our own doctypes, reports and charts are English. French gets them
+	# from fr.csv; every other non-English language needs them in its file too.
+	if lang != "en":
+		for folder in ("doctype", "report", "dashboard_chart"):
+			for path in glob.glob(os.path.join(APP, "dz_cod", folder, "*", "*.json")):
+				add(found, read_json(path).get("name"), os.path.relpath(path, APP))
+
+	skip = skipped(lang)
+	return {text: where for text, where in found.items() if text not in skip}
 
 
 def unescape(text):
 	return text.replace("\\'", "'").replace('\\"', '"').replace("\\n", "\n")
 
 
-def en_csv_path():
-	return os.path.join(APP, "translations", "en.csv")
+def csv_path(lang):
+	return os.path.join(APP, "translations", f"{lang}.csv")
 
 
-def read_en_csv():
-	"""Return {French text: English text} from translations/en.csv."""
-	path = en_csv_path()
+def read_csv(lang):
+	"""Return {French text: translation} from translations/<lang>.csv."""
+	path = csv_path(lang)
 	if not os.path.exists(path):
 		return {}
 	with open(path, encoding="utf-8", newline="") as f:
 		return {row[0]: row[1] for row in csv.reader(f) if len(row) >= 2}
 
 
-def missing():
-	known = read_en_csv()
-	return {text: where for text, where in collect().items() if text not in known}
+def missing(lang):
+	known = read_csv(lang)
+	return {text: where for text, where in collect(lang).items() if text not in known}
 
 
-def print_missing():
-	for text, where in sorted(missing().items(), key=lambda item: item[1]):
+def print_missing(lang="en"):
+	for text, where in sorted(missing(lang).items(), key=lambda item: item[1]):
 		print(f"{where}\t{text}")

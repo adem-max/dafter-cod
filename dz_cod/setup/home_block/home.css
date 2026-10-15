@@ -18,10 +18,11 @@
 .cod-home .red { background: var(--bg-red, #fde8e8); color: var(--text-on-red, #b91c1c); }
 .cod-home .side { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 14px; }
 .cod-home .side > div { padding: 8px 10px; border-radius: 8px; background: var(--subtle-fg, #f8f8f8); }
-.cod-home .routine { border-left: 3px solid var(--primary, #2490ef); padding: 4px 12px; }
+.cod-home .routine { border-inline-start: 3px solid var(--primary, #2490ef); padding: 4px 12px; }
 .cod-home .routine div + div { margin-top: 4px; }
-/* Language: French by default; home.js adds .lang-en for English users */
-.cod-home [lang="en"] { display: none; }
-.cod-home.lang-en [lang="en"] { display: block; }
-.cod-home.lang-en [lang="fr"] { display: none; }
+/* Language: French by default; home.js adds .lang-en or .lang-ar */
+.cod-home [lang="en"], .cod-home [lang="ar"] { display: none; }
+.cod-home.lang-en [lang="en"], .cod-home.lang-ar [lang="ar"] { display: block; }
+.cod-home.lang-en [lang="fr"], .cod-home.lang-ar [lang="fr"] { display: none; }
+.cod-home.lang-ar { direction: rtl; }
 .cod-home.collapsed .body { display: none !important; }

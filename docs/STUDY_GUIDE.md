@@ -38,7 +38,7 @@ and chapter 4 (stock). Everything else hangs off those three.
 12. [Production: processes, backups, updates](#12-production)
 13. [How to read an error](#13-how-to-read-an-error)
 14. [A four-week learning plan](#14-a-four-week-learning-plan)
-15. [Two languages: French and English](#15-two-languages-french-and-english)
+15. [Languages: French, English, Arabic](#15-languages-french-english-arabic)
 
 ---
 
@@ -78,6 +78,7 @@ dz_cod/
   public/js/sales_order.js <- extra buttons on the order form
   translations/fr.csv      <- French names for our doctypes
   translations/en.csv      <- English version of every French text of the app
+  translations/ar.csv      <- Arabic version (Frappe switches the screen to right-to-left)
 ```
 
 ### The lines that matter
@@ -824,17 +825,18 @@ name, and compare the number of orders. Time it. That number is your
 
 ---
 
-## 15. Two languages: French and English
+## 15. Languages: French, English, Arabic
 
-Read `dz_cod/translations/en.csv`, then `dz_cod/tests/test_translations.py`.
+Read `dz_cod/translations/en.csv` and `ar.csv`, then `dz_cod/tests/test_translations.py`.
 
 ### Mental model
 
 The app is **written in French**: field labels, workflow states, buttons,
-messages. English is a **lookup table** laid on top, like a translated
-item description: `en.csv` pairs each French text with its English text.
-When a user's language is English, Frappe swaps every text it finds in the
-table. The data does not change: an order is still stored as "Livrée", it is
+messages. Each other language is a **lookup table** laid on top, like a
+translated item description: `en.csv` pairs each French text with its English
+text, `ar.csv` with its Arabic text. When a user's language is English or
+Arabic, Frappe swaps every text it finds in that table. For Arabic, Frappe
+also mirrors the whole screen (right-to-left); we have nothing to do for that. The data does not change: an order is still stored as "Livrée", it is
 only *shown* as "Delivered".
 
 Each user picks their language (**User → Language**). On the same site, one
@@ -850,6 +852,7 @@ frm.add_custom_button(__("Inspecter le retour"), ...)                     // Jav
 ```
 ```
 La wilaya {0} n'est pas livrable.,Wilaya {0} is not deliverable.          # en.csv
+La wilaya {0} n'est pas livrable.,الولاية {0} غير قابلة للتوصيل.          # ar.csv
 ```
 
 A text that is not wrapped in `_()` / `__()` is never translated. Labels in
@@ -857,23 +860,33 @@ JSON files (fields, menu, home page) and in `setup/custom_fields.py` are
 translated automatically.
 
 The welcome guide on the home page is plain HTML, which Frappe does not
-translate: `setup/home_block/home.html` holds both versions, and `home.js`
+translate: `setup/home_block/home.html` holds the three versions, and `home.js`
 shows the one matching the user's language.
+
+The names of our own doctypes and reports are English ("Courier Settlement",
+"COD Daily Orders"): `fr.csv` gives their French names and `ar.csv` their
+Arabic names. English users simply see them as they are.
 
 ### Break it on purpose
 
 Add a new button label in `public/js/sales_order.js`, e.g. `__("Rappeler")`,
 and run `bench --site test.localhost run-tests --module dz_cod.tests.test_translations`.
-The test fails and names the text and the file: add `Rappeler,Call back` to
-`en.csv` and run it again. Undo.
+The test fails and names the text and the file, once for English and once
+for Arabic: add `Rappeler,Call back` to `en.csv` and `Rappeler,إعادة الاتصال`
+to `ar.csv`, and run it again. Undo.
 
 ### Rebuild it yourself
 
 List what is missing at any time:
-`bench --site test.localhost execute dz_cod.tests.i18n_strings.print_missing`.
+`bench --site test.localhost execute dz_cod.tests.i18n_strings.print_missing --kwargs "{'lang': 'ar'}"`.
+
+Adding a fourth language (Tamazight, for example) is the same work: a new
+`<code>.csv` file, the code added to `LANGUAGES` in `tests/i18n_strings.py`,
+and a fourth copy of the welcome guide.
 
 ### Failure modes
 
-- **A text stays French for an English user**: it is not wrapped in `_()` / `__()`, or its line in `en.csv` does not match exactly (accents, punctuation, final full stop).
-- **A text from ERPNext changes too**: `en.csv` applies to the whole site. Never translate a French word that is also an English word used by Frappe or ERPNext (that is why "Client" is left alone).
+- **A text stays French for an English or Arabic user**: it is not wrapped in `_()` / `__()`, or its line in the language file does not match exactly (accents, punctuation, final full stop).
+- **A text from ERPNext changes too**: a language file applies to the whole site. Never translate a French word that is also an English word used by Frappe or ERPNext (that is why "Client" and "Code" are left alone: Frappe already translates them).
+- **Some English left on an Arabic screen** ("Optional", "Terms", "4 of 6 steps done"): that is Frappe's own text, not translated into Arabic by Frappe. Not ours to fix.
 - **Change not visible**: `bench --site <site> clear-cache`, then Ctrl+Shift+R in the browser.

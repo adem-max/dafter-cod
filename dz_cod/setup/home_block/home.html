@@ -1,9 +1,10 @@
 <div class="cod-home">
-	<!-- Two copies of the guide: French (default) and English. home.js shows
-	     the one matching the user's language (User > Language). -->
+	<!-- Three copies of the guide: French (default), English and Arabic.
+	     home.js shows the one matching the user's language (User > Language). -->
 	<div class="head">
 		<h3 lang="fr">Bienvenue dans COD</h3>
 		<h3 lang="en">Welcome to COD</h3>
+		<h3 lang="ar">مرحبًا بك في COD</h3>
 		<div class="buttons">
 			<button class="btn btn-xs btn-default toggle">Réduire</button>
 			<button class="btn btn-xs btn-default dismiss">✕</button>
@@ -73,6 +74,39 @@
 		<div class="routine">
 			<div><b>Every day</b>: confirm the New orders, pack and ship, mark deliveries and returns.</div>
 			<div><b>Every week</b>: enter each courier's Settlement and check the differences (missing or disputed amounts).</div>
+		</div>
+	</div>
+
+	<div class="body" lang="ar" dir="rtl">
+		<p class="lead">
+			كل طلبية (إنستغرام، فيسبوك، الموقع الإلكتروني، الهاتف) تتبع المسار نفسه،
+			من أول مكالمة حتى وصول المال إليك. في كل طلبية، لا يعرض زر
+			<b>الإجراءات</b> إلا الخطوات الممكنة في تلك اللحظة.
+		</p>
+
+		<div class="flow">
+			<div class="step"><span class="pill blue">جديدة</span><p>تم إدخال الطلبية. تُحسب رسوم التوصيل حسب الولاية.</p></div>
+			<div class="arrow">←</div>
+			<div class="step"><span class="pill blue">مؤكدة</span><p>تم الاتصال بالعميل هاتفيًا. حُجز المخزون.</p></div>
+			<div class="arrow">←</div>
+			<div class="step"><span class="pill orange">مجهّزة</span><p>تم تغليف الطرد، وهو جاهز للانطلاق.</p></div>
+			<div class="arrow">←</div>
+			<div class="step"><span class="pill purple">مُرسلة</span><p>سُلّم الطرد لشركة التوصيل: أُنشئ إشعار التسليم وخرج المخزون.</p></div>
+			<div class="arrow">←</div>
+			<div class="step"><span class="pill green">مُسلّمة</span><p>دفع العميل لعامل التوصيل. المال الآن لدى شركة التوصيل.</p></div>
+			<div class="arrow">←</div>
+			<div class="step"><span class="pill green">مُسدّدة</span><p>دفعت لك شركة التوصيل (التسديد).</p></div>
+		</div>
+
+		<div class="side">
+			<div><span class="pill yellow">تعذّر الاتصال</span> لا رد: أعد الاتصال (3 محاولات افتراضيًا)، ثم أكّد أو ألغِ.</div>
+			<div><span class="pill red">ملغاة</span> قبل التأكيد أو بعده. يُحرَّر المخزون المحجوز.</div>
+			<div><span class="pill red">مُرتجعة</span> رُفض الطرد: يصل إلى مستودع المرتجعات. <b>فحص المرتجع</b> يعيد القطع السليمة إلى المخزون.</div>
+		</div>
+
+		<div class="routine">
+			<div><b>كل يوم</b>: أكّد الطلبيات الجديدة، جهّز وأرسل، وسجّل التسليمات والمرتجعات.</div>
+			<div><b>كل أسبوع</b>: أدخل تسديد كل شركة توصيل وراجع الفروق (المبالغ الناقصة أو المتنازع عليها).</div>
 		</div>
 	</div>
 </div>

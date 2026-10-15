@@ -19,9 +19,10 @@ function save(state) {
 	frappe.xcall("dz_cod.cod.home.set_guide_state", { state });
 }
 
-// English guide for users whose language is English (en, en-US, en-GB...)
-if ((frappe.boot.lang || "").startsWith("en")) {
-	box.classList.add("lang-en");
+// Guide in the user's language: English (en, en-US...), Arabic (ar...), else French
+const lang = (frappe.boot.lang || "").slice(0, 2);
+if (lang === "en" || lang === "ar") {
+	box.classList.add("lang-" + lang);
 }
 
 show(frappe.defaults.get_user_default(KEY) || "open");

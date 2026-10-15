@@ -123,6 +123,7 @@ dz_cod/
   public/js/sales_order.js  "Expédier" dialog and return inspection on the order form
   translations/fr.csv       French names for our doctypes and reports
   translations/en.csv       English version of every French text (per-user language)
+  translations/ar.csv       Arabic version (right-to-left)
 scripts/backup_offsite.sh   nightly backup of all sites, copied off the server
 ```
 
@@ -131,7 +132,7 @@ scripts/backup_offsite.sh   nightly backup of all sites, copied off the server
 1. ERPNext / Frappe core is never modified: everything is in this app.
 2. Standard doctypes first (Sales Order, Delivery Note, Stock Entry, Customer, Supplier, Item); new doctypes only where nothing fits (justified in DECISIONS.md).
 3. Per-client differences live in settings and data, never in code branches.
-4. Short, plainly commented code, English in code, French for users (English available per user: User → Language).
+4. Short, plainly commented code, English in code, French for users (English and Arabic available per user: User → Language).
 5. Currency DZD, no VAT logic.
 
 License: MIT.
