@@ -311,7 +311,7 @@ Statut chez le transporteur,الحالة لدى شركة التوصيل
 Statut transporteur mis à jour le,تاريخ تحديث حالة شركة التوصيل
 Paiement chez le transporteur,الدفع لدى شركة التوصيل
 N° de paiement transporteur,رقم دفعة شركة التوصيل
-"Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. Yalidine : colis, statuts et tarifs par l'API Yalidine.",يدوي: تُدخل رقم التتبع بنفسك. Mock: محاكاة دون اتصال للاختبارات. Yalidine: الطرود والحالات والأسعار عبر واجهة Yalidine.
+"Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. Yalidine : colis, statuts et tarifs par l'API Yalidine. ZR Express : bientôt disponible, saisie manuelle en attendant.",يدوي: تُدخل رقم التتبع بنفسك. Mock: محاكاة دون اتصال للاختبارات. Yalidine: الطرود والحالات والأسعار عبر واجهة Yalidine. ZR Express: قريبًا، الإدخال يدوي في الانتظار.
 Wilaya de départ,ولاية الانطلاق
 Wilaya où vous remettez les colis au transporteur.,الولاية التي تسلّم فيها الطرود لشركة التوصيل.
 Clé secrète webhook,المفتاح السري للـ webhook
@@ -319,3 +319,5 @@ Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATI
 Courier Webhook Event,حدث webhook لشركة التوصيل
 DZ Commune,البلدية
 DZ Stop Desk,مكتب الاستلام
+"Connecteur ZR Express : bientôt disponible. En attendant, saisissez le n° de suivi à l'expédition et passez les commandes en Livrée ou Retournée à la main.",موصل ZR Express: قريبًا. في الانتظار، أدخل رقم التتبع عند الإرسال وانقل الطلبات إلى «مُسلّمة» أو «مُرتجعة» يدويًا.
+ZR Express,ZR Express

@@ -47,6 +47,23 @@ class TestCourierSync(IntegrationTestCase):
 	def test_manual_adapter_gives_no_tracking(self):
 		self.assertIsNone(get_adapter(h.MANUAL_COURIER).create_shipment(h.make_order()))
 
+	def test_zr_express_is_coming_soon_and_works_like_manual(self):
+		# A courier can already be set to "ZR Express": tracking typed by hand,
+		# no status from the courier, until the real connector is built
+		options = frappe.get_meta("Supplier").get_field("dz_courier_adapter").options.split("\n")
+		self.assertIn("ZR Express", options)
+		frappe.db.set_value("Supplier", h.MANUAL_COURIER, "dz_courier_adapter", "ZR Express")
+		frappe.clear_document_cache("Supplier", h.MANUAL_COURIER)
+		try:
+			adapter = get_adapter(h.MANUAL_COURIER)
+			self.assertTrue(adapter.coming_soon)
+			self.assertIsNone(adapter.create_shipment(h.make_order()))
+			self.assertEqual(adapter.get_status("ZR-123"), "unknown")
+		finally:
+			# The cached courier would outlive the rollback: put it back
+			frappe.db.set_value("Supplier", h.MANUAL_COURIER, "dz_courier_adapter", "Manuel")
+			frappe.clear_document_cache("Supplier", h.MANUAL_COURIER)
+
 
 class TestWebhooks(IntegrationTestCase):
 	"""Webhooks are queued during the save and sent after the commit.

@@ -1,7 +1,9 @@
-// Courier (Supplier) form: Yalidine imports, see dz_cod/couriers/yalidine_import.py
+// Courier (Supplier) form: Yalidine imports, see dz_cod/couriers/yalidine_import.py,
+// and the "coming soon" notice for ZR Express (dz_cod/couriers/zrexpress.py)
 
 frappe.ui.form.on("Supplier", {
 	refresh(frm) {
+		show_coming_soon(frm);
 		if (frm.is_new() || frm.doc.dz_courier_adapter !== "Yalidine") {
 			return;
 		}
@@ -22,7 +24,24 @@ frappe.ui.form.on("Supplier", {
 			"Yalidine"
 		);
 	},
+
+	dz_courier_adapter(frm) {
+		show_coming_soon(frm);
+	},
 });
+
+function show_coming_soon(frm) {
+	if (frm.doc.dz_courier_adapter === "ZR Express") {
+		frm.set_intro(
+			__(
+				"Connecteur ZR Express : bientôt disponible. En attendant, saisissez le n° de suivi à l'expédition et passez les commandes en Livrée ou Retournée à la main."
+			),
+			"orange"
+		);
+	} else {
+		frm.set_intro();
+	}
+}
 
 function start_import(frm, what) {
 	frappe

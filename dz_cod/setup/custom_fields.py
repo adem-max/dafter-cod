@@ -257,10 +257,11 @@ SUPPLIER_FIELDS = [
 		"fieldname": "dz_courier_adapter",
 		"label": "Connecteur",
 		"fieldtype": "Select",
-		"options": "Manuel\nMock\nYalidine",
+		"options": "Manuel\nMock\nYalidine\nZR Express",
 		"default": "Manuel",
 		"description": "Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. "
-		"Yalidine : colis, statuts et tarifs par l'API Yalidine.",
+		"Yalidine : colis, statuts et tarifs par l'API Yalidine. "
+		"ZR Express : bientôt disponible, saisie manuelle en attendant.",
 		"insert_after": "dz_courier_section",
 	},
 	{"fieldname": "dz_api_id", "label": "API ID", "fieldtype": "Data", "insert_after": "dz_courier_adapter"},

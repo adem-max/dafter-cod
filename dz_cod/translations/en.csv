@@ -299,8 +299,10 @@ Statut chez le transporteur,Status at the courier
 Statut transporteur mis à jour le,Courier status updated on
 Paiement chez le transporteur,Payment at the courier
 N° de paiement transporteur,Courier payment no.
-"Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. Yalidine : colis, statuts et tarifs par l'API Yalidine.","Manuel: you type the tracking number. Mock: offline simulation for tests. Yalidine: parcels, statuses and prices through the Yalidine API."
+"Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. Yalidine : colis, statuts et tarifs par l'API Yalidine. ZR Express : bientôt disponible, saisie manuelle en attendant.","Manuel: you type the tracking number. Mock: offline simulation for tests. Yalidine: parcels, statuses and prices through the Yalidine API. ZR Express: coming soon, typed by hand until then."
 Wilaya de départ,Departure wilaya
 Wilaya où vous remettez les colis au transporteur.,Wilaya where you hand the parcels to the courier.
 Clé secrète webhook,Webhook secret key
 Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).,Copied from the courier's Webhooks dashboard (see docs/COURIER_INTEGRATION.md).
+"Connecteur ZR Express : bientôt disponible. En attendant, saisissez le n° de suivi à l'expédition et passez les commandes en Livrée ou Retournée à la main.","ZR Express connector: coming soon. Until then, type the tracking number when shipping and move orders to Delivered or Returned by hand."
+ZR Express,ZR Express

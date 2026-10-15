@@ -6,12 +6,14 @@ from frappe import _
 from dz_cod.couriers.base import ManualAdapter
 from dz_cod.couriers.mock import MockAdapter
 from dz_cod.couriers.yalidine import YalidineAdapter
+from dz_cod.couriers.zrexpress import ZRExpressAdapter
 
 # Value of the Supplier field "Connecteur" -> adapter class
 ADAPTERS = {
 	"Manuel": ManualAdapter,
 	"Mock": MockAdapter,
 	"Yalidine": YalidineAdapter,
+	"ZR Express": ZRExpressAdapter,  # coming soon: works like Manuel for now
 }
 
 

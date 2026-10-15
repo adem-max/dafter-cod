@@ -11,12 +11,12 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 |---|---|
 | **Target version** | **ERPNext v16.50.0 on Frappe v16.51.0** (branch `version-16`, latest stable major in October 2026) |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
-| **Automated tests** | 84 tests (25 unit + 59 integration on a real ERPNext site), all passing on the test site. |
+| **Automated tests** | 85 tests (25 unit + 60 integration on a real ERPNext site), all passing on the test site. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |
 | **Not run** | production mode (nginx, supervisor, Let's Encrypt, firewall), off-site copy to a real cloud storage (the backup script was run with a local rclone remote), the Fedora/distrobox commands — they need a public server or a Fedora machine. Marked *(not run here)* in the docs. |
-| **Not implemented** | a connector checked against a real courier account. The Yalidine connector is built from a verbatim copy of Yalidine's docs and tested with a fake HTTP layer only: run the checklist in docs/COURIER_INTEGRATION.md §4 with a client's keys before using it. ZR Express is not built (waiting for its official docs). |
+| **Not implemented** | a connector checked against a real courier account. The Yalidine connector is built from a verbatim copy of Yalidine's docs and tested with a fake HTTP layer only: run the checklist in docs/COURIER_INTEGRATION.md §4 with a client's keys before using it. ZR Express is "coming soon": it can be chosen as a courier's connector and works like Manuel until the connector for ZR's new platform is built. |
 
 ## What you get
 

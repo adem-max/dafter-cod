@@ -7,8 +7,15 @@ we are, and the step-by-step plan for real connectors.
 to Y7 and Y9 below; Y8 is not), tested with a fake HTTP layer that answers
 with the JSON examples of Yalidine's docs. **It has never been called
 against a real Yalidine account.** Before the first client uses it, go
-through the checklist in section 4 ("Before going live"). ZR Express is on
-hold until ZR's official docs arrive.
+through the checklist in section 4 ("Before going live").
+
+**ZR Express: coming soon.** ZR is moving its merchants from the old Procolis
+API to its new platform, so building the old API now would be wasted, and
+the new one has no official docs yet. Meanwhile the *Connecteur* "ZR Express"
+can already be chosen on a courier: it works like *Manuel* (tracking typed
+by hand) and the courier form says the connector is coming
+(`dz_cod/couriers/zrexpress.py`). When the connector is built, only that
+class changes.
 
 ---
 
@@ -353,6 +360,23 @@ independent open-source clients; ask ZR for the official "API Docs"):
 **Old platform "Procolis"** (`https://procolis.com/api_v1/`): credentials
 *Token* + *Key* (ZR portal → Paramètres → Info personnelles). Older accounts
 may still use it. Do not build both: build the one the client has.
+
+**Decision (15 October 2026): build only the new platform.** ZR is migrating
+its merchants off Procolis. What was learned about Procolis, in case the
+migration stalls (from the merchant portal's *Développement* page and the
+CourierDZ PHP client, never called for real):
+- headers `token` and `key` on every call; `GET /token` answers
+  `{"Statut": "Accès activé"}` when the keys are valid
+- `POST /add_colis` with `{"Colis": [{Tracking, TypeLivraison (0 home, 1 stop
+  desk), TypeColis (1 exchange), Confrimee (sic; 1 = ready to ship), Client,
+  MobileA, MobileB, Adresse, IDWilaya, Commune, Total, Note, TProduit,
+  id_Externe, Source}]}`; **we choose the tracking number**; the answer's
+  `Colis[0].MessageRetour` is `"Good"`, `"Double Tracking"` or an error text
+- `POST /lire` and `POST /pret` with `{"Colis": [{"Tracking": …}, …]}` (read
+  parcels incl. their `Situation`; mark ready to ship); `POST /tarification`
+  (list per `IDWilaya`)
+- no labels, no cancel, no webhooks (Telegram notifications only), no
+  stop-desk list; the `Situation` values and rate limits are not documented
 
 ## 6. ZR Express (new platform): implementation steps
 
