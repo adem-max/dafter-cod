@@ -442,7 +442,8 @@ in `tests/test_order_flow.py` (copy `test_stop_desk_rate`).
 
 ## 6. Courier connectors
 
-Read `dz_cod/couriers/base.py`, `mock.py`, `__init__.py`, `yalidine.py`.
+Read `dz_cod/couriers/base.py`, `mock.py`, `__init__.py`, `sync.py`, then
+`yalidine.py`, `yalidine_webhook.py` and `tests/test_yalidine.py`.
 
 ### Mental model
 
@@ -457,10 +458,25 @@ Status words are translated into our 4-word vocabulary (`in_transit`,
 `delivered`, `returned`, `unknown`), like mapping a supplier's status codes to
 your own lookup codes.
 
-**Important:** Yalidine is only a documented stub. The official API docs
-could not be reached when this was written, and the project rule is "never
-invent endpoints". Before writing it, read the official documentation from
-the client's courier account.
+**Yalidine** is the first real connector. Think of it as an EBS interface
+built from the supplier's spec before you ever get a test environment: every
+endpoint comes from a verbatim copy of Yalidine's docs, the tests replace the
+network with a fake that answers the docs' examples, and a checklist
+(docs/COURIER_INTEGRATION.md §4) lists what only a real account can confirm.
+Four ideas carry it:
+
+- **Ask in batches**: the hourly sync asks for 50 parcels per call
+  (`get_statuses`), because Yalidine allows 50 calls a minute.
+- **Respect the quota**: Yalidine says in each answer how many calls are left;
+  a window at 0 (or a 429 "Too many requests") is remembered in Redis and the
+  next call waits or refuses with a clear message.
+- **Never create twice**: the API call runs inside the "Expédier"
+  transaction; if anything fails afterwards, the next click first looks for a
+  parcel already made for this order.
+- **Push, but trust nothing**: the webhook checks a signature (HMAC: a hash
+  of the body with a shared secret, like a signed EDI message), stores each
+  event once by its id, answers at once and applies the events in a
+  background job. Events can arrive twice or out of order; both are handled.
 
 ### The lines that matter
 
@@ -474,12 +490,27 @@ return adapter_class(courier)
 The choice of connector is **data** (a field on the Supplier), not code:
 per-client difference in settings, rule 4 again.
 
+`dz_cod/couriers/yalidine_webhook.py`:
+
+```python
+courier = courier_for_signature(raw_body, signature)   # HMAC on the raw bytes
+if not courier:
+    return 400, "invalid signature"
+names = store_events(courier, payload)                 # event_id = record name
+frappe.enqueue(..., enqueue_after_commit=True, event_names=names)
+```
+
+The signature is checked on the bytes exactly as received, **before** any JSON
+parsing: re-encoding the JSON would change the bytes and break the hash.
+
 ### Break it on purpose
 
-Set the courier "Rapide Express (démo)" connector to **Yalidine** and ship an
-order without tracking number: *"Le connecteur Yalidine n'est pas encore
-implémenté"*. Lesson: this is how an unfinished connector must fail — loudly,
-before any stock moves. Set it back to Mock.
+Set the courier "Rapide Express (démo)" connector to **Yalidine** without
+API keys and ship an order: *"Renseignez l'API ID et l'API Token…"*, and the
+order stays Préparée. Lesson: a connector must fail loudly, before any stock
+moves. Set it back to Mock. Then, in `tests/test_yalidine.py`, change
+`STATUS_MAP` in `yalidine.py` so that "Retour vers vendeur" means
+`returned`, run the module, and read which test fails and why.
 
 ### Rebuild it yourself
 
@@ -495,6 +526,10 @@ connector options in `custom_fields.py`, migrate, test with the hourly sync:
 - *Sync does nothing* → the setting is off, or the scheduler is disabled (`bench --site <site> enable-scheduler`), or no worker runs.
 - *One order fails during sync* → it is logged in **Error Log** ("Synchronisation transporteur : …") and the others continue.
 - *Real API: works in the shell, not in production* → the firewall or the courier's IP allow-list; tokens must be in the Supplier's *API Token* field (encrypted), never in code.
+- *"Yalidine : quota d'appels dépassé"* → too many calls this minute/hour/day; wait the number of seconds shown. Repeated 429s can get the keys disabled.
+- *Webhook disabled by Yalidine* → our URL did not answer 2xx within 10 s seven times, or the crc check failed (site down, tunnel closed). The hourly sync keeps working; re-activate the webhook in the Yalidine dashboard.
+- *Webhook events "Ignoré"* → no order has that tracking number, or the event is older than the status already stored. Look at **Courier Webhook Event**.
+- *"Commune … inconnue de Yalidine"* at confirmation → pick the commune in the list (imported from Yalidine), or re-run the import.
 
 ---
 

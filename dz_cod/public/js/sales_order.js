@@ -1,15 +1,34 @@
 // Extra behaviour on the Sales Order form for COD orders.
 // 1. Before "Expédier": ask for the courier and tracking number.
 // 2. On a returned order: a button to record the inspection of the parcel.
+// 3. Commune and stop desk pick lists (imported from the courier, e.g. Yalidine).
+
+// Offices of the order's wilaya (and of its parent wilaya for the 2026 wilayas)
+const stopdesk_query = (frm) => ({
+	query: "dz_cod.couriers.places.stopdesk_query",
+	filters: { wilaya: frm.doc.dz_wilaya },
+});
 
 frappe.ui.form.on("Sales Order", {
 	setup(frm) {
 		frm.set_query("dz_courier", () => ({ filters: { is_transporter: 1 } }));
+		frm.set_query("dz_stopdesk_id", () => stopdesk_query(frm));
+		// All the wilaya's communes: a name outside the list is refused. Nothing
+		// imported = empty list = free text.
+		frm.set_query("dz_commune", () => ({
+			query: "dz_cod.couriers.places.commune_names",
+			params: { wilaya: frm.doc.dz_wilaya },
+		}));
 	},
 
 	refresh(frm) {
 		if (frm.doc.workflow_state === "Retournée" && !frm.doc.dz_return_inspected) {
 			frm.add_custom_button(__("Inspecter le retour"), () => inspect_return(frm));
+		}
+		if (frm.doc.dz_label_url) {
+			frm.add_custom_button(__("Étiquette du transporteur"), () =>
+				window.open(frm.doc.dz_label_url, "_blank", "noopener")
+			);
 		}
 	},
 
@@ -45,6 +64,15 @@ frappe.ui.form.on("Sales Order", {
 							"Laissez vide si le transporteur est connecté (le numéro sera demandé automatiquement)."
 						),
 					},
+					{
+						fieldname: "stopdesk_id",
+						label: __("Bureau stop desk"),
+						fieldtype: "Link",
+						options: "DZ Stop Desk",
+						default: frm.doc.dz_stopdesk_id,
+						hidden: frm.doc.dz_delivery_type !== "Stop desk",
+						get_query: () => stopdesk_query(frm),
+					},
 				],
 				primary_action_label: __("Expédier"),
 				primary_action(values) {
@@ -53,6 +81,7 @@ frappe.ui.form.on("Sales Order", {
 							sales_order: frm.doc.name,
 							courier: values.courier,
 							tracking_number: values.tracking_number,
+							stopdesk_id: values.stopdesk_id,
 						})
 						.then(() => {
 							shipped = true;

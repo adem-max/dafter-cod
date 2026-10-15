@@ -1,11 +1,21 @@
 # Courier integration: Yalidine and ZR Express
 
 What is known about the couriers' APIs and prices (October 2026), how sure
-we are, and the step-by-step plan to replace the stub in
-`dz_cod/couriers/yalidine.py` with real connectors.
+we are, and the step-by-step plan for real connectors.
 
-Nothing in this file has been called against a real courier account yet.
-Every step ends with a check you do with the client's real account.
+**Status (15 October 2026):** the Yalidine connector is **built** (steps Y1
+to Y7 and Y9 below; Y8 is not), tested with a fake HTTP layer that answers
+with the JSON examples of Yalidine's docs. **It has never been called
+against a real Yalidine account.** Before the first client uses it, go
+through the checklist in section 4 ("Before going live").
+
+**ZR Express: coming soon.** ZR is moving its merchants from the old Procolis
+API to its new platform, so building the old API now would be wasted, and
+the new one has no official docs yet. Meanwhile the *Connecteur* "ZR Express"
+can already be chosen on a courier: it works like *Manuel* (tracking typed
+by hand) and the courier form says the connector is coming
+(`dz_cod/couriers/zrexpress.py`). When the connector is built, only that
+class changes.
 
 ---
 
@@ -117,9 +127,83 @@ Facts from the docs copy. Check each against the client's dashboard docs.
 
 ## 4. Yalidine: implementation steps
 
-Estimated effort: 3–4 days including tests. Do it on your laptop with the
-client's API keys, against **one or two real test parcels** that you delete
-right after (deleting is allowed while status is "En préparation").
+**Built** in October 2026, without a Yalidine account. Where the code is:
+
+| Step | Code |
+|------|------|
+| Y1 fields | `setup/custom_fields.py` (Supplier: *Wilaya de départ*, *Clé secrète webhook*; Sales Order: *Bureau stop desk*, *Étiquette du transporteur*, *Statut chez le transporteur* + date, *Paiement chez le transporteur* + n°) |
+| Y2–Y4 | `couriers/yalidine.py` (`call`, `create_shipment`, `get_statuses`, `get_tracking`) |
+| Y5, Y6 | `couriers/yalidine_import.py` (two buttons on the courier, `public/js/supplier.js`), `couriers/places.py`, doctypes DZ Commune and DZ Stop Desk |
+| Y7 | `couriers/yalidine_webhook.py`, doctype Courier Webhook Event |
+| Y9 | `tests/test_yalidine.py` (23 tests) |
+
+Differences from the plan below, and why (also in DECISIONS.md):
+- **`freeshipping` is sent as `true`, not `false`.** Yalidine's docs say
+  `false` = "paid by the receiver", which reads as "Yalidine adds its fee to
+  what the customer pays". Our `price` already contains the delivery fee, so
+  `false` could make the customer pay it twice. With `true` Yalidine keeps
+  its fee from what it pays us, which is what our settlement expects.
+  **Check 2 below decides.**
+- **Status sync reads `GET parcels/?tracking=…` (field `last_status`)**
+  instead of `histories/`: one line per parcel, so 50 parcels fit in one
+  call without paging. `get_tracking` still reads `histories/<tracking>`.
+- **Duplicate guard**: before creating, `GET parcels/?order_id=<order>`
+  (the filter is in the docs); an existing parcel that is not "Annulé" is
+  reused instead of creating a second one.
+- **Commune check at confirmation**: once communes are imported, an order
+  for a Yalidine courier cannot be confirmed with a commune Yalidine does
+  not know (the spelling is corrected automatically: "kouba" → "Kouba").
+  Before the import, the commune is sent as typed.
+- **Webhooks only move orders when *Synchroniser les statuts
+  automatiquement* is ticked** in COD Settings, like the hourly sync.
+  Yalidine's own words are always written on the order.
+- **Wilayas 59–69** are sent as their parent wilaya unless the communes
+  import shows Yalidine knows them (communes with that wilaya id).
+
+### Before going live: checks with the client's real Yalidine account
+
+Do them in this order, on your laptop, with **one or two test parcels** that
+you delete right after in the Yalidine dashboard (allowed while the status is
+"En préparation"). Fill in the courier first: *Connecteur* = Yalidine,
+*API ID*, *API Token*, *Wilaya de départ*.
+
+1. **Keys and quotas**: in `bench --site <site> console`,
+   `from dz_cod.couriers import get_adapter; get_adapter("<courier>").call("GET", "wilayas/")`
+   returns the wilayas. Note the account's real rate limits in the Developer
+   Dashboard (the code assumes the defaults 5/s, 50/min).
+2. **Amount collected** (the most important): ship one test order. In the
+   Yalidine dashboard the amount to collect must equal the order's *Montant
+   à encaisser*, **not** that amount plus the delivery fee. If Yalidine adds
+   its fee, `freeshipping` must change (`build_parcel` in `yalidine.py`).
+3. **The parcel**: names, phones, commune, address, product list look right;
+   the label link (*Étiquette du transporteur* button on the order) opens and
+   prints.
+4. **Retry guard**: call `get_adapter(...).find_parcel("<order name>")` and
+   check it finds the test parcel, and only it (the `order_id` filter must
+   be an exact match).
+5. **Wilayas 59–69**: does `GET wilayas/` list them? If yes, run *Importer
+   communes et bureaux Yalidine* and check a 2026 wilaya gets its own
+   communes; if no, check a parcel to a 2026 wilaya goes to the parent.
+6. **Communes and stop desks**: run the import; ship one stop-desk test
+   parcel (Yalidine wants `stopdesk_id`; we send the id as text).
+7. **Statuses**: `get_adapter(...).get_statuses(["<tracking>"])` returns
+   `in_transit`; check the exact spelling of the statuses the account
+   returns ("Livré", "Retourné au vendeur" move the order). Agree the
+   mapping with the client.
+8. **Prices**: run *Importer les tarifs Yalidine*, compare 3 wilayas with the
+   dashboard (express home / stop desk of the chef-lieu). If the account
+   uses the "economic" prices, `chef_lieu_prices` must read those.
+9. **Webhook**: in the Yalidine Webhooks dashboard add
+   `https://<client site>/api/method/dz_cod.couriers.yalidine_webhook.receive`,
+   copy its secret key into *Clé secrète webhook*, run Yalidine's test page:
+   the URL check (crc) must pass and a test event must appear in **Courier
+   Webhook Event** as "Traité" or "Ignoré", not be refused. Then set the
+   webhook active. A background worker must run (the events are applied by
+   a job).
+10. Delete the test parcels, then tick *Synchroniser les statuts
+    automatiquement* in COD Settings.
+
+The original plan follows (kept for the reasoning).
 
 **Y1. Configuration fields** (`setup/custom_fields.py`, then migrate)
 - On **Supplier** (the courier): `dz_from_wilaya` (Link DZ Wilaya, the
@@ -235,7 +319,7 @@ clear message to delete the orphan parcel in the dashboard.
 - Keep the hourly sync as a safety net (webhooks can be disabled after 7
   failed deliveries).
 
-**Y8. Versement from Yalidine payments (optional)**
+**Y8. Versement from Yalidine payments (optional, NOT built)**
 - A button "Charger depuis Yalidine": read parcels with
   `payment_status=receivable` or a given `payment_id`, and create one line per
   parcel (tracking, amount, fee). The matching rules stay the same.
@@ -276,6 +360,23 @@ independent open-source clients; ask ZR for the official "API Docs"):
 **Old platform "Procolis"** (`https://procolis.com/api_v1/`): credentials
 *Token* + *Key* (ZR portal → Paramètres → Info personnelles). Older accounts
 may still use it. Do not build both: build the one the client has.
+
+**Decision (15 October 2026): build only the new platform.** ZR is migrating
+its merchants off Procolis. What was learned about Procolis, in case the
+migration stalls (from the merchant portal's *Développement* page and the
+CourierDZ PHP client, never called for real):
+- headers `token` and `key` on every call; `GET /token` answers
+  `{"Statut": "Accès activé"}` when the keys are valid
+- `POST /add_colis` with `{"Colis": [{Tracking, TypeLivraison (0 home, 1 stop
+  desk), TypeColis (1 exchange), Confrimee (sic; 1 = ready to ship), Client,
+  MobileA, MobileB, Adresse, IDWilaya, Commune, Total, Note, TProduit,
+  id_Externe, Source}]}`; **we choose the tracking number**; the answer's
+  `Colis[0].MessageRetour` is `"Good"`, `"Double Tracking"` or an error text
+- `POST /lire` and `POST /pret` with `{"Colis": [{"Tracking": …}, …]}` (read
+  parcels incl. their `Situation`; mark ready to ship); `POST /tarification`
+  (list per `IDWilaya`)
+- no labels, no cancel, no webhooks (Telegram notifications only), no
+  stop-desk list; the `Situation` values and rate limits are not documented
 
 ## 6. ZR Express (new platform): implementation steps
 

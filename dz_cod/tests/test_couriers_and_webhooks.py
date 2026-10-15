@@ -1,4 +1,5 @@
 """Integration tests: courier connectors, hourly status sync, webhooks, reports.
+(The Yalidine connector has its own file: test_yalidine.py.)
 
 Run: bench --site <site> run-tests --module dz_cod.tests.test_couriers_and_webhooks
 """
@@ -14,7 +15,6 @@ from dz_cod.couriers import get_adapter
 from dz_cod.couriers.base import DELIVERED, RETURNED
 from dz_cod.couriers.mock import set_mock_status
 from dz_cod.couriers.sync import sync_shipped_orders
-from dz_cod.couriers.yalidine import YalidineAdapter
 from dz_cod.setup.webhooks import webhook_name
 from dz_cod.tests import helpers as h
 
@@ -44,13 +44,25 @@ class TestCourierSync(IntegrationTestCase):
 		self.assertEqual(state(returned), S.RETURNED)
 		self.assertEqual(state(travelling), S.SHIPPED)
 
-	def test_yalidine_stub_says_it_is_not_implemented(self):
-		adapter = YalidineAdapter(frappe.get_doc("Supplier", h.MOCK_COURIER))
-		with self.assertRaises(NotImplementedError):
-			adapter.get_status("ABC")
-
 	def test_manual_adapter_gives_no_tracking(self):
 		self.assertIsNone(get_adapter(h.MANUAL_COURIER).create_shipment(h.make_order()))
+
+	def test_zr_express_is_coming_soon_and_works_like_manual(self):
+		# A courier can already be set to "ZR Express": tracking typed by hand,
+		# no status from the courier, until the real connector is built
+		options = frappe.get_meta("Supplier").get_field("dz_courier_adapter").options.split("\n")
+		self.assertIn("ZR Express", options)
+		frappe.db.set_value("Supplier", h.MANUAL_COURIER, "dz_courier_adapter", "ZR Express")
+		frappe.clear_document_cache("Supplier", h.MANUAL_COURIER)
+		try:
+			adapter = get_adapter(h.MANUAL_COURIER)
+			self.assertTrue(adapter.coming_soon)
+			self.assertIsNone(adapter.create_shipment(h.make_order()))
+			self.assertEqual(adapter.get_status("ZR-123"), "unknown")
+		finally:
+			# The cached courier would outlive the rollback: put it back
+			frappe.db.set_value("Supplier", h.MANUAL_COURIER, "dz_courier_adapter", "Manuel")
+			frappe.clear_document_cache("Supplier", h.MANUAL_COURIER)
 
 
 class TestWebhooks(IntegrationTestCase):

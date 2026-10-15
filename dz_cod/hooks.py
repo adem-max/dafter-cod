@@ -32,7 +32,8 @@ after_install = "dz_cod.setup.install.after_install"
 after_migrate = "dz_cod.setup.install.after_migrate"
 
 # Extra buttons on the Sales Order form (Expédier dialog, return inspection)
-doctype_js = {"Sales Order": "public/js/sales_order.js"}
+# and on the courier (Yalidine imports)
+doctype_js = {"Sales Order": "public/js/sales_order.js", "Supplier": "public/js/supplier.js"}
 
 # The COD order life cycle: see dz_cod/cod/order.py
 doc_events = {
@@ -49,3 +50,7 @@ doc_events = {
 scheduler_events = {
 	"hourly": ["dz_cod.couriers.sync.sync_shipped_orders"],
 }
+
+# Courier webhook events are kept 30 days (Log Settings), enough to spot an
+# event delivered twice: Yalidine retries a delivery for 40 hours at most
+default_log_clearing_doctypes = {"Courier Webhook Event": 30}

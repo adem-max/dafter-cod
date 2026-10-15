@@ -35,7 +35,6 @@ Le retour de la commande {0} est déjà inspecté.,تم فحص مرتجع الط
 Les quantités inspectées doivent correspondre exactement aux quantités retournées.,يجب أن تطابق الكميات المفحوصة الكميات المُرتجعة تمامًا.
 "Retour inspecté : {0} remis en stock, {1} mis au rebut.",تم فحص المرتجع: {0} أُعيدت إلى المخزون، {1} أُتلفت.
 Connecteur inconnu pour le transporteur {0}.,وصلة غير معروفة لشركة التوصيل {0}.
-Le connecteur Yalidine n'est pas encore implémenté (documentation officielle non vérifiée).,وصلة Yalidine غير مُنجزة بعد (لم يتم التحقق من الوثائق الرسمية).
 Où en sont les commandes des 30 derniers jours.,حالة طلبيات آخر 30 يومًا.
 Le nombre de commandes saisies chaque jour.,عدد الطلبيات المُدخلة كل يوم.
 Réafficher le guide d'accueil,إظهار دليل الترحيب من جديد
@@ -244,7 +243,6 @@ Commande (retour),الطلبية (مرتجع)
 Commande retournée dont ce mouvement traite l'inspection.,الطلبية المُرتجعة التي يُسجّل هذا القيد فحصها.
 Intégration transporteur (COD),ربط شركة التوصيل (COD)
 Connecteur,الوصلة
-Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests.,يدوي: تُدخل رقم التتبع بنفسك. Mock: محاكاة دون اتصال للاختبارات.
 Manuel,يدوي
 Afficher,إظهار
 Réduire,تصغير
@@ -261,3 +259,65 @@ COD Return Rate,نسبة الإرجاع (COD)
 COD Courier Outstanding,مستحقات شركات التوصيل (COD)
 COD Orders Per Day,الطلبيات
 COD Orders By State,الطلبيات
+Yalidine ne répond pas ({0}). Réessayez plus tard.,Yalidine لا تستجيب ({0}). أعد المحاولة لاحقًا.
+"Yalidine : quota d'appels dépassé, réessayez dans {0} s.",Yalidine: تم تجاوز حصة الطلبات، أعد المحاولة بعد {0} ثانية.
+Yalidine refuse les clés API du transporteur {0} (API ID / API Token).,Yalidine ترفض مفاتيح API لشركة التوصيل {0} (API ID / API Token).
+Yalidine a répondu par une erreur {0} : {1},ردّت Yalidine بخطأ {0}: {1}
+Renseignez l'API ID et l'API Token du transporteur {0}.,أدخل API ID و API Token لشركة التوصيل {0}.
+Commune « {0} » inconnue de Yalidine dans la wilaya {1}. Choisissez-la dans la liste.,البلدية «{0}» غير معروفة لدى Yalidine في الولاية {1}. اخترها من القائمة.
+Yalidine ne livre pas la commune {0}.,Yalidine لا توصل إلى البلدية {0}.
+Yalidine a refusé le colis : {0},رفضت Yalidine الطرد: {0}
+réponse inattendue,رد غير متوقع
+Expédition impossible,تعذّر الشحن
+Choisissez le bureau stop desk de la commande avant d'expédier.,اختر مكتب الاستلام (stop desk) للطلبية قبل الشحن.
+Yalidine accepte un montant à encaisser de 0 à {0} DA.,تقبل Yalidine مبلغ تحصيل من 0 إلى {0} دج.
+Import inconnu.,استيراد غير معروف.
+Un import est déjà en cours pour ce transporteur.,هناك استيراد جارٍ بالفعل لشركة التوصيل هذه.
+Import lancé en arrière-plan. Un message s'affichera à la fin (1 à 2 minutes).,بدأ الاستيراد في الخلفية. ستظهر رسالة عند الانتهاء (دقيقة إلى دقيقتين).
+Le connecteur du transporteur {0} n'est pas Yalidine.,وصلة شركة التوصيل {0} ليست Yalidine.
+L'import des tarifs Yalidine a échoué : voir le journal des erreurs.,فشل استيراد أسعار Yalidine: راجع سجل الأخطاء.
+Tarifs Yalidine importés pour {0} wilayas (coûts transporteur seulement).,تم استيراد أسعار Yalidine لـ {0} ولاية (تكاليف شركة التوصيل فقط).
+Renseignez la wilaya de départ du transporteur {0}.,أدخل ولاية الانطلاق لشركة التوصيل {0}.
+L'import des communes Yalidine a échoué : voir le journal des erreurs.,فشل استيراد بلديات Yalidine: راجع سجل الأخطاء.
+{0} communes et {1} bureaux stop desk importés de Yalidine.,تم استيراد {0} بلدية و{1} مكتب استلام من Yalidine.
+ID de l'événement,معرّف الحدث
+Type d'événement,نوع الحدث
+Survenu le,وقع في
+Traitement,المعالجة
+En attente,قيد الانتظار
+Traité,تمت المعالجة
+Ignoré,تم التجاهل
+Erreur,خطأ
+Données reçues,البيانات المستلمة
+Remarque,ملاحظة
+Nom de la commune,اسم البلدية
+Stop desk dans la commune,مكتب استلام في البلدية
+ID Yalidine,معرّف Yalidine
+Identifiant de la commune chez Yalidine.,معرّف البلدية لدى Yalidine.
+Wilaya chez Yalidine,الولاية لدى Yalidine
+Nom de la wilaya tel que Yalidine l'écrit.,اسم الولاية كما تكتبه Yalidine.
+Nom du bureau,اسم المكتب
+ID du bureau,معرّف المكتب
+Identifiant du bureau chez le transporteur (envoyé avec le colis).,معرّف المكتب لدى شركة التوصيل (يُرسل مع الطرد).
+Coordonnées GPS,إحداثيات GPS
+Importer les tarifs Yalidine,استيراد أسعار Yalidine
+Les coûts transporteur de chaque wilaya seront remplacés par les tarifs de votre compte Yalidine. Les tarifs facturés aux clients ne changent pas. Continuer ?,ستُستبدل تكاليف شركة التوصيل لكل ولاية بأسعار حسابك لدى Yalidine. الأسعار المفوترة للعملاء لا تتغير. هل تريد المتابعة؟
+Importer communes et bureaux Yalidine,استيراد بلديات ومكاتب Yalidine
+Bureau stop desk,مكتب الاستلام (stop desk)
+Bureau du transporteur où le client retire son colis.,مكتب شركة التوصيل الذي يستلم منه العميل طرده.
+Étiquette du transporteur,ملصق شركة التوصيل
+Statut chez le transporteur,الحالة لدى شركة التوصيل
+"Ex. « Retour vers vendeur » : le colis revient, mais n'est pas encore arrivé.",مثال: «Retour vers vendeur»: الطرد في طريق العودة لكنه لم يصل بعد.
+Statut transporteur mis à jour le,تاريخ تحديث حالة شركة التوصيل
+Paiement chez le transporteur,الدفع لدى شركة التوصيل
+N° de paiement transporteur,رقم دفعة شركة التوصيل
+"Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. Yalidine : colis, statuts et tarifs par l'API Yalidine. ZR Express : bientôt disponible, saisie manuelle en attendant.",يدوي: تُدخل رقم التتبع بنفسك. Mock: محاكاة دون اتصال للاختبارات. Yalidine: الطرود والحالات والأسعار عبر واجهة Yalidine. ZR Express: قريبًا، الإدخال يدوي في الانتظار.
+Wilaya de départ,ولاية الانطلاق
+Wilaya où vous remettez les colis au transporteur.,الولاية التي تسلّم فيها الطرود لشركة التوصيل.
+Clé secrète webhook,المفتاح السري للـ webhook
+Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).,منسوخ من لوحة Webhooks لدى شركة التوصيل (انظر docs/COURIER_INTEGRATION.md).
+Courier Webhook Event,حدث webhook لشركة التوصيل
+DZ Commune,البلدية
+DZ Stop Desk,مكتب الاستلام
+"Connecteur ZR Express : bientôt disponible. En attendant, saisissez le n° de suivi à l'expédition et passez les commandes en Livrée ou Retournée à la main.",موصل ZR Express: قريبًا. في الانتظار، أدخل رقم التتبع عند الإرسال وانقل الطلبات إلى «مُسلّمة» أو «مُرتجعة» يدويًا.
+ZR Express,ZR Express
