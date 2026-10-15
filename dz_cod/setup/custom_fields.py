@@ -78,9 +78,11 @@ SALES_ORDER_FIELDS = [
 		"in_list_view": 1,
 	},
 	{
+		# Autocomplete: free text, or a pick list once the courier's communes
+		# are imported (Yalidine refuses names it does not know)
 		"fieldname": "dz_commune",
 		"label": "Commune",
-		"fieldtype": "Data",
+		"fieldtype": "Autocomplete",
 		"insert_after": "dz_wilaya",
 		"fetch_from": "customer.dz_commune",
 		"fetch_if_empty": 1,
@@ -104,11 +106,22 @@ SALES_ORDER_FIELDS = [
 		"in_standard_filter": 1,
 	},
 	{
+		"fieldname": "dz_stopdesk_id",
+		"label": "Bureau stop desk",
+		"description": "Bureau du transporteur où le client retire son colis.",
+		"fieldtype": "Link",
+		"options": "DZ Stop Desk",
+		"insert_after": "dz_delivery_type",
+		"depends_on": 'eval:doc.dz_delivery_type=="Stop desk"',
+		"allow_on_submit": 1,
+		"no_copy": 1,
+	},
+	{
 		"fieldname": "dz_manual_shipping",
 		"label": "Tarif de livraison manuel",
 		"description": "Cochez pour saisir vous-même les frais (livraison offerte, remise...).",
 		"fieldtype": "Check",
-		"insert_after": "dz_delivery_type",
+		"insert_after": "dz_stopdesk_id",
 	},
 	{
 		"fieldname": "dz_shipping_charge",
@@ -157,10 +170,13 @@ SALES_ORDER_FIELDS = [
 		"in_standard_filter": 1,
 	},
 	after_submit_readonly(
+		"dz_label_url", "Étiquette du transporteur", "Data", "dz_tracking_number", options="URL"
+	),
+	after_submit_readonly(
 		"dz_courier_fee",
 		"Frais transporteur prévus",
 		"Currency",
-		"dz_tracking_number",
+		"dz_label_url",
 		options="currency",
 		description="Montant que le transporteur devrait retenir (d'après la grille de la wilaya).",
 	),
@@ -180,6 +196,21 @@ SALES_ORDER_FIELDS = [
 	after_submit_readonly("dz_delivered_on", "Livrée le", "Date", "dz_shipped_on"),
 	after_submit_readonly("dz_returned_on", "Retournée le", "Date", "dz_delivered_on"),
 	after_submit_readonly("dz_settled_on", "Réglée le", "Date", "dz_returned_on"),
+	# What the courier itself says (Yalidine sync or webhook), word for word
+	after_submit_readonly(
+		"dz_courier_status",
+		"Statut chez le transporteur",
+		"Data",
+		"dz_settled_on",
+		description="Ex. « Retour vers vendeur » : le colis revient, mais n'est pas encore arrivé.",
+	),
+	after_submit_readonly("dz_courier_status_on", "Statut transporteur mis à jour le", "Datetime", "dz_courier_status"),
+	after_submit_readonly(
+		"dz_courier_payment_status", "Paiement chez le transporteur", "Data", "dz_courier_status_on"
+	),
+	after_submit_readonly(
+		"dz_courier_payment_id", "N° de paiement transporteur", "Data", "dz_courier_payment_status"
+	),
 ]
 
 CUSTOMER_FIELDS = [
@@ -228,11 +259,28 @@ SUPPLIER_FIELDS = [
 		"fieldtype": "Select",
 		"options": "Manuel\nMock\nYalidine",
 		"default": "Manuel",
-		"description": "Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests.",
+		"description": "Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests. "
+		"Yalidine : colis, statuts et tarifs par l'API Yalidine.",
 		"insert_after": "dz_courier_section",
 	},
 	{"fieldname": "dz_api_id", "label": "API ID", "fieldtype": "Data", "insert_after": "dz_courier_adapter"},
 	{"fieldname": "dz_api_token", "label": "API Token", "fieldtype": "Password", "insert_after": "dz_api_id"},
+	{"fieldname": "dz_courier_column", "fieldtype": "Column Break", "insert_after": "dz_api_token"},
+	{
+		"fieldname": "dz_from_wilaya",
+		"label": "Wilaya de départ",
+		"description": "Wilaya où vous remettez les colis au transporteur.",
+		"fieldtype": "Link",
+		"options": "DZ Wilaya",
+		"insert_after": "dz_courier_column",
+	},
+	{
+		"fieldname": "dz_webhook_secret",
+		"label": "Clé secrète webhook",
+		"description": "Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).",
+		"fieldtype": "Password",
+		"insert_after": "dz_from_wilaya",
+	},
 ]
 
 STOCK_ENTRY_FIELDS = [
@@ -266,6 +314,7 @@ SALES_ORDER_PROPERTIES = [
 
 def setup_custom_fields():
 	"""Create or update all custom fields. Safe to run many times."""
+	switch_commune_to_autocomplete()
 	create_custom_fields(
 		{
 			"Sales Order": SALES_ORDER_FIELDS,
@@ -276,6 +325,16 @@ def setup_custom_fields():
 		update=True,
 	)
 	setup_list_properties()
+
+
+def switch_commune_to_autocomplete():
+	"""Sales Order "Commune" was a Data field before the Yalidine pick list.
+	Frappe refuses Data -> Autocomplete in a Custom Field (not in its list of
+	allowed changes), although both are the same database column
+	(varchar 140): nothing stored changes. So the type is switched directly."""
+	name = "Sales Order-dz_commune"
+	if frappe.db.get_value("Custom Field", name, "fieldtype") == "Data":
+		frappe.db.set_value("Custom Field", name, "fieldtype", "Autocomplete")
 
 
 def setup_list_properties():

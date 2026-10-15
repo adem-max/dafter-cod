@@ -1,0 +1,119 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:yalidine_id",
+ "creation": "2026-10-15 22:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "commune_name",
+  "wilaya",
+  "column_break_main",
+  "is_deliverable",
+  "has_stop_desk",
+  "yalidine_section",
+  "yalidine_id",
+  "yalidine_wilaya_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "commune_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nom de la commune",
+   "reqd": 1
+  },
+  {
+   "fieldname": "wilaya",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Wilaya",
+   "options": "DZ Wilaya",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_deliverable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Livrable"
+  },
+  {
+   "fieldname": "has_stop_desk",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Stop desk dans la commune"
+  },
+  {
+   "fieldname": "yalidine_section",
+   "fieldtype": "Section Break",
+   "label": "Yalidine"
+  },
+  {
+   "description": "Identifiant de la commune chez Yalidine.",
+   "fieldname": "yalidine_id",
+   "fieldtype": "Data",
+   "label": "ID Yalidine",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Nom de la wilaya tel que Yalidine l'écrit.",
+   "fieldname": "yalidine_wilaya_name",
+   "fieldtype": "Data",
+   "label": "Wilaya chez Yalidine"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-15 22:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "DZ COD",
+ "name": "DZ Commune",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  }
+ ],
+ "search_fields": "commune_name,wilaya",
+ "show_title_field_in_link": 1,
+ "sort_field": "commune_name",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "commune_name"
+}

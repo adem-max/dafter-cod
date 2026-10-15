@@ -72,6 +72,9 @@ def validate(order, method=None):
 def before_submit(order, method=None):
 	"""Confirmer: check the order is complete before reserving stock."""
 	check_delivery_details(order)
+	if order.dz_courier:
+		# e.g. Yalidine: the commune must be one the courier knows
+		get_adapter(order.dz_courier).check_order(order)
 
 	problems = stock.check_available_stock(order)
 	if problems:
@@ -147,11 +150,14 @@ def prepare_shipment(order):
 
 
 @frappe.whitelist()
-def set_shipping_details(sales_order, courier, tracking_number=None):
-	"""Called by the "Expédier" button (sales_order.js) to save the courier and
-	tracking number just before the workflow action runs."""
+def set_shipping_details(sales_order, courier, tracking_number=None, stopdesk_id=None):
+	"""Called by the "Expédier" button (sales_order.js) to save the courier,
+	tracking number and stop desk office just before the workflow action runs."""
 	order = frappe.get_doc("Sales Order", sales_order)
 	order.check_permission("write")
 	if order.workflow_state != S.PREPARED:
 		frappe.throw(_("La commande doit être à l'état {0}.").format(S.PREPARED))
-	order.db_set({"dz_courier": courier, "dz_tracking_number": (tracking_number or "").strip() or None})
+	values = {"dz_courier": courier, "dz_tracking_number": (tracking_number or "").strip() or None}
+	if stopdesk_id:
+		values["dz_stopdesk_id"] = stopdesk_id
+	order.db_set(values)
