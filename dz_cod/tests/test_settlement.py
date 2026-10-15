@@ -238,3 +238,22 @@ class TestSettlement(IntegrationTestCase):
 		self.assertEqual(summary["delivered_net"], 500)
 		self.assertEqual(summary["disputed_count"], 1)
 		self.assertEqual(summary["disputed_net"], 500)  # the gap, not the whole order
+
+	def test_home_card_shows_the_report_amount_due(self):
+		# "Argent à recevoir" on the home page = the report's "Montant dû (net)",
+		# so a disputed order counts only for the gap, not the whole order
+		order = delivered_order()
+		before = outstanding.get_amount_due_card()["value"]
+		new_settlement([short_line(order, 500)]).submit()
+
+		card = outstanding.get_amount_due_card()
+		self.assertEqual(before - card["value"], order.dz_cod_amount - order.dz_courier_fee - 500)
+		summary = outstanding.execute({})[4]
+		self.assertEqual(card["value"], summary[0]["value"])  # Montant dû (net)
+
+		frappe.set_user("Guest")
+		try:
+			with self.assertRaises(frappe.PermissionError):
+				outstanding.get_amount_due_card()
+		finally:
+			frappe.set_user("Administrator")

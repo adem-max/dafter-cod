@@ -12,6 +12,9 @@ dispute is the gap still owed, not the whole order.
 
 Tick "Détail par commande" to see one line per order (to send the list to
 the courier, for example).
+
+The number card "Argent à recevoir" on the COD home page shows this report's
+"Montant dû (net)" for all couriers (get_amount_due_card).
 """
 
 import frappe
@@ -22,14 +25,36 @@ from dz_cod.cod import states as S
 from dz_cod.cod.settlement import is_paid, remaining_due
 from dz_cod.dz_cod.doctype.courier_settlement.courier_settlement import get_amounts_received
 
+REPORT = "COD Courier Outstanding"
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	filters.company = filters.company or frappe.db.get_single_value("COD Settings", "company")
+	filters.company = filters.company or default_company()
 	orders = get_orders(filters)
 	if filters.detail:
 		return get_detail_columns(), get_detail_rows(orders), None, None, get_summary(orders)
 	return get_summary_columns(), get_summary_rows(orders), None, None, get_summary(orders)
+
+
+def default_company():
+	return frappe.db.get_single_value("COD Settings", "company")
+
+
+@frappe.whitelist()
+def get_amount_due_card(filters=None):
+	"""Number card "Argent à recevoir": the report's "Montant dû (net)", all
+	couriers. `filters` is sent by every Custom number card; not used here."""
+	if not frappe.get_cached_doc("Report", REPORT).is_permitted():
+		raise frappe.PermissionError
+	orders = get_orders(frappe._dict(company=default_company()))
+	# route: a click on the card opens this report
+	return {"value": amount_due(orders), "fieldtype": "Currency", "route": ["query-report", REPORT]}
+
+
+def amount_due(orders):
+	"""Montant dû (net): what couriers still owe on delivered orders."""
+	return sum(order.due for order in orders if order.state == S.DELIVERED)
 
 
 def get_orders(filters):
@@ -186,7 +211,7 @@ def get_summary(orders):
 	return [
 		{
 			"label": _("Montant dû (net)"),
-			"value": sum(o.due for o in delivered),
+			"value": amount_due(orders),
 			"datatype": "Currency",
 			"indicator": "orange",
 		},
