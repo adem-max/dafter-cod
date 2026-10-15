@@ -108,8 +108,14 @@ def bin_qty(warehouse, field="actual_qty"):
 
 
 def set_stock(qty):
-	"""Receive enough pieces so that the main warehouse holds `qty`."""
-	missing = qty - bin_qty(main_warehouse())
+	"""Receive enough pieces so that the main warehouse holds `qty`.
+
+	Counted from the stock ledger, not the Bin: a Delivery Note checks the
+	ledger, and once (15 Oct 2026) a Bin showing enough stock let a test ship
+	from an empty ledger ("Insufficient Stock"). Not reproduced since."""
+	from erpnext.stock.utils import get_stock_balance
+
+	missing = qty - get_stock_balance(ITEM, main_warehouse())
 	if missing <= 0:
 		return
 	entry = frappe.new_doc("Stock Entry")
