@@ -63,7 +63,8 @@ Newest decisions are added at the bottom of each section.
 - **Only "Livrée" orders can be settled**: an order still "Expédiée" is shown as Invalide; mark it delivered first (the list view allows bulk workflow actions).
 - **"Missing" = delivered by this courier up to the settlement date, not in this statement and not paid yet.**
 - **Cancelling a Versement puts its orders back to "Livrée" by writing the field directly**: a Workflow cannot move backwards.
-- **A dispute stays on the order until a later Versement pays it**; partial payment of a disputed parcel over several statements is not modelled (LATER.md).
+- **A dispute stays on the order until a later Versement pays the rest**: an order can be paid over several Versements. "Déjà versé" on a line = the net of the order's lines in earlier submitted Versements of the same courier; the line then expects only the rest, "Charger les commandes livrées" pre-fills only the rest (no fee again), and "Encours transporteurs" shows the rest as owed and as "Montant en litige". Found in the 15 Oct 2026 demo walk: before this, the next Versement pre-filled the whole order again and it was booked as paid twice.
+- **A Versement cannot be cancelled while a later Versement settled one of its disputed orders on the rest**: cancel the later one first, or the order would stay Réglée while paid short.
 - **Tolerance** (COD Settings, default 0 DA) for rounding differences.
 
 ## Webhooks

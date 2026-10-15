@@ -11,14 +11,13 @@ Roughly in order of value for a COD seller.
 4. **Commune master list** (1,541 communes, law 26-06) with the courier's own commune codes and stop desk offices per commune.
 5. **Customer phone checks**: warn when a new order's phone belongs to a customer with several refused parcels (blacklist), and detect duplicate customers by phone.
 6. **Rates per courier**, plus return fees (couriers usually charge for a returned parcel) in the settlement expected amount.
-7. **Partial payment of a disputed parcel** across several settlements (today one line per order and per settlement).
-8. **Exchanges and returns after delivery** ("échange", customer sends back a delivered item): today Retournée is only reachable from Expédiée.
-9. **Shipping label / bordereau print format** with barcode of the tracking number.
-10. **Dashboard with number cards** (orders today, to confirm, to ship, cash outstanding).
-11. **Hard stock reservation** (ERPNext Stock Reservation Entries) if overselling the last pieces becomes a problem.
-12. **Arabic names of wilayas and an Arabic interface option.**
-13. **A patch to update the webhook templates** on existing client sites when the template changes (today setup never overwrites a webhook).
-14. **SMS confirmation** of the order to the customer (through n8n).
+7. **Exchanges and returns after delivery** ("échange", customer sends back a delivered item): today Retournée is only reachable from Expédiée.
+8. **Shipping label / bordereau print format** with barcode of the tracking number.
+9. **Dashboard with number cards** (orders today, to confirm, to ship, cash outstanding).
+10. **Hard stock reservation** (ERPNext Stock Reservation Entries) if overselling the last pieces becomes a problem.
+11. **Arabic names of wilayas and an Arabic interface option.**
+12. **A patch to update the webhook templates** on existing client sites when the template changes (today setup never overwrites a webhook).
+13. **SMS confirmation** of the order to the customer (through n8n).
 
 ## Out of scope by request (do not build here)
 

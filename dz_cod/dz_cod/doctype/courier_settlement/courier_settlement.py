@@ -9,6 +9,8 @@ How it is used:
 3. Save: every line is matched to its order and gets a status
    (OK / Écart / Inconnue / Déjà réglée / Invalide), and the summary shows
    what is paid, what is disputed and what is missing.
+   If an earlier Versement already paid part of the order (an Écart line not
+   accepted), the line shows it in "Déjà versé" and only the rest is expected.
 4. Submit: every OK line (and every Écart line you ticked "Accepter") moves
    its order to "Réglée". The others stay "Livrée" and keep showing in the
    "Encours transporteurs" report.
@@ -46,6 +48,26 @@ class CourierSettlement(Document):
 			apply_workflow(order, S.ACTION_SETTLE)
 			frappe.db.set_value("Sales Order", order.name, "dz_settlement", self.name)
 
+	def before_cancel(self):
+		"""Refuse when a later Versement settled an order on the rest of the
+		money of this one: cancelling this one would leave it paid short."""
+		for line in self.items:
+			if not line.sales_order or line.status == rules.ALREADY_SETTLED:
+				continue
+			if rules.is_paid(line.status, line.accept_difference):
+				continue
+			settled_by = frappe.db.get_value("Sales Order", line.sales_order, "dz_settlement")
+			if not settled_by:
+				continue
+			counted = frappe.db.get_value(
+				"Courier Settlement Item",
+				{"parent": settled_by, "sales_order": line.sales_order},
+				"already_received",
+			)
+			if flt(counted):
+				message = _("Ligne {0} : annulez d'abord {1}, qui a réglé {2} en comptant cette ligne.")
+				frappe.throw(message.format(line.idx, settled_by, line.sales_order))
+
 	def on_cancel(self):
 		"""Put the orders paid by this settlement back to "Livrée".
 
@@ -66,32 +88,40 @@ class CourierSettlement(Document):
 	def match_lines(self):
 		"""Find the order of each line and decide its status."""
 		tolerance = flt(frappe.db.get_single_value("COD Settings", "settlement_tolerance"))
-		seen_orders = set()
 
-		for line in self.items:
-			order = self.find_order(line)
+		matches = [(line, self.find_order(line)) for line in self.items]
+		seen_orders = set()
+		for line, order in matches:
 			if order and order.name in seen_orders:
 				frappe.throw(
 					_("Ligne {0} : la commande {1} apparaît deux fois.").format(line.idx, order.name)
 				)
-
-			line.net_amount = flt(line.collected_amount) - flt(line.courier_fee)
 			if order:
 				seen_orders.add(order.name)
+		received = get_amounts_received(seen_orders, exclude_settlement=self.name)
+
+		for line, order in matches:
+			line.net_amount = flt(line.collected_amount) - flt(line.courier_fee)
+			expected_net = 0
+			if order:
 				line.sales_order = order.name
 				line.tracking_number = line.tracking_number or order.dz_tracking_number
 				line.expected_amount = flt(order.dz_cod_amount)
 				line.expected_fee = flt(order.dz_courier_fee)
-				line.difference = line.net_amount - (line.expected_amount - line.expected_fee)
+				line.already_received = received.get(order.name, 0)
+				expected_net = rules.remaining_due(
+					line.expected_amount - line.expected_fee, line.already_received
+				)
+				line.difference = line.net_amount - expected_net
 			else:
-				line.expected_amount = line.expected_fee = line.difference = 0
+				line.expected_amount = line.expected_fee = line.already_received = line.difference = 0
 
 			line.status = rules.line_status(
 				order_state=order.workflow_state if order else None,
 				order_courier=order.dz_courier if order else None,
 				settlement_courier=self.courier,
 				net_paid=line.net_amount,
-				expected_net=line.expected_amount - line.expected_fee,
+				expected_net=expected_net,
 				tolerance=tolerance,
 			)
 
@@ -126,11 +156,14 @@ class CourierSettlement(Document):
 
 		missing = self.get_missing_orders()
 		self.missing_count = len(missing)
-		self.missing_amount = sum(flt(o.dz_cod_amount) - flt(o.dz_courier_fee) for o in missing)
+		self.missing_amount = sum(
+			rules.remaining_due(flt(o.dz_cod_amount) - flt(o.dz_courier_fee), o.already_received)
+			for o in missing
+		)
 
 	def get_missing_orders(self):
 		"""Orders this courier delivered up to the settlement date, not in this
-		settlement and not paid yet."""
+		settlement and not paid yet, each with its `already_received`."""
 		in_this_settlement = [line.sales_order for line in self.items if line.sales_order]
 		filters = {
 			"docstatus": 1,
@@ -140,20 +173,50 @@ class CourierSettlement(Document):
 		}
 		if in_this_settlement:
 			filters["name"] = ["not in", in_this_settlement]
-		return frappe.get_all("Sales Order", filters=filters, fields=ORDER_FIELDS)
+		orders = frappe.get_all("Sales Order", filters=filters, fields=ORDER_FIELDS)
+		received = get_amounts_received([o.name for o in orders], exclude_settlement=self.name)
+		for order in orders:
+			order.already_received = received.get(order.name, 0)
+		return orders
 
 	@frappe.whitelist()
 	def load_delivered_orders(self):
 		"""Button "Charger les commandes livrées": one line per missing order,
-		pre-filled with the expected amounts (edit only the exceptions)."""
+		pre-filled with what is still due (edit only the exceptions)."""
 		for order in self.get_missing_orders():
+			collected, fee = rules.prefill_amounts(
+				flt(order.dz_cod_amount), flt(order.dz_courier_fee), order.already_received
+			)
 			self.append(
 				"items",
 				{
 					"sales_order": order.name,
 					"tracking_number": order.dz_tracking_number,
-					"collected_amount": order.dz_cod_amount,
-					"courier_fee": order.dz_courier_fee,
+					"collected_amount": collected,
+					"courier_fee": fee,
 				},
 			)
 		self.validate()
+
+
+def get_amounts_received(orders, exclude_settlement=None):
+	"""{order: net already received}: the net of the order's lines in submitted
+	Versements of the order's own courier (rule in dz_cod.cod.settlement)."""
+	if not orders:
+		return {}
+	rows = frappe.db.sql(
+		"""
+		SELECT line.sales_order, SUM(line.net_amount) AS received
+		FROM `tabCourier Settlement Item` line
+		JOIN `tabCourier Settlement` settlement ON settlement.name = line.parent
+		JOIN `tabSales Order` so ON so.name = line.sales_order
+		WHERE settlement.docstatus = 1
+			AND settlement.courier = so.dz_courier
+			AND settlement.name != %(exclude)s
+			AND line.sales_order IN %(orders)s
+		GROUP BY line.sales_order
+		""",
+		{"orders": list(orders), "exclude": exclude_settlement or ""},
+		as_dict=True,
+	)
+	return {row.sales_order: flt(row.received) for row in rows}

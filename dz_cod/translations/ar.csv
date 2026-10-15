@@ -87,6 +87,7 @@ Montant reçu moins total net du relevé. Doit être 0.,المبلغ المُس�
 Remarques,ملاحظات
 Versement {0} annulé : retour à l'état {1}.,أُلغي التسديد {0}: العودة إلى الحالة {1}.
 Ligne {0} : la commande {1} apparaît deux fois.,السطر {0}: الطلبية {1} مذكورة مرتين.
+"Ligne {0} : annulez d'abord {1}, qui a réglé {2} en comptant cette ligne.",السطر {0}: ألغِ أولًا {1}، الذي سدّد {2} باحتساب هذا السطر.
 Commande,الطلبية
 Laisser vide : retrouvée automatiquement par le n° de suivi.,اتركه فارغًا: يُعثر عليها تلقائيًا من رقم التتبع.
 Encaissé,المُحصّل
@@ -96,6 +97,8 @@ Frais retenus par le transporteur pour ce colis.,الرسوم التي احتف�
 Net versé,الصافي المدفوع
 Montant attendu,المبلغ المتوقع
 Frais prévus,الرسوم المتوقعة
+Déjà versé,مدفوع سابقًا
+Net déjà payé pour cette commande dans des versements précédents. Seul le reste est attendu.,الصافي المدفوع سابقًا لهذه الطلبية في تسديدات سابقة. المتوقع هو الباقي فقط.
 Écart,الفرق
 Net versé moins net attendu. Négatif = il manque de l'argent.,الصافي المدفوع ناقص الصافي المتوقع. سالب = هناك مال ناقص.
 Statut,الحالة

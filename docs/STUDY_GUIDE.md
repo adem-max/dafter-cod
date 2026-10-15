@@ -557,7 +557,7 @@ option in the line doctype JSON, and a unit test in `TestSettlementRules`.
 
 - *Many "Invalide" lines* → orders still "Expédiée": the courier delivered them but nobody clicked *Marquer livrée*. Select them in the list → **Actions → Marquer livrée** (bulk), then save the Versement again.
 - *"Écart reçu / relevé" not 0* → the bank transfer does not equal the statement total: the courier's own arithmetic, or a parcel paid outside the statement.
-- *Courier pays the rest of a dispute later* → today: add the order in the new Versement with the expected amounts and tick *Accepter* (partial payments are in LATER.md).
+- *Courier pays the rest of a dispute later* → *Charger les commandes livrées* in the new Versement pre-fills only what is still due (column *Déjà versé* shows what the earlier Versement paid). If the courier writes the whole amount again, the line shows Écart: it was already paid once.
 
 ---
 

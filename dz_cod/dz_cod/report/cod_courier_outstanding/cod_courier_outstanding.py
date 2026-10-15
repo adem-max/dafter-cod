@@ -2,10 +2,12 @@
 
 "Owed" = orders in state Livrée: the courier collected the cash from the
 customer but has not paid us yet (no Versement marked them Réglée).
-Each amount is NET: cash to collect minus the courier's expected fee.
+Each amount is NET: cash to collect minus the courier's expected fee, minus
+what earlier Versements already paid on the order ("Déjà versé").
 
 "En litige" = a Versement already listed the order but the line was not
-accepted (wrong amount, ...): follow it up with the courier.
+accepted (wrong amount, ...): follow it up with the courier. The amount in
+dispute is the gap still owed, not the whole order.
 "Sur la route" = orders still Expédiée: cash that should come later.
 
 Tick "Détail par commande" to see one line per order (to send the list to
@@ -17,7 +19,8 @@ from frappe import _
 from frappe.utils import date_diff, flt, today
 
 from dz_cod.cod import states as S
-from dz_cod.cod.settlement import is_paid
+from dz_cod.cod.settlement import is_paid, remaining_due
+from dz_cod.dz_cod.doctype.courier_settlement.courier_settlement import get_amounts_received
 
 
 def execute(filters=None):
@@ -48,8 +51,11 @@ def get_orders(filters):
 	)
 
 	disputes = get_disputes()
+	received = get_amounts_received([order.name for order in orders])
 	for order in orders:
 		order.dispute = disputes.get(order.name)
+		order.already_received = received.get(order.name, 0)
+		order.due = remaining_due(flt(order.net), order.already_received)
 	return orders
 
 
@@ -112,14 +118,14 @@ def get_summary_rows(orders):
 		)
 		if order.state == S.SHIPPED:
 			row["road_count"] += 1
-			row["road_net"] += flt(order.net)
+			row["road_net"] += order.due
 			continue
 
 		row["delivered_count"] += 1
-		row["delivered_net"] += flt(order.net)
+		row["delivered_net"] += order.due
 		if order.dispute:
 			row["disputed_count"] += 1
-			row["disputed_net"] += flt(order.net)
+			row["disputed_net"] += abs(order.due)
 		if order.dz_delivered_on and (not row["oldest"] or order.dz_delivered_on < row["oldest"]):
 			row["oldest"] = order.dz_delivered_on
 
@@ -155,7 +161,8 @@ def get_detail_columns():
 		{"fieldname": "days", "label": _("Jours"), "fieldtype": "Int", "width": 70},
 		{"fieldname": "dz_cod_amount", "label": _("À encaisser"), "fieldtype": "Currency", "width": 120},
 		{"fieldname": "dz_courier_fee", "label": _("Frais prévus"), "fieldtype": "Currency", "width": 110},
-		{"fieldname": "net", "label": _("Net dû"), "fieldtype": "Currency", "width": 120},
+		{"fieldname": "already_received", "label": _("Déjà versé"), "fieldtype": "Currency", "width": 110},
+		{"fieldname": "due", "label": _("Net dû"), "fieldtype": "Currency", "width": 120},
 		{
 			"fieldname": "dispute",
 			"label": _("En litige (versement)"),
@@ -179,19 +186,19 @@ def get_summary(orders):
 	return [
 		{
 			"label": _("Montant dû (net)"),
-			"value": sum(flt(o.net) for o in delivered),
+			"value": sum(o.due for o in delivered),
 			"datatype": "Currency",
 			"indicator": "orange",
 		},
 		{
 			"label": _("Dont en litige"),
-			"value": sum(flt(o.net) for o in disputed),
+			"value": sum(abs(o.due) for o in disputed),
 			"datatype": "Currency",
 			"indicator": "red",
 		},
 		{
 			"label": _("Sur la route"),
-			"value": sum(flt(o.net) for o in orders if o.state == S.SHIPPED),
+			"value": sum(o.due for o in orders if o.state == S.SHIPPED),
 			"datatype": "Currency",
 			"indicator": "blue",
 		},

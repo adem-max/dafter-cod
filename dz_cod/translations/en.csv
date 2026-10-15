@@ -87,6 +87,7 @@ Montant reçu moins total net du relevé. Doit être 0.,Amount received minus th
 Remarques,Remarks
 Versement {0} annulé : retour à l'état {1}.,Settlement {0} cancelled: back to state {1}.
 Ligne {0} : la commande {1} apparaît deux fois.,Line {0}: order {1} appears twice.
+"Ligne {0} : annulez d'abord {1}, qui a réglé {2} en comptant cette ligne.","Line {0}: first cancel {1}, which settled {2} counting this line."
 Commande,Order
 Laisser vide : retrouvée automatiquement par le n° de suivi.,Leave empty: found automatically from the tracking number.
 Encaissé,Collected
@@ -96,6 +97,8 @@ Frais retenus par le transporteur pour ce colis.,Fees the courier kept for this 
 Net versé,Net paid
 Montant attendu,Expected amount
 Frais prévus,Expected fees
+Déjà versé,Already paid
+Net déjà payé pour cette commande dans des versements précédents. Seul le reste est attendu.,Net already paid for this order in earlier settlements. Only the rest is expected.
 Écart,Difference
 Net versé moins net attendu. Négatif = il manque de l'argent.,Net paid minus net expected. Negative = money is missing.
 Statut,Status
