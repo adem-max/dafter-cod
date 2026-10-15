@@ -42,8 +42,21 @@ def prepare(company, abbr, courier=None):
 	settings.save()
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", main)
 	remove_default_vat(company)
+	make_cod_the_home_page()
 	frappe.db.commit()
 	print(f"{company} is ready. Next: products, opening stock, users, wilaya rates.")
+
+
+def make_cod_the_home_page():
+	"""After login, open the COD home page instead of ERPNext's app list
+	(route from add_to_apps_screen in hooks.py). A user can still pick another
+	default app for themselves."""
+	from frappe.core.doctype.system_settings.system_settings import clear_system_settings_cache
+
+	frappe.db.set_single_value("System Settings", "default_app", "dz_cod")
+	# System Settings are cached per process: drop the copies so it applies now
+	clear_system_settings_cache()
+	frappe.local.system_settings = None
 
 
 def run_setup_wizard(company, abbr):

@@ -13,6 +13,20 @@ app_license = "mit"
 
 required_apps = ["erpnext"]
 
+# Where to land after login. COD is docked on ERPNext's rail, so Frappe keeps
+# it off the apps screen, but this route is used when COD is the site's
+# default app (System Settings > default_app = dz_cod, set by new_client and
+# the demo loader): sellers then open straight on the COD home page.
+add_to_apps_screen = [
+	{
+		"name": "dz_cod",
+		"logo": "/assets/dz_cod/images/cod-logo.svg",
+		"title": "COD",
+		"route": "/desk/cod",
+		"has_permission": "erpnext.check_app_permission",
+	}
+]
+
 # Create custom fields, workflow, wilayas and webhooks
 after_install = "dz_cod.setup.install.after_install"
 after_migrate = "dz_cod.setup.install.after_migrate"

@@ -35,6 +35,7 @@ from frappe.utils.nestedset import get_root_of
 from dz_cod.cod import states as S
 from dz_cod.cod.stock import get_returned_items, inspect_return
 from dz_cod.demo import data as D
+from dz_cod.setup.new_client import make_cod_the_home_page
 from dz_cod.setup.wilayas import WILAYAS, wilaya_docname
 
 DAYS_OF_HISTORY = 60
@@ -209,6 +210,18 @@ def setup_settings():
 		"Sales Taxes and Charges Template", {"company": D.COMPANY, "is_default": 1}, pluck="name"
 	):
 		frappe.db.set_value("Sales Taxes and Charges Template", name, "is_default", 0)
+
+	make_cod_the_home_page()
+	complete_onboarding()
+
+
+def complete_onboarding():
+	"""The demo shop is fully set up: hide "Lancez votre boutique COD" so a
+	prospect does not see an unfinished checklist."""
+	onboarding = frappe.get_doc("Module Onboarding", "COD Onboarding")
+	for row in onboarding.steps:
+		frappe.db.set_value("Onboarding Step", row.step, "is_complete", 1)
+	frappe.db.set_value("Module Onboarding", onboarding.name, "is_complete", 1)
 
 
 # ----------------------------------------------------------------- 2. items
@@ -556,7 +569,11 @@ def plan_orders(rng, customers, return_rate):
 				# Transit time grows with distance (zone 1 = Alger ... 6 = far south)
 				zone = customer["zone"] or 3
 				day = add_days(day, rng.randint(1, 2) + zone // 2)
-				if rng.random() < return_rate:
+				# Bulk buyers (a team, an event) have agreed the order: they do not
+				# refuse the parcel. One returned bulk parcel would also make its
+				# product's return rate jump to 50 % in the report.
+				is_bulk = any(qty >= 5 for _code, qty in lines)
+				if rng.random() < return_rate and not is_bulk:
 					# Customer refused or never came: parcel comes back a few days later
 					day = add_days(day, rng.randint(3, 7))
 					events.append((day, S.ACTION_RETURN))
