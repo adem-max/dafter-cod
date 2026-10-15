@@ -14,6 +14,23 @@
    "indent": 0,
    "is_default_module": 0,
    "keep_closed": 0,
+   "label": "Accueil",
+   "link_to": "COD",
+   "link_type": "Workspace",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link",
+   "icon": "house",
+   "idx": 1
+  },
+  {
+   "added": 0,
+   "child": 0,
+   "collapsible": 1,
+   "hidden": 0,
+   "indent": 0,
+   "is_default_module": 0,
+   "keep_closed": 0,
    "label": "Commandes",
    "link_to": "Sales Order",
    "link_type": "DocType",
@@ -21,7 +38,7 @@
    "show_arrow": 0,
    "type": "Link",
    "icon": "shopping-cart",
-   "idx": 1
+   "idx": 2
   },
   {
    "added": 0,
@@ -38,7 +55,7 @@
    "show_arrow": 0,
    "type": "Link",
    "icon": "wallet",
-   "idx": 2
+   "idx": 3
   },
   {
    "added": 0,
@@ -55,7 +72,7 @@
    "show_arrow": 0,
    "type": "Link",
    "icon": "user-round",
-   "idx": 3
+   "idx": 4
   },
   {
    "added": 0,
@@ -72,7 +89,7 @@
    "show_arrow": 0,
    "type": "Link",
    "icon": "package",
-   "idx": 4
+   "idx": 5
   },
   {
    "added": 0,
@@ -89,7 +106,7 @@
    "show_arrow": 0,
    "type": "Link",
    "icon": "truck",
-   "idx": 5
+   "idx": 6
   },
   {
    "added": 0,
@@ -105,7 +122,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break",
-   "idx": 6
+   "idx": 7
   },
   {
    "added": 0,
@@ -121,7 +138,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 7
+   "idx": 8
   },
   {
    "added": 0,
@@ -137,7 +154,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 8
+   "idx": 9
   },
   {
    "added": 0,
@@ -153,7 +170,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 9
+   "idx": 10
   },
   {
    "added": 0,
@@ -169,7 +186,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 10
+   "idx": 11
   },
   {
    "added": 0,
@@ -185,7 +202,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break",
-   "idx": 11
+   "idx": 12
   },
   {
    "added": 0,
@@ -201,7 +218,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 12
+   "idx": 13
   },
   {
    "added": 0,
@@ -217,7 +234,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 13
+   "idx": 14
   },
   {
    "added": 0,
@@ -233,7 +250,7 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 14
+   "idx": 15
   },
   {
    "added": 0,
@@ -249,10 +266,10 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link",
-   "idx": 15
+   "idx": 16
   }
  ],
- "modified": "2026-10-09 10:00:00.000000",
+ "modified": "2026-10-14 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "COD",

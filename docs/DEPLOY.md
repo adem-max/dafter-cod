@@ -312,12 +312,20 @@ Major upgrades (v16 → v17) are a project: test on a copy of each site first.
 
 ## 13. New client in under 2 hours
 
+**Shortcut:** steps 0:25 to 0:45 (wizard, warehouses, delivery-fee account, COD Settings, courier, no VAT) are one command:
+
+```bash
+bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
+  --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine'}"
+```
+
 | Time | Step |
 |------|------|
 | 0:00 | Client sends: company name, logo, domain, list of products with prices and stock, courier(s) and their rate card, users (names, emails, roles). |
 | 0:10 | DNS A record for the client domain → server (section 7). |
 | 0:15 | `bench new-site … --install-app erpnext`, `install-app dz_cod`, `enable-scheduler`, `setup nginx`, `setup lets-encrypt` (section 7). |
 | 0:25 | Setup wizard: Français / Algeria / DZD / Africa/Algiers, company name and abbreviation. |
+| 0:28 | **No VAT**: the wizard makes *Algeria TVA 19%* the default sales tax template, and the order form then adds 19 % to every order typed by hand. Search *Sales Taxes and Charges Template* → open *Algeria TVA 19% - XX* → untick **Default** → save. (Skip only if the client is VAT-registered.) |
 | 0:30 | Warehouses: create **Stock principal** and **Retours** (Stock → Warehouse). |
 | 0:35 | Account for delivery fees: Accounting → Chart of Accounts → under income accounts, add **Frais de livraison facturés**. |
 | 0:40 | **Paramètres COD**: company, main warehouse, returns warehouse, delivery-fee account, max calls (3), stock blocking (on/off), tolerance. |
@@ -325,7 +333,7 @@ Major upgrades (v16 → v17) are a project: test on a copy of each site first.
 | 0:50 | **Wilayas et tarifs**: list view → edit *Tarif domicile*, *Tarif stop desk* and the courier costs from the client's rate card; untick *Livrable* where the courier does not go. (Report view allows editing many rows quickly.) |
 | 1:05 | Products: Item Attributes Taille/Couleur exist? create them; import items with Data Import (Item, then Item Price), or create templates + variants. |
 | 1:25 | Opening stock: Stock Reconciliation (or Stock Entry "Material Receipt") into Stock principal. |
-| 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français. |
+| 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français (or English or Arabic for someone who prefers it: the whole COD app follows). |
 | 1:45 | Webhooks: if the client uses n8n, paste the URLs and enable (docs/WEBHOOKS.md). |
 | 1:50 | Smoke test with the client: one order Nouvelle → Confirmer → Préparer → Expédier → Marquer livrée, then cancel/delete it. Check the delivery note and stock. |
 | 1:55 | Add the site to the backup check (it is automatic: the script backs up every site) and note the admin password in your password manager. |

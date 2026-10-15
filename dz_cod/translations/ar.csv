@@ -1,0 +1,263 @@
+Nouvelle,جديدة
+Injoignable,تعذّر الاتصال
+Confirmée,مؤكدة
+Préparée,مجهّزة
+Expédiée,مُرسلة
+Livrée,مُسلّمة
+Réglée,مُسدّدة
+Retournée,مُرتجعة
+Annulée,ملغاة
+Annulée après confirmation,ملغاة بعد التأكيد
+Annuler,إلغاء
+Confirmer,تأكيد
+Marquer livrée,تسجيل كمُسلّمة
+Pas de réponse,لا رد
+Préparer,تجهيز
+Marquer retournée,تسجيل كمُرتجعة
+Marquer réglée,تسجيل كمُسدّدة
+Expédier,إرسال
+Commande COD,طلبية COD
+Stock insuffisant :,المخزون غير كافٍ:
+Confirmation impossible,تعذّر التأكيد
+Attention,تنبيه
+un numéro de téléphone valide (ex. 0555123456),رقم هاتف صحيح (مثال: 0555123456)
+la wilaya,الولاية
+la commune et l'adresse (livraison à domicile),البلدية والعنوان (التوصيل إلى المنزل)
+"Impossible de confirmer, il manque : {0}",لا يمكن التأكيد، ينقص: {0}
+Choisissez le transporteur avant d'expédier.,اختر شركة التوصيل قبل الإرسال.
+Saisissez le n° de suivi du colis avant d'expédier.,أدخل رقم تتبع الطرد قبل الإرسال.
+La commande doit être à l'état {0}.,يجب أن تكون الطلبية في الحالة {0}.
+Choisissez le compte des frais de livraison dans les Paramètres COD.,اختر حساب رسوم التوصيل في إعدادات COD.
+"{0} : besoin {1}, disponible {2}",{0}: المطلوب {1}، المتوفر {2}
+Pas de bon de livraison pour la commande {0}.,لا يوجد إشعار تسليم للطلبية {0}.
+La commande {0} n'est pas retournée.,الطلبية {0} ليست مُرتجعة.
+Le retour de la commande {0} est déjà inspecté.,تم فحص مرتجع الطلبية {0} من قبل.
+Les quantités inspectées doivent correspondre exactement aux quantités retournées.,يجب أن تطابق الكميات المفحوصة الكميات المُرتجعة تمامًا.
+"Retour inspecté : {0} remis en stock, {1} mis au rebut.",تم فحص المرتجع: {0} أُعيدت إلى المخزون، {1} أُتلفت.
+Connecteur inconnu pour le transporteur {0}.,وصلة غير معروفة لشركة التوصيل {0}.
+Le connecteur Yalidine n'est pas encore implémenté (documentation officielle non vérifiée).,وصلة Yalidine غير مُنجزة بعد (لم يتم التحقق من الوثائق الرسمية).
+Où en sont les commandes des 30 derniers jours.,حالة طلبيات آخر 30 يومًا.
+Le nombre de commandes saisies chaque jour.,عدد الطلبيات المُدخلة كل يوم.
+Réafficher le guide d'accueil,إظهار دليل الترحيب من جديد
+Le guide est de retour sur la page Accueil COD.,عاد الدليل إلى الصفحة الرئيسية لـ COD.
+Société,الشركة
+Entrepôt principal,المستودع الرئيسي
+Entrepôt d'où partent les commandes.,المستودع الذي تنطلق منه الطلبيات.
+Entrepôt des retours,مستودع المرتجعات
+"Les colis retournés arrivent ici, en attente d'inspection.",تصل الطرود المُرتجعة إلى هنا في انتظار الفحص.
+Compte des frais de livraison,حساب رسوم التوصيل
+Compte de produits où sont enregistrés les frais de livraison facturés aux clients.,حساب الإيرادات الذي تُسجّل فيه رسوم التوصيل المفوترة للعملاء.
+Bloquer la confirmation si stock insuffisant,منع التأكيد عند نقص المخزون
+"Si coché, une commande ne peut pas être confirmée sans stock disponible. Sinon, un simple avertissement s'affiche (utile si vous imprimez à la demande).",إذا تم التحديد، لا يمكن تأكيد طلبية دون مخزون متوفر. وإلا يظهر تنبيه فقط (مفيد إذا كنت تطبع حسب الطلب).
+Commandes et versements,الطلبيات والتسديدات
+Nombre maximum d'appels,الحد الأقصى لعدد المكالمات
+"Après ce nombre d'appels sans réponse, le bouton « Pas de réponse » disparaît : il faut confirmer ou annuler.",بعد هذا العدد من المكالمات دون رد، يختفي زر «لا رد»: يجب التأكيد أو الإلغاء.
+Tolérance d'écart (DA),هامش الفرق المسموح (دج)
+Écart accepté automatiquement entre le montant attendu et le montant versé par le transporteur.,الفرق المقبول تلقائيًا بين المبلغ المتوقع والمبلغ الذي دفعته شركة التوصيل.
+Transporteur par défaut,شركة التوصيل الافتراضية
+Synchroniser les statuts automatiquement,مزامنة الحالات تلقائيًا
+"Chaque heure, demander au transporteur le statut des colis expédiés et passer automatiquement les commandes en Livrée ou Retournée.",كل ساعة، يُسأل شركة التوصيل عن حالة الطرود المُرسلة وتنتقل الطلبيات تلقائيًا إلى مُسلّمة أو مُرتجعة.
+L'entrepôt {0} n'appartient pas à la société {1}.,المستودع {0} لا ينتمي إلى الشركة {1}.
+L'entrepôt des retours doit être différent de l'entrepôt principal.,يجب أن يختلف مستودع المرتجعات عن المستودع الرئيسي.
+Veuillez d'abord remplir les Paramètres COD.,يرجى ملء إعدادات COD أولًا.
+Charger les commandes livrées,تحميل الطلبيات المُسلّمة
+Date du versement,تاريخ التسديد
+Référence transporteur,مرجع شركة التوصيل
+Référence du relevé ou du virement du transporteur.,مرجع كشف أو تحويل شركة التوصيل.
+Montant reçu,المبلغ المُستلم
+"Argent réellement reçu (virement, chèque ou espèces).",المال المُستلم فعلًا (تحويل أو صك أو نقدًا).
+Colis du relevé,طرود الكشف
+"Une ligne par colis du relevé du transporteur. Bouton « Charger les commandes livrées » pour pré-remplir, ou « Téléverser » pour importer un fichier CSV.",سطر لكل طرد في كشف شركة التوصيل. زر «تحميل الطلبيات المُسلّمة» للملء المسبق، أو «تحميل» لاستيراد ملف CSV.
+Lignes,الأسطر
+Résumé,الملخص
+Colis réglés,الطرود المُسدّدة
+Montant réglé,المبلغ المُسدّد
+Colis en litige,الطرود المتنازع عليها
+"Lignes avec un écart non accepté, un n° inconnu ou une commande invalide.",أسطر بها فرق غير مقبول أو رقم غير معروف أو طلبية غير صالحة.
+Montant en litige,المبلغ المتنازع عليه
+Colis livrés manquants,طرود مُسلّمة ناقصة
+Commandes livrées par ce transporteur jusqu'à la date du versement mais absentes de ce relevé et pas encore réglées.,طلبيات سلّمتها شركة التوصيل هذه حتى تاريخ التسديد لكنها غائبة عن هذا الكشف ولم تُسدَّد بعد.
+Montant manquant,المبلغ الناقص
+Totaux du relevé,مجاميع الكشف
+Total encaissé,مجموع المُحصّل
+Total des frais,مجموع الرسوم
+Total net du relevé,صافي مجموع الكشف
+Écart reçu / relevé,الفرق بين المُستلم والكشف
+Montant reçu moins total net du relevé. Doit être 0.,المبلغ المُستلم ناقص صافي مجموع الكشف. يجب أن يكون 0.
+Remarques,ملاحظات
+Versement {0} annulé : retour à l'état {1}.,أُلغي التسديد {0}: العودة إلى الحالة {1}.
+Ligne {0} : la commande {1} apparaît deux fois.,السطر {0}: الطلبية {1} مذكورة مرتين.
+"Ligne {0} : annulez d'abord {1}, qui a réglé {2} en comptant cette ligne.",السطر {0}: ألغِ أولًا {1}، الذي سدّد {2} باحتساب هذا السطر.
+Commande,الطلبية
+Laisser vide : retrouvée automatiquement par le n° de suivi.,اتركه فارغًا: يُعثر عليها تلقائيًا من رقم التتبع.
+Encaissé,المُحصّل
+Montant que le transporteur dit avoir encaissé auprès du client.,المبلغ الذي تقول شركة التوصيل إنها حصّلته من العميل.
+Frais,الرسوم
+Frais retenus par le transporteur pour ce colis.,الرسوم التي احتفظت بها شركة التوصيل عن هذا الطرد.
+Net versé,الصافي المدفوع
+Montant attendu,المبلغ المتوقع
+Frais prévus,الرسوم المتوقعة
+Déjà versé,مدفوع سابقًا
+Net déjà payé pour cette commande dans des versements précédents. Seul le reste est attendu.,الصافي المدفوع سابقًا لهذه الطلبية في تسديدات سابقة. المتوقع هو الباقي فقط.
+Écart,الفرق
+Net versé moins net attendu. Négatif = il manque de l'argent.,الصافي المدفوع ناقص الصافي المتوقع. سالب = هناك مال ناقص.
+Statut,الحالة
+Inconnue,غير معروفة
+Déjà réglée,مُسدّدة من قبل
+Invalide,غير صالحة
+Accepter,قبول
+Cocher pour accepter l'écart : la commande sera quand même marquée Réglée.,حدّد لقبول الفرق: ستُسجَّل الطلبية كمُسدّدة رغم ذلك.
+Nom de la wilaya,اسم الولاية
+Wilaya d'origine,الولاية الأصلية
+Pour les wilayas créées en 2026 : wilaya d'origine (certains transporteurs utilisent encore l'ancien découpage).,للولايات المُستحدثة في 2026: الولاية التي انبثقت منها (بعض شركات التوصيل لا تزال تعتمد التقسيم القديم).
+Livrable,قابلة للتوصيل
+Décocher si vous ne livrez pas dans cette wilaya.,ألغِ التحديد إذا كنت لا توصل إلى هذه الولاية.
+Zone tarifaire,منطقة التسعير
+Tarifs de livraison (DA),أسعار التوصيل (دج)
+Tarif domicile,سعر التوصيل إلى المنزل
+Prix facturé au client pour une livraison à domicile.,السعر المفوتر للعميل مقابل التوصيل إلى المنزل.
+Tarif stop desk,سعر التوصيل إلى المكتب
+Prix facturé au client pour un retrait au bureau du transporteur.,السعر المفوتر للعميل مقابل الاستلام من مكتب شركة التوصيل.
+Stop desk disponible,التوصيل إلى المكتب متاح
+Coût transporteur domicile,تكلفة شركة التوصيل (المنزل)
+Ce que le transporteur vous retient par colis livré à domicile.,ما تقتطعه شركة التوصيل عن كل طرد يُسلَّم إلى المنزل.
+Coût transporteur stop desk,تكلفة شركة التوصيل (المكتب)
+Ce que le transporteur vous retient par colis livré en stop desk.,ما تقتطعه شركة التوصيل عن كل طرد يُسلَّم في المكتب.
+La wilaya {0} n'est pas livrable.,الولاية {0} غير قابلة للتوصيل.
+Pas de stop desk disponible dans la wilaya {0}.,لا يوجد مكتب توصيل في الولاية {0}.
+Lancez votre boutique COD,جهّز متجرك للدفع عند الاستلام
+Ajoutez votre transporteur,أضف شركة التوصيل
+Un transporteur est un fournisseur avec la case *Est un transporteur* cochée. Choisissez le connecteur *Manuel* si vous saisissez le n° de suivi à la main.,شركة التوصيل هي مورد مع تحديد خانة *هو الناقل*. اختر الوصلة *يدوي* إذا كنت تُدخل رقم التتبع بنفسك.
+Ajouter un transporteur,إضافة شركة توصيل
+Ajoutez vos articles,أضف أصنافك
+"Un article par produit (ou un modèle avec des variantes taille / couleur), avec son prix de vente.",صنف لكل منتج (أو نموذج بمتغيرات المقاس / اللون)، مع سعر البيع.
+Ajouter un article,إضافة صنف
+Suivez l'argent chez les transporteurs,تابع المال لدى شركات التوصيل
+"Le rapport *Encours transporteurs* montre, pour chaque transporteur, ce qu'il vous doit encore.",يُظهر تقرير *مستحقات شركات التوصيل* ما لا تزال كل شركة توصيل مدينة لك به.
+Voir l'encours,عرض المستحقات
+Argent encaissé par les transporteurs et pas encore versé.,مال حصّلته شركات التوصيل ولم تدفعه بعد.
+Saisissez votre première commande,أدخل أول طلبية
+"Client, téléphone, wilaya, adresse, articles. Enregistrez : les frais de livraison s'ajoutent. Puis suivez le bouton *Actions* : Confirmer, Préparer, Expédier, Marquer livrée.",العميل، الهاتف، الولاية، العنوان، الأصناف. احفظ: تُضاف رسوم التوصيل. ثم اتبع زر *الإجراءات*: تأكيد، تجهيز، إرسال، تسجيل كمُسلّمة.
+Nouvelle commande,طلبية جديدة
+Enregistrez un versement,سجّل تسديدًا
+"Quand le transporteur vous paie, créez un Versement et cliquez *Charger les commandes livrées* : les commandes payées passent en Réglée, les écarts sont signalés.",عندما تدفع لك شركة التوصيل، أنشئ تسديدًا واضغط *تحميل الطلبيات المُسلّمة*: تنتقل الطلبيات المدفوعة إلى مُسدّدة ويُشار إلى الفروق.
+Nouveau versement,تسديد جديد
+Entrez votre stock de départ,أدخل مخزونك الافتتاحي
+"Une *Réception de matériel* dans l'entrepôt principal, avec la quantité et le prix d'achat de chaque article.",قيد *أستلام مواد* في المستودع الرئيسي، مع كمية وسعر شراء كل صنف.
+Entrer le stock,إدخال المخزون
+Vérifiez les Paramètres COD,راجع إعدادات COD
+"Société, entrepôt principal, entrepôt des retours, compte des frais de livraison, nombre d'appels avant d'abandonner. Tout le reste en dépend.",الشركة، المستودع الرئيسي، مستودع المرتجعات، حساب رسوم التوصيل، عدد المكالمات قبل التخلي. كل الباقي يعتمد عليها.
+Ouvrir les Paramètres COD,فتح إعدادات COD
+Ajustez les tarifs par wilaya,عدّل الأسعار حسب الولاية
+"Les 69 wilayas sont créées avec des tarifs d'exemple. Mettez les prix Domicile et Stop desk de votre transporteur, et décochez *Livrable* là où il ne va pas.",تم إنشاء 69 ولاية بأسعار تجريبية. أدخل أسعار شركة التوصيل للمنزل وللمكتب، وألغِ تحديد *قابلة للتوصيل* حيث لا توصل.
+Ouvrir les wilayas,فتح الولايات
+Détail par commande,التفاصيل حسب الطلبية
+Livrées non réglées,مُسلّمة غير مُسدّدة
+Montant dû (net),المبلغ المستحق (صافي)
+Dont en litige,منه متنازع عليه
+Plus ancienne livraison,أقدم تسليم
+Jours d'attente,أيام الانتظار
+Sur la route,في الطريق
+Montant sur la route,المبلغ في الطريق
+État,الحالة
+Jours,الأيام
+À encaisser,للتحصيل
+Net dû,الصافي المستحق
+En litige (versement),متنازع عليه (تسديد)
+Du,من
+Au,إلى
+Montant (hors annulées),المبلغ (دون الملغاة)
+Taux de confirmation,نسبة التأكيد
+Taux d'annulation,نسبة الإلغاء
+Vide = société des Paramètres COD,فارغ = شركة إعدادات COD
+Expédiées du,المُرسلة من
+Grouper par,تجميع حسب
+Produit,المنتج
+pièces,قطعة
+commandes,طلبية
+Désignation,الاسم
+Livrées ({0}),مُسلّمة ({0})
+Retournées ({0}),مُرتجعة ({0})
+En transit ({0}),قيد النقل ({0})
+Taux de retour (%),نسبة الإرجاع (%)
+Accueil,الرئيسية
+Commandes,الطلبيات
+Versements,التسديدات
+Clients,العملاء
+Articles,الأصناف
+Bons de livraison,إشعارات التسليم
+Rapports,التقارير
+Commandes par jour,الطلبيات حسب اليوم
+Taux de retour,نسبة الإرجاع
+Encours transporteurs,مستحقات شركات التوصيل
+Stock par entrepôt,المخزون حسب المستودع
+Paramètres,الإعدادات
+Wilayas et tarifs,الولايات والأسعار
+Transporteurs,شركات التوصيل
+Paramètres COD,إعدادات COD
+Au quotidien,يوميًا
+À confirmer,للتأكيد
+À expédier,للإرسال
+En transit,قيد النقل
+Argent à recevoir,مال مُنتظر
+Commandes par état (30 j),الطلبيات حسب الحالة (30 يومًا)
+Inspecter le retour,فحص المرتجع
+Expédier la commande,إرسال الطلبية
+Laissez vide si le transporteur est connecté (le numéro sera demandé automatiquement).,اتركه فارغًا إذا كانت شركة التوصيل موصولة (سيُطلب الرقم تلقائيًا).
+Inspection du retour,فحص المرتجع
+Indiquez pour chaque article combien de pièces sont en bon état (remises en stock) et combien sont abîmées (mises au rebut).,حدّد لكل صنف عدد القطع السليمة (تعود إلى المخزون) وعدد القطع التالفة (تُتلف).
+Article,الصنف
+Bon état,سليم
+Abîmé,تالف
+Valider l'inspection,تأكيد الفحص
+Coordonnées COD,بيانات الاتصال COD
+Téléphone,الهاتف
+Adresse,العنوان
+Livraison COD,التوصيل COD
+Téléphone 2,الهاتف 2
+Source de la commande,مصدر الطلبية
+Site web,الموقع الإلكتروني
+Autre,أخرى
+Type de livraison,نوع التوصيل
+Domicile,المنزل
+Tarif de livraison manuel,رسوم توصيل يدوية
+"Cochez pour saisir vous-même les frais (livraison offerte, remise...).",حدّد لإدخال الرسوم بنفسك (توصيل مجاني، تخفيض...).
+Frais de livraison,رسوم التوصيل
+Montant à encaisser,المبلغ المطلوب تحصيله
+Total que le livreur doit encaisser auprès du client (articles + livraison).,المجموع الذي يجب على عامل التوصيل تحصيله من العميل (الأصناف + التوصيل).
+Suivi COD,متابعة COD
+Appels sans réponse,مكالمات دون رد
+Transporteur,شركة التوصيل
+N° de suivi,رقم التتبع
+Frais transporteur prévus,رسوم شركة التوصيل المتوقعة
+Montant que le transporteur devrait retenir (d'après la grille de la wilaya).,المبلغ الذي يُفترض أن تقتطعه شركة التوصيل (حسب جدول أسعار الولاية).
+Bon de livraison,إشعار التسليم
+Bon de retour,إشعار الإرجاع
+Retour inspecté,تم فحص المرتجع
+Versement,التسديد
+Confirmée le,تاريخ التأكيد
+Expédiée le,تاريخ الإرسال
+Livrée le,تاريخ التسليم
+Retournée le,تاريخ الإرجاع
+Réglée le,تاريخ التسديد
+Commande (retour),الطلبية (مرتجع)
+Commande retournée dont ce mouvement traite l'inspection.,الطلبية المُرتجعة التي يُسجّل هذا القيد فحصها.
+Intégration transporteur (COD),ربط شركة التوصيل (COD)
+Connecteur,الوصلة
+Manuel : vous saisissez le n° de suivi. Mock : simulation hors ligne pour les tests.,يدوي: تُدخل رقم التتبع بنفسك. Mock: محاكاة دون اتصال للاختبارات.
+Manuel,يدوي
+Afficher,إظهار
+Réduire,تصغير
+Masquer ce guide ? Vous pourrez le réafficher depuis Paramètres COD.,إخفاء هذا الدليل؟ يمكنك إظهاره من جديد من إعدادات COD.
+Wilaya,الولاية
+Commune,البلدية
+Stop desk,المكتب (Stop desk)
+DZ Wilaya,الولاية
+COD Settings,إعدادات COD
+Courier Settlement,التسديد
+Courier Settlement Item,سطر التسديد
+COD Daily Orders,الطلبيات حسب اليوم (COD)
+COD Return Rate,نسبة الإرجاع (COD)
+COD Courier Outstanding,مستحقات شركات التوصيل (COD)
+COD Orders Per Day,الطلبيات
+COD Orders By State,الطلبيات

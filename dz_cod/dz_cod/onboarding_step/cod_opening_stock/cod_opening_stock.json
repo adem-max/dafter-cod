@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Entrer le stock",
+ "creation": "2026-10-14 12:00:00.000000",
+ "description": "Une *Réception de matériel* dans l'entrepôt principal, avec la quantité et le prix d'achat de chaque article.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "COD Opening Stock",
+ "owner": "Administrator",
+ "reference_document": "Stock Entry",
+ "route_options": "{\"stock_entry_type\": \"Material Receipt\"}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Entrez votre stock de départ",
+ "validate_action": 1
+}

@@ -1,0 +1,21 @@
+{
+ "action": "Go to Page",
+ "action_label": "Ouvrir les wilayas",
+ "creation": "2026-10-14 12:00:00.000000",
+ "description": "Les 69 wilayas sont créées avec des tarifs d'exemple. Mettez les prix Domicile et Stop desk de votre transporteur, et décochez *Livrable* là où il ne va pas.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "COD Wilaya Rates",
+ "owner": "Administrator",
+ "path": "List/DZ Wilaya/Report",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Ajustez les tarifs par wilaya",
+ "validate_action": 0
+}

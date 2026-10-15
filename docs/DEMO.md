@@ -31,11 +31,14 @@ cd ~/frappe-bench
 bench new-site demo.localhost --install-app erpnext      # asks for the MariaDB root password, then an admin password
 bench --site demo.localhost install-app dz_cod
 bench --site demo.localhost execute dz_cod.demo.loader.load
+bench use demo.localhost                                  # the development server will show this site
+bench start
 ```
 
-The last command takes 3 to 5 minutes and ends with a count of orders per
-state. Then open `http://demo.localhost:8000` (with `bench start` running),
-log in as `Administrator`.
+The loader takes 2 to 5 minutes and ends with a count of orders per state.
+Then open `http://demo.localhost:8000` and log in as `Administrator`.
+On a laptop, `bench start` shows only the site chosen with `bench use`
+(see docs/LOCAL_TEST.md, section 5).
 
 ## Change the return rate
 
@@ -60,6 +63,12 @@ Option 1 — keep the site, delete the demo data (about 1 minute):
 bench --site demo.localhost execute dz_cod.demo.wipe.run
 bench --site demo.localhost execute dz_cod.demo.loader.load
 ```
+
+Keep `bench start` running in another terminal while you do this: the wipe
+and the loader queue about 1,000 background clean-up jobs, and the workers
+started by `bench start` process them. Without workers the queue fills up
+and Frappe refuses new jobs ("Too many queued background jobs"); fix it with
+`bench worker --queue default,short,long --burst`.
 
 It cancels and deletes settlements, stock entries, delivery notes and orders,
 then the demo customers, couriers and items. The company, warehouses,

@@ -8,7 +8,9 @@ confirmed (submitted). Fields filled during shipping, delivery or settlement
 need it.
 """
 
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 DELIVERY_TYPES = "Domicile\nStop desk"
 ORDER_SOURCES = "\nInstagram\nFacebook\nSite web\nWhatsApp\nTikTok\nTéléphone\nAutre"
@@ -46,6 +48,7 @@ SALES_ORDER_FIELDS = [
 		"fetch_from": "customer.dz_phone",
 		"fetch_if_empty": 1,
 		"in_standard_filter": 1,
+		"in_list_view": 1,
 	},
 	{
 		"fieldname": "dz_phone_2",
@@ -72,6 +75,7 @@ SALES_ORDER_FIELDS = [
 		"fetch_from": "customer.dz_wilaya",
 		"fetch_if_empty": 1,
 		"in_standard_filter": 1,
+		"in_list_view": 1,
 	},
 	{
 		"fieldname": "dz_commune",
@@ -244,6 +248,22 @@ STOCK_ENTRY_FIELDS = [
 ]
 
 
+# ERPNext's own Sales Order fields that mean little for a COD seller: hide them
+# from the Commandes list filters and columns, so orders start higher up.
+# (fieldname, property, value)
+SALES_ORDER_PROPERTIES = [
+	("company", "in_standard_filter", 0),
+	("customer", "in_standard_filter", 0),  # "Nom du client" already filters by customer
+	("delivery_status", "in_standard_filter", 0),
+	("billing_status", "in_standard_filter", 0),
+	("advance_payment_status", "in_standard_filter", 0),
+	("delivery_date", "in_list_view", 0),  # planned date, not the COD delivery
+	("grand_total", "in_list_view", 0),  # "Montant à encaisser" is shown instead
+	("per_delivered", "in_list_view", 0),
+	("per_billed", "in_list_view", 0),
+]
+
+
 def setup_custom_fields():
 	"""Create or update all custom fields. Safe to run many times."""
 	create_custom_fields(
@@ -255,3 +275,17 @@ def setup_custom_fields():
 		},
 		update=True,
 	)
+	setup_list_properties()
+
+
+def setup_list_properties():
+	"""Apply SALES_ORDER_PROPERTIES once. A property the user already changed
+	(Customize Form) keeps the user's value."""
+	for fieldname, prop, value in SALES_ORDER_PROPERTIES:
+		if frappe.db.exists(
+			"Property Setter", {"doc_type": "Sales Order", "field_name": fieldname, "property": prop}
+		):
+			continue
+		make_property_setter(
+			"Sales Order", fieldname, prop, value, "Check", validate_fields_for_doctype=False
+		)

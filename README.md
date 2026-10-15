@@ -11,7 +11,7 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 |---|---|
 | **Target version** | **ERPNext v16.50.0 on Frappe v16.51.0** (branch `version-16`, latest stable major in October 2026) |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
-| **Automated tests** | 45 tests (17 unit + 28 integration on a real ERPNext site), all passing, on the development site and on a brand-new site. |
+| **Automated tests** | 60 tests (22 unit + 38 integration on a real ERPNext site), all passing, on the development site and on a brand-new site. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |
@@ -122,6 +122,8 @@ dz_cod/
   tests/                    automated tests
   public/js/sales_order.js  "Expédier" dialog and return inspection on the order form
   translations/fr.csv       French names for our doctypes and reports
+  translations/en.csv       English version of every French text (per-user language)
+  translations/ar.csv       Arabic version (right-to-left)
 scripts/backup_offsite.sh   nightly backup of all sites, copied off the server
 ```
 
@@ -130,7 +132,7 @@ scripts/backup_offsite.sh   nightly backup of all sites, copied off the server
 1. ERPNext / Frappe core is never modified: everything is in this app.
 2. Standard doctypes first (Sales Order, Delivery Note, Stock Entry, Customer, Supplier, Item); new doctypes only where nothing fits (justified in DECISIONS.md).
 3. Per-client differences live in settings and data, never in code branches.
-4. Short, plainly commented code, English in code, French for users.
+4. Short, plainly commented code, English in code, French for users (English and Arabic available per user: User → Language).
 5. Currency DZD, no VAT logic.
 
 License: MIT.

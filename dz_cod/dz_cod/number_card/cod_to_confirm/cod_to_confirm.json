@@ -1,0 +1,22 @@
+{
+ "color": "#2490EF",
+ "creation": "2026-10-14 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Sales Order",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Sales Order\", \"workflow_state\", \"in\", [\"Nouvelle\", \"Injoignable\"]]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "À confirmer",
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "DZ COD",
+ "name": "COD To Confirm",
+ "owner": "Administrator",
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type"
+}

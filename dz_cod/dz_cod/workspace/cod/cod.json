@@ -1,0 +1,208 @@
+{
+ "app": "dz_cod",
+ "charts": [
+  {
+   "chart_name": "COD Orders Per Day",
+   "label": "Commandes par jour"
+  },
+  {
+   "chart_name": "COD Orders By State",
+   "label": "Commandes par état (30 j)"
+  }
+ ],
+ "content": "[{\"id\": \"codhome000\", \"type\": \"custom_block\", \"data\": {\"custom_block_name\": \"COD Home\", \"col\": 12}}, {\"id\": \"codonb0000\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"COD Onboarding\", \"col\": 12}}, {\"id\": \"codnum0000\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"À confirmer\", \"col\": 3}}, {\"id\": \"codnum0001\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"À expédier\", \"col\": 3}}, {\"id\": \"codnum0002\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"En transit\", \"col\": 3}}, {\"id\": \"codnum0003\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Argent à recevoir\", \"col\": 3}}, {\"id\": \"codcht0000\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Commandes par jour\", \"col\": 6}}, {\"id\": \"codcht0001\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Commandes par état (30 j)\", \"col\": 6}}, {\"id\": \"codcrd0000\", \"type\": \"card\", \"data\": {\"card_name\": \"Au quotidien\", \"col\": 4}}, {\"id\": \"codcrd0001\", \"type\": \"card\", \"data\": {\"card_name\": \"Rapports\", \"col\": 4}}, {\"id\": \"codcrd0002\", \"type\": \"card\", \"data\": {\"card_name\": \"Paramètres\", \"col\": 4}}]",
+ "creation": "2026-10-14 12:00:00.000000",
+ "custom_blocks": [
+  {
+   "custom_block_name": "COD Home",
+   "label": "COD Home"
+  }
+ ],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "truck",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "COD",
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Au quotidien",
+   "link_count": 4,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Commandes",
+   "link_type": "DocType",
+   "link_to": "Sales Order",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Versements",
+   "link_type": "DocType",
+   "link_to": "Courier Settlement",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Bons de livraison",
+   "link_type": "DocType",
+   "link_to": "Delivery Note",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Clients",
+   "link_type": "DocType",
+   "link_to": "Customer",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Rapports",
+   "link_count": 4,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Commandes par jour",
+   "link_type": "Report",
+   "link_to": "COD Daily Orders",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1
+  },
+  {
+   "type": "Link",
+   "label": "Taux de retour",
+   "link_type": "Report",
+   "link_to": "COD Return Rate",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1
+  },
+  {
+   "type": "Link",
+   "label": "Encours transporteurs",
+   "link_type": "Report",
+   "link_to": "COD Courier Outstanding",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1
+  },
+  {
+   "type": "Link",
+   "label": "Stock par entrepôt",
+   "link_type": "Report",
+   "link_to": "Stock Balance",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1
+  },
+  {
+   "type": "Card Break",
+   "label": "Paramètres",
+   "link_count": 4,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Paramètres COD",
+   "link_type": "DocType",
+   "link_to": "COD Settings",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Wilayas et tarifs",
+   "link_type": "DocType",
+   "link_to": "DZ Wilaya",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Transporteurs",
+   "link_type": "DocType",
+   "link_to": "Supplier",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Articles",
+   "link_type": "DocType",
+   "link_to": "Item",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  }
+ ],
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "DZ COD",
+ "module_onboarding": "COD Onboarding",
+ "name": "COD",
+ "number_cards": [
+  {
+   "number_card_name": "COD To Confirm",
+   "label": "À confirmer"
+  },
+  {
+   "number_card_name": "COD To Ship",
+   "label": "À expédier"
+  },
+  {
+   "number_card_name": "COD In Transit",
+   "label": "En transit"
+  },
+  {
+   "number_card_name": "COD Cash With Couriers",
+   "label": "Argent à recevoir"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 30.0,
+ "shortcuts": [],
+ "standard": 1,
+ "title": "COD",
+ "type": "Workspace"
+}

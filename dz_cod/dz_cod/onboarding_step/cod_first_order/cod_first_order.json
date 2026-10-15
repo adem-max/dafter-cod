@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Nouvelle commande",
+ "creation": "2026-10-14 12:00:00.000000",
+ "description": "Client, téléphone, wilaya, adresse, articles. Enregistrez : les frais de livraison s'ajoutent. Puis suivez le bouton *Actions* : Confirmer, Préparer, Expédier, Marquer livrée.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "COD First Order",
+ "owner": "Administrator",
+ "reference_document": "Sales Order",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Saisissez votre première commande",
+ "validate_action": 1
+}

@@ -68,6 +68,19 @@ class TestSettlementRules(UnitTestCase):
 		self.assertEqual(rules.disputed_amount(rules.GAP, 2500, -500), 500)
 		self.assertEqual(rules.disputed_amount(rules.UNKNOWN, 1200, 0), 1200)
 
+	def test_remaining_due(self):
+		self.assertEqual(rules.remaining_due(2500, 0), 2500)
+		self.assertEqual(rules.remaining_due(2500, 2000), 500)  # 500 short the first time
+		self.assertEqual(rules.remaining_due(2500, 3000), -500)  # paid too much
+
+	def test_prefill_amounts(self):
+		# First Versement: the whole order and its fee
+		self.assertEqual(rules.prefill_amounts(3000, 500, 0), (3000, 500))
+		# After a line 500 short: only the 500 left, no fee again
+		self.assertEqual(rules.prefill_amounts(3000, 500, 2000), (500, 0))
+		# Paid too much: nothing to pre-fill (the line shows the gap to accept)
+		self.assertEqual(rules.prefill_amounts(3000, 500, 3000), (0, 0))
+
 
 class TestWorkflowDefinition(UnitTestCase):
 	"""The workflow table must respect Frappe's rules, or setup fails."""

@@ -10,12 +10,21 @@ from frappe.utils import today
 from dz_cod.cod import settlement as rules
 from dz_cod.cod import states as S
 from dz_cod.demo import data as D
+from dz_cod.dz_cod.report.cod_courier_outstanding import cod_courier_outstanding as outstanding
 from dz_cod.tests import helpers as h
 
 
 def delivered_order(qty=1):
 	order = h.make_order(qty=qty)
 	return h.act(order, S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP, S.ACTION_DELIVER)
+
+
+def short_line(order, short=500):
+	return {
+		"sales_order": order.name,
+		"collected_amount": order.dz_cod_amount - short,
+		"courier_fee": order.dz_courier_fee,
+	}
 
 
 def new_settlement(lines):
@@ -131,3 +140,120 @@ class TestSettlement(IntegrationTestCase):
 		line = next(line for line in settlement.items if line.sales_order == order.name)
 		self.assertEqual(line.status, rules.OK)
 		self.assertEqual(line.net_amount, order.dz_cod_amount - order.dz_courier_fee)
+
+	# --------------------------------------- a disputed line, then a second Versement
+
+	def disputed_order(self, short=500):
+		"""A delivered order paid `short` DA short in a submitted Versement."""
+		order = delivered_order()
+		first = new_settlement([short_line(order, short)])
+		self.assertEqual(first.items[0].status, rules.GAP)
+		first.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order", order.name, "workflow_state"), S.DELIVERED)
+		return order, first
+
+	def test_second_versement_expects_only_the_rest(self):
+		order, _first = self.disputed_order()
+		expected_net = order.dz_cod_amount - order.dz_courier_fee
+
+		settlement = frappe.new_doc("Courier Settlement")
+		settlement.update({"courier": h.MOCK_COURIER, "company": D.COMPANY, "posting_date": today()})
+		settlement.load_delivered_orders()
+		line = next(line for line in settlement.items if line.sales_order == order.name)
+		# Pre-filled with the 500 still due, not the whole order again
+		self.assertEqual(line.collected_amount, 500)
+		self.assertEqual(line.courier_fee, 0)
+		self.assertEqual(line.already_received, expected_net - 500)
+		self.assertEqual(line.difference, 0)
+		self.assertEqual(line.status, rules.OK)
+
+		settlement.set("items", [line])  # leave the other tests' orders alone
+		settlement.insert()
+		settlement.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order", order.name, "workflow_state"), S.SETTLED)
+		received = frappe.get_all(
+			"Courier Settlement Item",
+			filters={"sales_order": order.name, "docstatus": 1},
+			pluck="net_amount",
+		)
+		self.assertEqual(sum(received), expected_net)  # paid once in total, not twice
+
+	def test_whole_amount_again_after_dispute_is_a_gap(self):
+		# The demo bug: the full amount paid again must not pass as OK
+		order, _first = self.disputed_order()
+		line = {
+			"sales_order": order.name,
+			"collected_amount": order.dz_cod_amount,
+			"courier_fee": order.dz_courier_fee,
+		}
+		second = new_settlement([line])
+		self.assertEqual(second.items[0].status, rules.GAP)
+		self.assertEqual(second.items[0].difference, order.dz_cod_amount - order.dz_courier_fee - 500)
+
+	def test_missing_amount_is_the_rest(self):
+		order, _first = self.disputed_order()
+		other = delivered_order()
+		settlement = new_settlement(
+			[
+				{
+					"sales_order": other.name,
+					"collected_amount": other.dz_cod_amount,
+					"courier_fee": other.dz_courier_fee,
+				}
+			]
+		)
+		missing = {o.name: o for o in settlement.get_missing_orders()}
+		self.assertEqual(
+			missing[order.name].already_received, order.dz_cod_amount - order.dz_courier_fee - 500
+		)
+
+	def test_cancel_first_versement_refused_while_second_counts_it(self):
+		order, first = self.disputed_order()
+		second = new_settlement([{"sales_order": order.name, "collected_amount": 500, "courier_fee": 0}])
+		self.assertEqual(second.items[0].status, rules.OK)
+		second.submit()
+
+		first.reload()
+		with self.assertRaises(frappe.ValidationError):
+			first.cancel()
+
+		# In the right order it works, and the order is back to Livrée
+		second.reload()
+		second.cancel()
+		first.reload()
+		first.cancel()
+		self.assertEqual(frappe.db.get_value("Sales Order", order.name, "workflow_state"), S.DELIVERED)
+
+	def test_outstanding_report_shows_the_gap(self):
+		order, first = self.disputed_order()
+		expected_net = order.dz_cod_amount - order.dz_courier_fee
+
+		_columns, rows, *_rest = outstanding.execute({"courier": h.MOCK_COURIER, "detail": 1})
+		row = next(row for row in rows if row.name == order.name)
+		self.assertEqual(row.dispute, first.name)
+		self.assertEqual(row.already_received, expected_net - 500)
+		self.assertEqual(row.due, 500)
+
+		summary = outstanding.get_summary_rows([row])[0]
+		self.assertEqual(summary["delivered_net"], 500)
+		self.assertEqual(summary["disputed_count"], 1)
+		self.assertEqual(summary["disputed_net"], 500)  # the gap, not the whole order
+
+	def test_home_card_shows_the_report_amount_due(self):
+		# "Argent à recevoir" on the home page = the report's "Montant dû (net)",
+		# so a disputed order counts only for the gap, not the whole order
+		order = delivered_order()
+		before = outstanding.get_amount_due_card()["value"]
+		new_settlement([short_line(order, 500)]).submit()
+
+		card = outstanding.get_amount_due_card()
+		self.assertEqual(before - card["value"], order.dz_cod_amount - order.dz_courier_fee - 500)
+		summary = outstanding.execute({})[4]
+		self.assertEqual(card["value"], summary[0]["value"])  # Montant dû (net)
+
+		frappe.set_user("Guest")
+		try:
+			with self.assertRaises(frappe.PermissionError):
+				outstanding.get_amount_due_card()
+		finally:
+			frappe.set_user("Administrator")

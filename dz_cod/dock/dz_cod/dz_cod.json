@@ -1,0 +1,24 @@
+{
+ "app": "dz_cod",
+ "creation": "2026-10-13 12:00:00",
+ "docstatus": 0,
+ "doctype": "Dock",
+ "idx": 0,
+ "items": [
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "truck",
+   "link_to": "COD",
+   "link_type": "Sidebar",
+   "title": "COD"
+  }
+ ],
+ "modified": "2026-10-13 12:00:00",
+ "modified_by": "Administrator",
+ "mount_on": "erpnext",
+ "name": "dz_cod",
+ "owner": "Administrator",
+ "standard": 1,
+ "user": ""
+}
