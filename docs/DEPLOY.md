@@ -222,6 +222,18 @@ bench setup nginx && sudo systemctl reload nginx
    For each site it makes 4 files: `…-database.sql.gz`, `…-files.tgz`,
    `…-private-files.tgz` and `…-site_config_backup.json`.
 
+   If one site or the copy fails, the script still does the other sites,
+   lists what failed at the end and exits with an error. Local backups are
+   only deleted after a successful copy. Tested on 15 Oct 2026 in a bare
+   cron-like environment, with a working remote and with a missing one.
+
+   **Get warned when backups stop.** A backup that silently fails for weeks
+   is the classic disaster. Create a free check at healthchecks.io (period
+   1 day, grace 2 hours), then add its ping URL to the crontab line:
+   `30 2 * * * HEALTHCHECK_URL=https://hc-ping.com/<uuid> /home/frappe/backup_offsite.sh >> ...`
+   The script pings it on success and pings `/fail` on error, and you get an
+   e-mail when no ping arrives.
+
 3. **The `…-site_config_backup.json` file holds the site's `encryption_key`**
    (ERPNext creates it the first time a password is stored). Without it,
    passwords stored in ERPNext (email accounts, couriers' API tokens) cannot be
@@ -229,10 +241,28 @@ bench setup nginx && sudo systemctl reload nginx
 
 ## 10. Restore (tested)
 
-This exact procedure was run while writing this guide: backup of the demo
-site (with a courier API token stored encrypted), restore into a new empty
-site, then check. Result: the same 200 orders, and the API token could still
-be decrypted.
+**Monthly drill, one command.** `scripts/restore_test.sh` restores the latest
+backup into a throwaway site, compares it with the live site (orders,
+delivery notes, settlements, customers, items, stock ledger, files, users,
+last order, and whether every stored password can still be decrypted), then
+deletes the throwaway site:
+
+```bash
+cp ~/frappe-bench/apps/dz_cod/scripts/restore_test.sh ~/restore_test.sh && chmod +x ~/restore_test.sh
+DBPASS='...' ~/restore_test.sh erp.client1.com                # from the local backups
+rclone copy offsite:erp-backups/$(hostname)/erp.client1.com/ /tmp/restore/ --max-age 48h
+DBPASS='...' ~/restore_test.sh erp.client1.com /tmp/restore   # from the OFF-SITE copy (the real test)
+```
+
+It ends with `RESTORE TEST OK` or `RESTORE TEST FAILED: <what>`. On 15 Oct 2026
+it restored the demo from its off-site copy (200 orders, 1,625 stock ledger
+entries, all equal), and it failed as it should on a backup whose
+`encryption_key` had been removed.
+
+The same steps by hand, for a real disaster, are below. They were run while
+writing this guide: backup of the demo site (with a courier API token stored
+encrypted), restore into a new empty site, then check. Result: the same 200
+orders, and the API token could still be decrypted.
 
 ```bash
 cd ~/frappe-bench
