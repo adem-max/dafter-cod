@@ -11,7 +11,7 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 |---|---|
 | **Target version** | **ERPNext v16.50.0 on Frappe v16.51.0** (branch `version-16`, latest stable major in October 2026) |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
-| **Automated tests** | 85 tests (25 unit + 60 integration on a real ERPNext site), all passing on the test site. |
+| **Automated tests** | 94 tests (25 unit + 69 integration on a real ERPNext site), all passing on the test site. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |

@@ -29,7 +29,21 @@ def setup_all():
 	setup_webhooks()
 	setup_selling_settings()
 	setup_home_block()
+	setup_new_settings_defaults()
 	frappe.db.commit()
+
+
+def setup_new_settings_defaults():
+	"""A field added to COD Settings after a site was created gets no default
+	(Frappe only applies defaults to new documents). Set it once, only if it
+	was never saved, so a value chosen later (even 0) is kept."""
+	defaults = {"refused_warning_threshold": 1}
+	for fieldname, value in defaults.items():
+		saved = frappe.db.sql(
+			"SELECT 1 FROM `tabSingles` WHERE doctype = 'COD Settings' AND field = %s", fieldname
+		)
+		if not saved:
+			frappe.db.set_single_value("COD Settings", fieldname, value)
 
 
 def setup_wilayas():

@@ -109,6 +109,11 @@ Newest decisions are added at the bottom of each section.
 - **Disputed parcels stay disputed in the demo** (the next weekly statement does not re-pay them), so the outstanding report has something to show.
 - **Wipe = cancel and delete in reverse order, keep the company**; a total reset is simply dropping and re-creating the demo site.
 
+- **Phone checks warn, never block** (16 October 2026, Adem's choice): a refused-parcels warning on the order (threshold in COD Settings, default 1, 0 = off) and a duplicate-phone warning on the customer, both with links. Blocking was rejected: the operator knows the customer. Customer phones are now normalized like order phones, so the comparison works.
+- **Return-rate report needs a minimum sample** (16 October 2026): filter *Minimum de colis* (default 5 finished orders); below it the rate is empty and the row sorts last. Products are still counted in pieces; the new column counts orders.
+- **Webhook templates: refresh only what nobody edited** (16 October 2026): a fingerprint of the template we wrote is kept in the site defaults; migrate updates template + condition only when the site still has our last version. URL, Enabled and headers are never touched.
+- **Our own shipping label with a pure-Python Code 128** (16 October 2026): no new package on the servers; the 106 bar patterns come from python-barcode (MIT) and the test decodes our output back. Code set B only (tracking numbers are plain ASCII).
+
 ## Tests
 
 - **Tests live in `dz_cod/tests/`, outside doctype folders**: this way Frappe does not try to build ERPNext's own test records (slow and fragile); our fixtures reuse the demo setup functions and everything is rolled back after each test class.

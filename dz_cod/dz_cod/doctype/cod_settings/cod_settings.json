@@ -12,6 +12,7 @@
   "block_confirmation_without_stock",
   "orders_section",
   "max_call_attempts",
+  "refused_warning_threshold",
   "column_break_orders",
   "settlement_tolerance",
   "courier_section",
@@ -76,6 +77,14 @@
    "non_negative": 1
   },
   {
+   "default": "1",
+   "description": "Un avertissement s'affiche sur la commande quand son numéro a déjà ce nombre de colis refusés (Retournée). 0 = jamais.",
+   "fieldname": "refused_warning_threshold",
+   "fieldtype": "Int",
+   "label": "Avertir à partir de N colis refusés",
+   "non_negative": 1
+  },
+  {
    "fieldname": "column_break_orders",
    "fieldtype": "Column Break"
   },
@@ -114,7 +123,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-09 10:00:00.000000",
+ "modified": "2026-10-16 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "COD Settings",

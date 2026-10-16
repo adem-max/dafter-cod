@@ -30,6 +30,20 @@ frappe.ui.form.on("Sales Order", {
 				window.open(frm.doc.dz_label_url, "_blank", "noopener")
 			);
 		}
+		// Our own 100 x 150 mm label (print format "Bordereau COD"), for couriers
+		// whose API gives no label (Manuel, ZR Express...)
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Bordereau"), () => {
+				const params = new URLSearchParams({
+					doctype: frm.doc.doctype,
+					name: frm.doc.name,
+					format: "Bordereau COD",
+					no_letterhead: 1,
+					trigger_print: 1,
+				});
+				window.open(`/printview?${params}`, "_blank", "noopener");
+			});
+		}
 	},
 
 	// Runs when a workflow button is clicked, before the action is applied.

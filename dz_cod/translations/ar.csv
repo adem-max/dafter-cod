@@ -321,3 +321,18 @@ DZ Commune,البلدية
 DZ Stop Desk,مكتب الاستلام
 "Connecteur ZR Express : bientôt disponible. En attendant, saisissez le n° de suivi à l'expédition et passez les commandes en Livrée ou Retournée à la main.",موصل ZR Express: قريبًا. في الانتظار، أدخل رقم التتبع عند الإرسال وانقل الطلبات إلى «مُسلّمة» أو «مُرتجعة» يدويًا.
 ZR Express,ZR Express
+Avertir à partir de N colis refusés,تنبيه ابتداءً من N طرود مرفوضة
+Un avertissement s'affiche sur la commande quand son numéro a déjà ce nombre de colis refusés (Retournée). 0 = jamais.,يظهر تنبيه على الطلب عندما يكون لرقمه هذا العدد من الطرود المرفوضة (مُرتجعة). 0 = أبدًا.
+Commandes (livrées + retournées),الطلبات (مُسلّمة + مُرتجعة)
+Ce numéro a déjà {0} colis refusé(s) : {1}. Vérifiez avec le client avant d'expédier.,لهذا الرقم {0} طرد مرفوض مسبقًا: {1}. تحقق مع الزبون قبل الإرسال.
+Client à risque,زبون عالي المخاطر
+"Le numéro {0} est déjà utilisé par : {1}. S'il s'agit du même client, utilisez sa fiche.",الرقم {0} مستعمل من قبل: {1}. إذا كان نفس الزبون، استعمل بطاقته.
+Client peut-être en double,زبون مكرر محتمل
+Bordereau,بوليصة الشحن
+Minimum de colis,الحد الأدنى للطرود
+"En dessous de ce nombre de commandes livrées ou retournées, pas de taux (échantillon trop petit).",تحت هذا العدد من الطلبات المُسلّمة أو المُرتجعة، لا تُحسب النسبة (العينة صغيرة جدًا).
+Destinataire,المرسَل إليه
+Contenu,المحتوى
+Expéditeur,المرسِل
+Bureau,المكتب
+N° de commande (pas encore de n° de suivi),رقم الطلب (لا يوجد رقم تتبع بعد)

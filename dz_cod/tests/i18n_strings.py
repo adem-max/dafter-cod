@@ -135,6 +135,10 @@ def collect(lang="en"):
 		add(found, read_json(path).get("label"), os.path.relpath(path, APP))
 	for path in glob.glob(os.path.join(APP, "dz_cod", "dashboard_chart", "*", "*.json")):
 		add(found, read_json(path).get("empty_state_message"), os.path.relpath(path, APP))
+	# Print formats (Jinja): {{ _("...") }}
+	for path in glob.glob(os.path.join(APP, "dz_cod", "print_format", "*", "*.json")):
+		for match in PY_CALL.finditer(read_json(path).get("html") or ""):
+			add(found, unescape(match.group(2)), os.path.relpath(path, APP))
 
 	# Messages and labels in code: _("...") and __("...")
 	for path in glob.glob(os.path.join(APP, "**", "*.py"), recursive=True):

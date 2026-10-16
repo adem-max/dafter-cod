@@ -44,12 +44,17 @@ doc_events = {
 		"before_update_after_submit": "dz_cod.cod.order.before_update_after_submit",
 		"on_update_after_submit": "dz_cod.cod.order.on_update_after_submit",
 	},
+	# Warn when another customer already has this phone (dz_cod/cod/phone_checks.py)
+	"Customer": {"validate": "dz_cod.cod.phone_checks.warn_duplicate_customer"},
 }
 
 # Ask the couriers for parcel statuses every hour (only if enabled in COD Settings)
 scheduler_events = {
 	"hourly": ["dz_cod.couriers.sync.sync_shipped_orders"],
 }
+
+# code128_svg() in print formats: the barcode on the "Bordereau COD" label
+jinja = {"methods": ["dz_cod.cod.barcode.code128_svg"]}
 
 # Courier webhook events are kept 30 days (Log Settings), enough to spot an
 # event delivered twice: Yalidine retries a delivery for 40 hours at most
