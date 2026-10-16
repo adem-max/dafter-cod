@@ -22,12 +22,14 @@ from frappe.utils import cint
 
 from dz_cod.couriers import get_adapter, places
 from dz_cod.couriers.yalidine import YalidineAdapter
+from dz_cod.features import requires_feature
 
 PAUSE = 1.5  # seconds between two price calls: 40 calls per minute at most
 JOBS = {"fees": "import_fees", "places": "import_places"}
 
 
 @frappe.whitelist()
+@requires_feature("courier_api")
 def start_import(courier, what):
 	if what not in JOBS:
 		frappe.throw(_("Import inconnu."))

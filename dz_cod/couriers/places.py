@@ -9,6 +9,8 @@ import unicodedata
 
 import frappe
 
+from dz_cod.features import is_enabled
+
 
 def with_parent(wilaya):
 	"""[wilaya, its parent wilaya] (just [wilaya] for the 58 older ones)."""
@@ -51,7 +53,7 @@ def commune_names(wilaya=None, **kwargs):
 	"""Pick list of the order's Commune field (sales_order.js). Returns all the
 	wilaya's communes, so that a name typed outside the list is refused by the
 	form; an empty list (nothing imported) leaves the field free."""
-	if not wilaya or not frappe.has_permission("DZ Commune", "read"):
+	if not wilaya or not is_enabled("courier_api") or not frappe.has_permission("DZ Commune", "read"):
 		return []
 	return [c.commune_name for c in communes_of(wilaya)]
 
@@ -61,6 +63,8 @@ def commune_names(wilaya=None, **kwargs):
 def stopdesk_query(doctype, txt, searchfield, start, page_len, filters):
 	"""Pick list of the order's "Bureau stop desk": offices of the order's wilaya
 	(and of its parent wilaya)."""
+	if not is_enabled("courier_api"):
+		return []
 	conditions = {}
 	if filters and filters.get("wilaya"):
 		conditions["wilaya"] = ["in", with_parent(filters["wilaya"])]

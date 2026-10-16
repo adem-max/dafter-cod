@@ -3,10 +3,13 @@
 Run once, right after `bench new-site` and `install-app dz_cod`:
 
     bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
-        --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine'}"
+        --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine',
+                   'features': ['courier_api', 'labels_reports']}"
 
 It does the setup wizard (French, Algeria, DZD), the two warehouses, the
-delivery-fee account, COD Settings, one courier, and removes the default 19 % VAT.
+delivery-fee account, COD Settings, one courier, removes the default 19 % VAT,
+and writes the client's optional features (none given = base only; see
+dz_cod/features.py and docs/FEATURES.md).
 Products, stock, users and the wilaya rate card stay manual: they differ per client.
 Safe to run twice: whatever already exists is skipped.
 """
@@ -21,7 +24,12 @@ SHIPPING_ACCOUNT = "Frais de livraison facturés"
 COURIER_GROUP = "Transporteurs"
 
 
-def prepare(company, abbr, courier=None):
+def prepare(company, abbr, courier=None, features=None):
+	from dz_cod.features import set_features
+
+	if isinstance(features, str):  # "a,b" from the command line
+		features = [name.strip() for name in features.split(",") if name.strip()]
+	set_features(list(features or []))
 	run_setup_wizard(company, abbr)
 	main, returns = create_warehouses(company, abbr)
 	account = create_shipping_account(company, abbr)

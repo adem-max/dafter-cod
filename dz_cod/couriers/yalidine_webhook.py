@@ -35,6 +35,7 @@ from werkzeug.wrappers import Response
 from dz_cod.cod import states as S
 from dz_cod.couriers.base import DELIVERED, RETURNED
 from dz_cod.couriers.yalidine import map_status, update_order, with_reason
+from dz_cod.features import MESSAGE, is_enabled
 
 ACTIONS = {DELIVERED: S.ACTION_DELIVER, RETURNED: S.ACTION_RETURN}
 PENDING, DONE, IGNORED, ERROR = "En attente", "Traité", "Ignoré", "Erreur"
@@ -42,6 +43,9 @@ PENDING, DONE, IGNORED, ERROR = "En attente", "Traité", "Ignoré", "Erreur"
 
 @frappe.whitelist(allow_guest=True, methods=["GET", "POST"])
 def receive(**kwargs):
+	if not is_enabled("courier_api"):
+		# Not in this client's offer: refuse quietly (no Error Log for each retry)
+		return text_response(MESSAGE, 403)
 	request = frappe.request
 	if request.method == "GET":
 		return crc_answer(request.args)
@@ -125,6 +129,8 @@ def store_events(courier, payload):
 def process_events(event_names):
 	"""Background job: apply each stored event to its order."""
 	# The job was queued by a Guest request; the workflow buttons need a real user
+	if not is_enabled("courier_api"):
+		return
 	frappe.set_user("Administrator")
 	for name in event_names:
 		event = frappe.get_doc("Courier Webhook Event", name)

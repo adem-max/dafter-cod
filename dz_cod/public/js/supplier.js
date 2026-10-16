@@ -1,10 +1,21 @@
 // Courier (Supplier) form: Yalidine imports, see dz_cod/couriers/yalidine_import.py,
 // and the "coming soon" notice for ZR Express (dz_cod/couriers/zrexpress.py)
 
+// API connectors are an optional feature (dz_cod/features.py)
+const has_courier_api = () => (frappe.boot.dz_cod_features || []).includes("courier_api");
+
 frappe.ui.form.on("Supplier", {
 	refresh(frm) {
+		if (!has_courier_api()) {
+			// Only "Manuel" to choose (plus the current value, so it still shows)
+			const options = ["Manuel", "Mock"];
+			if (frm.doc.dz_courier_adapter && !options.includes(frm.doc.dz_courier_adapter)) {
+				options.push(frm.doc.dz_courier_adapter);
+			}
+			frm.set_df_property("dz_courier_adapter", "options", options.join("\n"));
+		}
 		show_coming_soon(frm);
-		if (frm.is_new() || frm.doc.dz_courier_adapter !== "Yalidine") {
+		if (frm.is_new() || frm.doc.dz_courier_adapter !== "Yalidine" || !has_courier_api()) {
 			return;
 		}
 		frm.add_custom_button(

@@ -11,7 +11,7 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 |---|---|
 | **Target version** | **ERPNext v16.50.0 on Frappe v16.51.0** (branch `version-16`, latest stable major in October 2026) |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
-| **Automated tests** | 94 tests (25 unit + 69 integration on a real ERPNext site), all passing on the test site. |
+| **Automated tests** | 104 tests (25 unit + 79 integration on a real ERPNext site), all passing on the test site. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |
@@ -96,6 +96,7 @@ bench --site test.localhost run-tests --app dz_cod
 | [docs/DEMO.md](docs/DEMO.md) | The demo shop: load, reload, wipe, a 10-minute demo script |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Ubuntu server, one site per client, SSL, backups, restore, updates, security, new client in 2 hours |
 | [docs/WEBHOOKS.md](docs/WEBHOOKS.md) | n8n webhooks and payloads |
+| [docs/FEATURES.md](docs/FEATURES.md) | Optional features per client: what each contains, the `dz-cod-features` command |
 | [docs/COURIER_INTEGRATION.md](docs/COURIER_INTEGRATION.md) | Yalidine / ZR Express APIs and prices: what is known, and the step-by-step plan for real connectors |
 | [docs/LOCAL_TEST.md](docs/LOCAL_TEST.md) | Run everything on your Fedora machine |
 | [DECISIONS.md](DECISIONS.md) | Every design choice, one line of reasoning each |
