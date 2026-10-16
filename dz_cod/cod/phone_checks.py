@@ -14,6 +14,7 @@ from frappe.utils import get_link_to_form
 
 from dz_cod.cod import states as S
 from dz_cod.cod.phone import normalize_phone
+from dz_cod.features import is_enabled
 
 
 def refused_parcels(phone, exclude_order=None):
@@ -34,6 +35,8 @@ def refused_parcels(phone, exclude_order=None):
 
 def warn_refused_parcels(order):
 	"""Called from order.validate (draft orders) and order.before_submit."""
+	if not is_enabled("phone_checks"):  # optional feature, dz_cod/features.py
+		return
 	threshold = frappe.db.get_single_value("COD Settings", "refused_warning_threshold")
 	if not threshold:
 		return
@@ -54,7 +57,9 @@ def warn_refused_parcels(order):
 
 def warn_duplicate_customer(customer, method=None):
 	"""Customer "validate" hook (hooks.py): another customer has this phone."""
-	customer.dz_phone = normalize_phone(customer.dz_phone)
+	customer.dz_phone = normalize_phone(customer.dz_phone)  # always (base)
+	if not is_enabled("phone_checks"):
+		return
 	if not customer.dz_phone or not (customer.is_new() or customer.has_value_changed("dz_phone")):
 		return
 	others = frappe.get_all(

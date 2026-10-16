@@ -17,12 +17,15 @@ from frappe.model.workflow import apply_workflow
 from dz_cod.cod import states as S
 from dz_cod.couriers import get_adapter
 from dz_cod.couriers.base import DELIVERED, RETURNED
+from dz_cod.features import is_enabled
 
 # Courier status -> workflow button to press
 ACTIONS = {DELIVERED: S.ACTION_DELIVER, RETURNED: S.ACTION_RETURN}
 
 
 def sync_shipped_orders():
+	if not is_enabled("courier_api"):  # optional feature, dz_cod/features.py
+		return
 	if not frappe.db.get_single_value("COD Settings", "auto_sync_courier_status"):
 		return
 

@@ -2,6 +2,12 @@
 
 frappe.ui.form.on("COD Settings", {
 	refresh(frm) {
+		// Settings of optional features this site doesn't have stay hidden
+		// (dz_cod/features.py, frappe.boot.dz_cod_features)
+		const has = (feature) => (frappe.boot.dz_cod_features || []).includes(feature);
+		frm.toggle_display("refused_warning_threshold", has("phone_checks"));
+		frm.toggle_display("auto_sync_courier_status", has("courier_api"));
+
 		// Brings back the welcome guide on the COD home page for the current
 		// user, after they closed it with ✕ (see setup/home_block/home.js).
 		frm.add_custom_button(__("Réafficher le guide d'accueil"), () => {

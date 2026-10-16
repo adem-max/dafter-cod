@@ -46,7 +46,13 @@ doc_events = {
 	},
 	# Warn when another customer already has this phone (dz_cod/cod/phone_checks.py)
 	"Customer": {"validate": "dz_cod.cod.phone_checks.warn_duplicate_customer"},
+	# Optional features (dz_cod/features.py): API connectors and COD webhooks
+	"Supplier": {"validate": "dz_cod.features.check_courier_connector"},
+	"Webhook": {"validate": "dz_cod.features.check_webhook"},
 }
+
+# Which optional features this site has: frappe.boot.dz_cod_features in the browser
+extend_bootinfo = ["dz_cod.features.boot"]
 
 # Ask the couriers for parcel statuses every hour (only if enabled in COD Settings)
 scheduler_events = {

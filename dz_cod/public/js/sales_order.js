@@ -25,14 +25,16 @@ frappe.ui.form.on("Sales Order", {
 		if (frm.doc.workflow_state === "Retournée" && !frm.doc.dz_return_inspected) {
 			frm.add_custom_button(__("Inspecter le retour"), () => inspect_return(frm));
 		}
-		if (frm.doc.dz_label_url) {
+		// Optional features this site has (dz_cod/features.py)
+		const has = (feature) => (frappe.boot.dz_cod_features || []).includes(feature);
+		if (frm.doc.dz_label_url && has("courier_api")) {
 			frm.add_custom_button(__("Étiquette du transporteur"), () =>
 				window.open(frm.doc.dz_label_url, "_blank", "noopener")
 			);
 		}
 		// Our own 100 x 150 mm label (print format "Bordereau COD"), for couriers
 		// whose API gives no label (Manuel, ZR Express...)
-		if (frm.doc.docstatus === 1) {
+		if (frm.doc.docstatus === 1 && has("labels_reports")) {
 			frm.add_custom_button(__("Bordereau"), () => {
 				const params = new URLSearchParams({
 					doctype: frm.doc.doctype,

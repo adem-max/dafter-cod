@@ -346,8 +346,12 @@ Major upgrades (v16 → v17) are a project: test on a copy of each site first.
 
 ```bash
 bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
-  --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine'}"
+  --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine', 'features': ['courier_api', 'labels_reports']}"
+bench --site erp.client1.com dz-cod-features --list     # check what the client gets
 ```
+
+`features` is the client's list of optional features (docs/FEATURES.md); leave
+it out for the base only. Change it later with `dz-cod-features`.
 
 | Time | Step |
 |------|------|

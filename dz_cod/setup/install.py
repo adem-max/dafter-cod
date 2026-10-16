@@ -8,6 +8,7 @@ import os
 
 import frappe
 
+from dz_cod.features import apply_features
 from dz_cod.setup.custom_fields import setup_custom_fields
 from dz_cod.setup.webhooks import setup_webhooks
 from dz_cod.setup.wilayas import WILAYAS, ZONE_RATES, wilaya_docname
@@ -30,6 +31,9 @@ def setup_all():
 	setup_selling_settings()
 	setup_home_block()
 	setup_new_settings_defaults()
+	# Last: migrate re-imports our reports and print formats (enabled); switch
+	# off again what this site doesn't have (dz_cod/features.py)
+	apply_features()
 	frappe.db.commit()
 
 
