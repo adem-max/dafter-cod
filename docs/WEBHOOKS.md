@@ -31,8 +31,11 @@ They are created **disabled**, pointing to `https://n8n.example.com/webhook/dz-c
    HMAC-SHA256 of the body, base64) so n8n can check the call really comes
    from your ERPNext.
 
-`bench migrate` never overwrites these webhooks once they exist, so your URL
-and settings are kept during updates.
+`bench migrate` never touches your URL, the Enabled tick or the headers.
+When a new version of dz_cod changes the JSON template or the condition, it
+refreshes them on each site, but only if nobody edited them there (it keeps a
+fingerprint of what it last wrote). A template edited by hand is left alone,
+with a note in the Error Log saying the new version was not applied.
 
 > **Background workers must be running** (they are in production, through
 > supervisor). Webhooks are sent by a worker. If no worker runs, jobs pile up

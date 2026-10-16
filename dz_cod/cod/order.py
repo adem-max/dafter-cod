@@ -25,6 +25,7 @@ from frappe.utils import flt, today
 from dz_cod.cod import states as S
 from dz_cod.cod import stock
 from dz_cod.cod.phone import is_valid_phone, normalize_phone
+from dz_cod.cod.phone_checks import warn_refused_parcels
 from dz_cod.cod.shipping import apply_shipping_charge, get_rates
 from dz_cod.couriers import get_adapter
 from dz_cod.dz_cod.doctype.cod_settings.cod_settings import get_settings
@@ -61,9 +62,12 @@ def before_validate(order, method=None):
 
 
 def validate(order, method=None):
-	"""Runs after ERPNext computed the totals: store the amount to collect."""
+	"""Runs after ERPNext computed the totals: store the amount to collect,
+	and warn if this phone already had parcels sent back."""
 	if order.docstatus == 0:
 		order.dz_cod_amount = flt(order.rounded_total or order.grand_total)
+		if not order.flags.get("dz_event_date"):  # the demo loader replays history quietly
+			warn_refused_parcels(order)
 
 
 # ------------------------------------------------------------ confirmation
@@ -72,6 +76,8 @@ def validate(order, method=None):
 def before_submit(order, method=None):
 	"""Confirmer: check the order is complete before reserving stock."""
 	check_delivery_details(order)
+	if not order.flags.get("dz_event_date"):
+		warn_refused_parcels(order)
 	if order.dz_courier:
 		# e.g. Yalidine: the commune must be one the courier knows
 		get_adapter(order.dz_courier).check_order(order)

@@ -306,3 +306,18 @@ Clé secrète webhook,Webhook secret key
 Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).,Copied from the courier's Webhooks dashboard (see docs/COURIER_INTEGRATION.md).
 "Connecteur ZR Express : bientôt disponible. En attendant, saisissez le n° de suivi à l'expédition et passez les commandes en Livrée ou Retournée à la main.","ZR Express connector: coming soon. Until then, type the tracking number when shipping and move orders to Delivered or Returned by hand."
 ZR Express,ZR Express
+Avertir à partir de N colis refusés,Warn from N refused parcels
+Un avertissement s'affiche sur la commande quand son numéro a déjà ce nombre de colis refusés (Retournée). 0 = jamais.,A warning shows on the order when its phone already has this many refused parcels (Returned). 0 = never.
+Commandes (livrées + retournées),Orders (delivered + returned)
+Ce numéro a déjà {0} colis refusé(s) : {1}. Vérifiez avec le client avant d'expédier.,This number already has {0} refused parcel(s): {1}. Check with the customer before shipping.
+Client à risque,Risky customer
+"Le numéro {0} est déjà utilisé par : {1}. S'il s'agit du même client, utilisez sa fiche.","The number {0} is already used by: {1}. If it is the same customer, use their record."
+Client peut-être en double,Possible duplicate customer
+Bordereau,Shipping label
+Minimum de colis,Minimum parcels
+"En dessous de ce nombre de commandes livrées ou retournées, pas de taux (échantillon trop petit).","Below this number of delivered or returned orders, no rate is shown (sample too small)."
+Destinataire,Recipient
+Contenu,Contents
+Expéditeur,Sender
+Bureau,Office
+N° de commande (pas encore de n° de suivi),Order number (no tracking number yet)
