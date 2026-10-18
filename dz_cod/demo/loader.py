@@ -201,8 +201,9 @@ def setup_settings():
 	)
 	settings.save()
 
-	# Allow selling to individuals without a tax ID and keep stock simple
-	frappe.db.set_single_value("Stock Settings", "default_warehouse", warehouse_name(D.MAIN_WAREHOUSE))
+	# Default warehouse for stock movements. ERPNext v16 keeps it on the Company
+	# (it used to be in Stock Settings, where writing it now does nothing)
+	frappe.db.set_value("Company", D.COMPANY, "default_warehouse", warehouse_name(D.MAIN_WAREHOUSE))
 
 	# The setup wizard makes "Algeria TVA 19%" the default: the order form would add
 	# 19 % VAT to every order typed by hand. The shop is not VAT-registered.

@@ -21,7 +21,9 @@ Roughly in order of value for a COD seller.
 
 ## Out of scope by request (do not build here)
 
-- Manufacturing for the print workshop (BOM: blank t-shirt + ink → printed t-shirt, work orders). ERPNext's Manufacturing module is installed and untouched; when needed, start with a BOM per printed design and "Manufacture" stock entries from the Atelier warehouse to Stock principal, before considering work orders.
 - Full accounting beyond ERPNext defaults, payroll, POS.
+- Manufacturing (BOMs, work orders), sector templates, legal invoices and the
+  Excel import: these live in dz_core (repo dafter-core), the base this app
+  runs on. Build them there, not here.
 - A customer-facing website.
 - The n8n workflows themselves (the webhooks and their payloads are ready: `docs/WEBHOOKS.md`).

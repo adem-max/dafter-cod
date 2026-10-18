@@ -10,6 +10,11 @@ Newest decisions are added at the bottom of each section.
 - **Ubuntu 24.04 LTS for the server guide**: that is what everything was tested on. Ubuntu 26.04 LTS should work but was not tested.
 - **The GitHub repo is the Frappe app itself** (the `dz_cod` package sits at the root): `bench get-app https://github.com/adem-max/dz-cod` works directly.
 - **No core changes, everything in `dz_cod`**: project rule. We use hooks, custom fields, a Workflow, Webhooks and three small doctypes.
+- **Runs on top of dz_core** (repo dafter-core, October 2026): `required_apps = ["erpnext", "dz_core"]`. dz_core is the base every client gets (setup wizard, sector template, tax regime, legal invoices, import workbook); this app adds only the online-sales part. `new_client.prepare` calls dz_core's prepare first, so the wizard and the tax step live in one place. Producers who sell by phone or wholesale get dz_core alone, without this app's Sales Order workflow.
+- **Repos renamed dafter-cod and dafter-core, app names unchanged** (`dz_cod`, `dz_core`): renaming a Frappe app means renaming its Python package on every live site; the brand lives in the repo names. `bench get-app` still puts the code in `apps/dz_cod`.
+- **IFU replaces "remove the default 19 % VAT"**: dz_core's tax regime does the same for IFU clients and keeps 19 % for régime réel clients.
+- **Orders leave from dz_core's "Produits finis"** on new client sites, instead of a separate "Stock principal". The demo shop keeps its own warehouses.
+- **Default warehouse on the Company, not Stock Settings**: ERPNext v16 moved it; writing Stock Settings `default_warehouse` did nothing.
 
 ## Reference data
 

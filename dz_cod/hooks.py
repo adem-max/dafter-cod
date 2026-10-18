@@ -11,7 +11,9 @@ app_description = "COD e-commerce starter kit for Algerian online sellers on ERP
 app_email = "adembenlecheb1@gmail.com"
 app_license = "mit"
 
-required_apps = ["erpnext"]
+# dz_core is the base every client gets (setup wizard, sector, tax regime,
+# invoices, import workbook); dz_cod adds the online-sales part on top
+required_apps = ["erpnext", "dz_core"]
 
 # Where to land after login. COD is docked on ERPNext's rail, so Frappe keeps
 # it off the apps screen, but this route is used when COD is the site's

@@ -1,37 +1,45 @@
 """Prepare a fresh client site in one command (docs/DEPLOY.md, section 13).
 
-Run once, right after `bench new-site` and `install-app dz_cod`:
+Run once, right after `bench new-site` and `install-app dz_cod` (which also
+installs dz_core, the base it runs on):
 
     bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
         --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine',
-                   'features': ['courier_api', 'labels_reports']}"
+                   'features': ['courier_api', 'labels_reports'],
+                   'sector': 'Confection', 'tax_regime': 'IFU'}"
 
-It does the setup wizard (French, Algeria, DZD), the two warehouses, the
-delivery-fee account, COD Settings, one courier, removes the default 19 % VAT,
-and writes the client's optional features (none given = base only; see
-dz_cod/features.py and docs/FEATURES.md).
-Products, stock, users and the wilaya rate card stay manual: they differ per client.
+dz_core does the base first: setup wizard (French, Algeria, DZD), sector
+template, the Matières premières / Travaux en cours / Produits finis
+warehouses, and the tax regime (IFU = no TVA by default, which replaces the
+old "remove the default 19 % VAT" step). Then this adds the COD part: the
+Retours warehouse, the delivery-fee account, COD Settings (orders leave from
+dz_core's Produits finis), one courier, and the client's optional features
+(none given = base only; see dz_cod/features.py and docs/FEATURES.md).
+Products, stock, users and the wilaya rate card stay manual: they differ per
+client (products and stock can come from dz_core's import workbook).
 Safe to run twice: whatever already exists is skipped.
 """
 
 import frappe
-from frappe.utils import today
 from frappe.utils.nestedset import get_root_of
 
-MAIN_WAREHOUSE = "Stock principal"
 RETURNS_WAREHOUSE = "Retours"
 SHIPPING_ACCOUNT = "Frais de livraison facturés"
 COURIER_GROUP = "Transporteurs"
 
 
-def prepare(company, abbr, courier=None, features=None):
+def prepare(company, abbr, courier=None, features=None, sector="Confection", tax_regime="IFU"):
+	from dz_core.setup.new_client import prepare as prepare_core
+
 	from dz_cod.features import set_features
 
 	if isinstance(features, str):  # "a,b" from the command line
 		features = [name.strip() for name in features.split(",") if name.strip()]
 	set_features(list(features or []))
-	run_setup_wizard(company, abbr)
-	main, returns = create_warehouses(company, abbr)
+	prepare_core(company, abbr, sector, tax_regime)
+	# Orders leave from dz_core's finished goods warehouse
+	main = frappe.db.get_single_value("DZ Core Settings", "finished_goods_warehouse")
+	returns = create_returns_warehouse(company, abbr)
 	account = create_shipping_account(company, abbr)
 	if courier:
 		create_courier(courier)
@@ -48,8 +56,6 @@ def prepare(company, abbr, courier=None, features=None):
 		}
 	)
 	settings.save()
-	frappe.db.set_single_value("Stock Settings", "default_warehouse", main)
-	remove_default_vat(company)
 	make_cod_the_home_page()
 	frappe.db.commit()
 	print(f"{company} is ready. Next: products, opening stock, users, wilaya rates.")
@@ -67,46 +73,22 @@ def make_cod_the_home_page():
 	frappe.local.system_settings = None
 
 
-def run_setup_wizard(company, abbr):
-	if frappe.is_setup_complete():
-		return
-	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-
-	year = today()[:4]
-	setup_complete(
-		{
-			"language": "Français",
-			"lang": "Français",
-			"country": "Algeria",
-			"timezone": "Africa/Algiers",
-			"currency": "DZD",
-			"company_name": company,
-			"company_abbr": abbr,
-			"chart_of_accounts": "Algerie - Plan Comptable General 2 avec code",
-			"fy_start_date": f"{year}-01-01",
-			"fy_end_date": f"{year}-12-31",
-			"setup_demo": 0,
-		}
-	)
-	# Saving the document (not just the value) also sets every user's default company
-	defaults = frappe.get_doc("Global Defaults")
-	defaults.update({"default_company": company, "default_currency": "DZD", "country": "Algeria"})
-	defaults.save()
-
-
-def create_warehouses(company, abbr):
-	root = frappe.db.get_value(
-		"Warehouse", {"company": company, "is_group": 1, "parent_warehouse": ["is", "not set"]}
-	)
-	names = []
-	for name in (MAIN_WAREHOUSE, RETURNS_WAREHOUSE):
-		full_name = f"{name} - {abbr}"
-		if not frappe.db.exists("Warehouse", full_name):
-			frappe.get_doc(
-				{"doctype": "Warehouse", "warehouse_name": name, "company": company, "parent_warehouse": root}
-			).insert()
-		names.append(full_name)
-	return names
+def create_returns_warehouse(company, abbr):
+	"""Returned parcels wait here for inspection (the other warehouses come from dz_core)."""
+	full_name = f"{RETURNS_WAREHOUSE} - {abbr}"
+	if not frappe.db.exists("Warehouse", full_name):
+		root = frappe.db.get_value(
+			"Warehouse", {"company": company, "is_group": 1, "parent_warehouse": ["is", "not set"]}
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": RETURNS_WAREHOUSE,
+				"company": company,
+				"parent_warehouse": root,
+			}
+		).insert()
+	return full_name
 
 
 def create_shipping_account(company, abbr):
@@ -148,11 +130,3 @@ def create_courier(courier):
 				"dz_courier_adapter": "Manuel",
 			}
 		).insert()
-
-
-def remove_default_vat(company):
-	"""The wizard makes "Algeria TVA 19%" the default; the order form would add it to every order."""
-	for name in frappe.get_all(
-		"Sales Taxes and Charges Template", {"company": company, "is_default": 1}, pluck="name"
-	):
-		frappe.db.set_value("Sales Taxes and Charges Template", name, "is_default", 0)
