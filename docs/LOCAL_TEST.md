@@ -65,7 +65,8 @@ cd ~
 bench init frappe-bench --frappe-branch version-16 --python "$(uv python find 3.14)"
 cd ~/frappe-bench
 bench get-app --branch version-16 https://github.com/frappe/erpnext
-bench get-app https://github.com/adem-max/dz-cod
+bench get-app https://github.com/adem-max/dafter-core
+bench get-app https://github.com/adem-max/dafter-cod
 
 # Demo site (see docs/DEMO.md)
 bench new-site demo.localhost --mariadb-root-password root --admin-password admin --install-app erpnext

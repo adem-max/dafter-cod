@@ -143,13 +143,15 @@ bench init frappe-bench --frappe-branch version-16 --python "$(uv python find 3.
 cd ~/frappe-bench
 bench get-app --branch version-16 https://github.com/frappe/erpnext
                                                      # downloads ERPNext v16 (use the full URL; the short name can fail)
-bench get-app https://github.com/adem-max/dz-cod     # downloads our app
+bench get-app https://github.com/adem-max/dafter-core   # the base every client gets (folder apps/dz_core)
+bench get-app https://github.com/adem-max/dafter-cod    # the online-sales app (folder apps/dz_cod)
 ```
 
-If the dz-cod repository is **private**, create a read-only *deploy key* on
-GitHub (repo → Settings → Deploy keys) with a key generated on the server
-(`ssh-keygen -t ed25519 -f ~/.ssh/dzcod`), then use
-`bench get-app git@github.com:adem-max/dz-cod.git`.
+If the repositories are **private**, create a read-only *deploy key* on
+GitHub for each (repo → Settings → Deploy keys) with a key generated on the
+server (`ssh-keygen -t ed25519 -f ~/.ssh/dzcod`), then use
+`bench get-app git@github.com:adem-max/dafter-core.git` and
+`bench get-app git@github.com:adem-max/dafter-cod.git`.
 
 ## 6. Production mode (nginx + supervisor) *(not run here)*
 
@@ -174,7 +176,7 @@ cd ~/frappe-bench
 ADMINPASS=$(openssl rand -base64 18); echo "Admin password: $ADMINPASS"   # store it in your password manager
 bench new-site erp.client1.com --mariadb-root-password "$DBPASS" \
       --admin-password "$ADMINPASS" --install-app erpnext                  # new database + ERPNext (2-3 min)
-bench --site erp.client1.com install-app dz_cod                            # COD app: fields, workflow, 69 wilayas
+bench --site erp.client1.com install-app dz_cod                            # installs dz_core first, then COD: fields, workflow, 69 wilayas
 bench --site erp.client1.com enable-scheduler                              # turn on background jobs for this site
 bench setup nginx && sudo systemctl reload nginx                           # publish the new domain *(not run here)*
 ```
@@ -342,16 +344,18 @@ Major upgrades (v16 → v17) are a project: test on a copy of each site first.
 
 ## 13. New client in under 2 hours
 
-**Shortcut:** steps 0:25 to 0:45 (wizard, warehouses, delivery-fee account, COD Settings, courier, no VAT) are one command:
+**Shortcut:** steps 0:25 to 0:45 (wizard, sector, warehouses, tax regime, delivery-fee account, COD Settings, courier) are one command. It runs dz_core's setup first, then the COD part:
 
 ```bash
 bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
-  --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine', 'features': ['courier_api', 'labels_reports']}"
+  --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine', 'features': ['courier_api', 'labels_reports'], 'sector': 'Confection', 'tax_regime': 'IFU'}"
 bench --site erp.client1.com dz-cod-features --list     # check what the client gets
 ```
 
 `features` is the client's list of optional features (docs/FEATURES.md); leave
 it out for the base only. Change it later with `dz-cod-features`.
+`sector` is `Confection` or `Alimentaire et cosmétique`; `tax_regime` is `IFU`
+(no TVA on orders, the usual case) or `Régime réel` (19 % by default).
 
 | Time | Step |
 |------|------|
@@ -359,14 +363,14 @@ it out for the base only. Change it later with `dz-cod-features`.
 | 0:10 | DNS A record for the client domain → server (section 7). |
 | 0:15 | `bench new-site … --install-app erpnext`, `install-app dz_cod`, `enable-scheduler`, `setup nginx`, `setup lets-encrypt` (section 7). |
 | 0:25 | Setup wizard: Français / Algeria / DZD / Africa/Algiers, company name and abbreviation. |
-| 0:28 | **No VAT**: the wizard makes *Algeria TVA 19%* the default sales tax template, and the order form then adds 19 % to every order typed by hand. Search *Sales Taxes and Charges Template* → open *Algeria TVA 19% - XX* → untick **Default** → save. (Skip only if the client is VAT-registered.) |
-| 0:30 | Warehouses: create **Stock principal** and **Retours** (Stock → Warehouse). |
+| 0:28 | **Tax regime** (dz_core): IFU clients get no default TVA template, so orders carry no VAT; régime réel clients keep *Algeria TVA 19%* as the default. To do it by hand: *Sales Taxes and Charges Template* → *Algeria TVA 19% - XX* → untick or tick **Default**. |
+| 0:30 | Warehouses: dz_core makes **Matières premières** and reuses the wizard's **Travaux en cours** and **Produits finis**; orders leave from Produits finis. Add **Retours** (Stock → Warehouse). |
 | 0:35 | Account for delivery fees: Accounting → Chart of Accounts → under income accounts, add **Frais de livraison facturés**. |
 | 0:40 | **Paramètres COD**: company, main warehouse, returns warehouse, delivery-fee account, max calls (3), stock blocking (on/off), tolerance. |
 | 0:45 | Couriers: Supplier → new, tick **Is Transporter**, *Connecteur* = Manuel. Set it as default courier in Paramètres COD. |
 | 0:50 | **Wilayas et tarifs**: list view → edit *Tarif domicile*, *Tarif stop desk* and the courier costs from the client's rate card; untick *Livrable* where the courier does not go. (Report view allows editing many rows quickly.) |
-| 1:05 | Products: Item Attributes Taille/Couleur exist? create them; import items with Data Import (Item, then Item Price), or create templates + variants. |
-| 1:25 | Opening stock: Stock Reconciliation (or Stock Entry "Material Receipt") into Stock principal. |
+| 1:05 | Products: dz_core's import workbook (`dz_core.imports.workbook.make_template`, see dafter-core's README): items, clothing models with size and colour variants, BOMs. |
+| 1:25 | Opening stock: the *Stock initial* sheet of the same workbook (or Stock Reconciliation by hand) into Produits finis. |
 | 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français (or English or Arabic for someone who prefers it: the whole COD app follows). |
 | 1:45 | Webhooks: if the client uses n8n, paste the URLs and enable (docs/WEBHOOKS.md). |
 | 1:50 | Smoke test with the client: one order Nouvelle → Confirmer → Préparer → Expédier → Marquer livrée, then cancel/delete it. Check the delivery note and stock. |

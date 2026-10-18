@@ -63,8 +63,9 @@ On a bench with Frappe v16 and ERPNext v16 (full server guide: docs/DEPLOY.md):
 
 ```bash
 cd ~/frappe-bench
-bench get-app https://github.com/adem-max/dz-cod        # downloads the app (folder apps/dz_cod)
-bench --site erp.client1.com install-app dz_cod          # custom fields, workflow, 69 wilayas, webhooks
+bench get-app https://github.com/adem-max/dafter-core   # the base it runs on (folder apps/dz_core)
+bench get-app https://github.com/adem-max/dafter-cod    # downloads the app (folder apps/dz_cod)
+bench --site erp.client1.com install-app dz_cod          # installs dz_core first, then custom fields, workflow, 69 wilayas, webhooks
 ```
 
 Then, in the site (interface in French):
