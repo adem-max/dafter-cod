@@ -2,7 +2,7 @@
 // and the "coming soon" notice for ZR Express (dz_cod/couriers/zrexpress.py)
 
 // API connectors are an optional feature (dz_cod/features.py)
-const has_courier_api = () => (frappe.boot.dz_cod_features || []).includes("courier_api");
+const has_courier_api = () => (frappe.boot.dz_features || []).includes("courier_api");
 
 frappe.ui.form.on("Supplier", {
 	refresh(frm) {

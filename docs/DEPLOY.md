@@ -40,11 +40,11 @@ account, COD Settings and courier are one command. It runs dz_core's
 ```bash
 bench --site erp.client1.com execute dz_cod.setup.new_client.prepare \
   --kwargs "{'company': 'Client One', 'abbr': 'C1', 'courier': 'Yalidine', 'features': ['courier_api', 'labels_reports'], 'sector': 'Confection', 'tax_regime': 'IFU'}"
-bench --site erp.client1.com dz-cod-features --list     # check what the client gets
+bench --site erp.client1.com dz-features --list         # check what the client gets
 ```
 
 `features` is the client's list of optional features (docs/FEATURES.md); leave
-it out for the base only. Change it later with `dz-cod-features`.
+it out for the base only. Change it later with `dz-features` (or from the hub).
 `sector` is `Confection` or `Alimentaire et cosmétique`; `tax_regime` is `IFU`
 (no TVA on orders, the usual case) or `Régime réel` (19 % by default).
 

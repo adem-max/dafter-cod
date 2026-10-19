@@ -318,5 +318,4 @@ Expéditeur,Sender
 Bureau,Office
 N° de commande (pas encore de n° de suivi),Order number (no tracking number yet)
 Fonction non incluse dans votre offre,Feature not included in your plan
-Fonctions inconnues : {0},Unknown features: {0}
 Le connecteur {0} n'est pas inclus dans votre offre : choisissez Manuel.,The {0} connector is not included in your plan: choose Manual.

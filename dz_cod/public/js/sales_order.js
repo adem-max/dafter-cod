@@ -26,7 +26,7 @@ frappe.ui.form.on("Sales Order", {
 			frm.add_custom_button(__("Inspecter le retour"), () => inspect_return(frm));
 		}
 		// Optional features this site has (dz_cod/features.py)
-		const has = (feature) => (frappe.boot.dz_cod_features || []).includes(feature);
+		const has = (feature) => (frappe.boot.dz_features || []).includes(feature);
 		if (frm.doc.dz_label_url && has("courier_api")) {
 			frm.add_custom_button(__("Étiquette du transporteur"), () =>
 				window.open(frm.doc.dz_label_url, "_blank", "noopener")

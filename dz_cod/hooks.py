@@ -54,8 +54,9 @@ doc_events = {
 	"Webhook": {"validate": "dz_cod.features.check_webhook"},
 }
 
-# Which optional features this site has: frappe.boot.dz_cod_features in the browser
-extend_bootinfo = ["dz_cod.features.boot"]
+# Our optional features. dz_core switches them per site (dz-features command,
+# frappe.boot.dz_features in the browser, the hub's offers)
+dz_features = ["dz_cod.features.FEATURES"]
 
 # Ask the couriers for parcel statuses every hour (only if enabled in COD Settings)
 scheduler_events = {

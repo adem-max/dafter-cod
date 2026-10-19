@@ -1,6 +1,6 @@
 """Optional features per client site (dz_cod/features.py).
 
-The test site has no "dz_cod_features" key, so every other test runs with
+The test site has no "dz_features" key (the mechanism is dz_core's), so every other test runs with
 everything on. Here the key is patched in frappe.local.conf for one test at
 a time, and apply_features() puts the records back afterwards.
 
@@ -10,6 +10,7 @@ Run: bench --site <site> run-tests --module dz_cod.tests.test_features
 from unittest.mock import patch
 
 import frappe
+from dz_core.features import boot
 from frappe.tests import IntegrationTestCase
 
 from dz_cod import features as F
@@ -50,8 +51,8 @@ class TestFeatureList(IntegrationTestCase):
 	def test_boot_lists_the_features(self):
 		bootinfo = frappe._dict()
 		with only("labels_reports"):
-			F.boot(bootinfo)
-		self.assertEqual(bootinfo.dz_cod_features, ["labels_reports"])
+			boot(bootinfo)
+		self.assertEqual(bootinfo.dz_features, ["labels_reports"])
 
 
 class TestFeatureGuards(IntegrationTestCase):

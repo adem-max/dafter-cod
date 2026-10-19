@@ -96,7 +96,7 @@ bench --site test.localhost run-tests --app dz_core       # the base it runs on
 | [docs/DEMO.md](docs/DEMO.md) | The demo shop: load, reload, wipe, a 10-minute demo script |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | What an online seller's site adds to dafter-core's server guide: install, new client in 2 hours, updates, COD security |
 | [docs/WEBHOOKS.md](docs/WEBHOOKS.md) | n8n webhooks and payloads |
-| [docs/FEATURES.md](docs/FEATURES.md) | Optional features per client: what each contains, the `dz-cod-features` command |
+| [docs/FEATURES.md](docs/FEATURES.md) | Optional features per client: what each contains, dz_core's `dz-features` command |
 | [docs/COURIER_INTEGRATION.md](docs/COURIER_INTEGRATION.md) | Yalidine / ZR Express APIs and prices: what is known, and the step-by-step plan for real connectors |
 | [docs/LOCAL_TEST.md](docs/LOCAL_TEST.md) | Run everything on your Fedora machine |
 | [DECISIONS.md](DECISIONS.md) | Every design choice, one line of reasoning each |
@@ -117,7 +117,7 @@ dz_cod/
     home.py                   per-user state of the COD home page
     barcode.py                Code 128 for the shipping label
   couriers/                 courier connectors: base, mock, yalidine (+ imports, webhook), hourly sync
-  features.py, commands.py  optional features per client, `dz-cod-features` command
+  features.py               our 4 optional features and their guards (switched by dz_core)
   setup/                    created on install/migrate: custom fields, workflow, wilaya rates, webhooks; new_client.prepare
   dz_cod/doctype/           COD Settings, Courier Settlement (+ Item), DZ Commune, DZ Stop Desk, Courier Webhook Event
                             (DZ Wilaya, phone rules and backups are dz_core's)
