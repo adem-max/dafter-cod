@@ -19,12 +19,12 @@ How ERPNext sees it:
 """
 
 import frappe
+from dz_core.phone import is_valid_phone, normalize_phone
 from frappe import _
 from frappe.utils import flt, today
 
 from dz_cod.cod import states as S
 from dz_cod.cod import stock
-from dz_cod.cod.phone import is_valid_phone, normalize_phone
 from dz_cod.cod.phone_checks import warn_refused_parcels
 from dz_cod.cod.shipping import apply_shipping_charge, get_rates
 from dz_cod.couriers import get_adapter

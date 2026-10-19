@@ -28,6 +28,8 @@ What it does, in order:
 import random
 
 import frappe
+from dz_core.setup.tax import unset_default_templates
+from dz_core.setup.wilayas import WILAYAS, wilaya_docname
 from frappe.model.workflow import apply_workflow
 from frappe.utils import add_days, getdate, today
 from frappe.utils.nestedset import get_root_of
@@ -36,7 +38,6 @@ from dz_cod.cod import states as S
 from dz_cod.cod.stock import get_returned_items, inspect_return
 from dz_cod.demo import data as D
 from dz_cod.setup.new_client import make_cod_the_home_page
-from dz_cod.setup.wilayas import WILAYAS, wilaya_docname
 
 DAYS_OF_HISTORY = 60
 NB_CUSTOMERS = 80
@@ -201,16 +202,16 @@ def setup_settings():
 	)
 	settings.save()
 
-	# Default warehouse for stock movements. ERPNext v16 keeps it on the Company
-	# (it used to be in Stock Settings, where writing it now does nothing)
-	frappe.db.set_value("Company", D.COMPANY, "default_warehouse", warehouse_name(D.MAIN_WAREHOUSE))
+	# Default warehouse for stock movements. ERPNext 16.51+ keeps it on the
+	# Company ("Warehouse Defaults"); up to 16.50 it is in Stock Settings
+	if frappe.get_meta("Company").has_field("default_warehouse"):
+		frappe.db.set_value("Company", D.COMPANY, "default_warehouse", warehouse_name(D.MAIN_WAREHOUSE))
+	else:
+		frappe.db.set_single_value("Stock Settings", "default_warehouse", warehouse_name(D.MAIN_WAREHOUSE))
 
 	# The setup wizard makes "Algeria TVA 19%" the default: the order form would add
-	# 19 % VAT to every order typed by hand. The shop is not VAT-registered.
-	for name in frappe.get_all(
-		"Sales Taxes and Charges Template", {"company": D.COMPANY, "is_default": 1}, pluck="name"
-	):
-		frappe.db.set_value("Sales Taxes and Charges Template", name, "is_default", 0)
+	# 19 % VAT to every order typed by hand. The shop is not VAT-registered: IFU.
+	unset_default_templates(D.COMPANY)
 
 	make_cod_the_home_page()
 	complete_onboarding()
@@ -357,7 +358,7 @@ def setup_customers(rng):
 		D.CUSTOMER_GROUP,
 		{"customer_group_name": D.CUSTOMER_GROUP, "parent_customer_group": get_root_of("Customer Group")},
 	)
-	wilaya_names = {code: wilaya_docname(code, name) for code, name, _zone, _parent in WILAYAS}
+	wilaya_names = {code: wilaya_docname(code, name) for code, name, _parent in WILAYAS}
 	wilaya_codes = list(D.WILAYA_COMMUNES)
 	weights = [D.WILAYA_COMMUNES[code][0] for code in wilaya_codes]
 

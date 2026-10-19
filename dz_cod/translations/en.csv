@@ -106,9 +106,6 @@ Déjà réglée,Already settled
 Invalide,Invalid
 Accepter,Accept
 Cocher pour accepter l'écart : la commande sera quand même marquée Réglée.,Tick to accept the difference: the order will still be marked Settled.
-Nom de la wilaya,Wilaya name
-Wilaya d'origine,Original wilaya
-Pour les wilayas créées en 2026 : wilaya d'origine (certains transporteurs utilisent encore l'ancien découpage).,For wilayas created in 2026: the wilaya they came from (some couriers still use the old map).
 Livrable,Deliverable
 Décocher si vous ne livrez pas dans cette wilaya.,Untick if you do not deliver to this wilaya.
 Zone tarifaire,Rate zone
@@ -209,7 +206,6 @@ Article,Item
 Bon état,Good
 Abîmé,Damaged
 Valider l'inspection,Confirm inspection
-Coordonnées COD,COD contact details
 Téléphone,Phone
 Adresse,Address
 Livraison COD,COD delivery

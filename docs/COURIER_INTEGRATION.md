@@ -419,7 +419,7 @@ real account.
 1. Add the new class to `ADAPTERS` in `dz_cod/couriers/__init__.py` and the
    option name to the Supplier field *Connecteur* (`setup/custom_fields.py`).
 2. Never put keys in code: they live in the Supplier record (*API Token* is
-   encrypted). Back up the site's `encryption_key` (docs/DEPLOY.md §9).
+   encrypted). Back up the site's `encryption_key` (dafter-core docs/DEPLOY.md §9).
 3. Turn on *Synchroniser les statuts automatiquement* in COD Settings only
    after the status mapping has been checked on real parcels.
 4. Add a print format with the courier label link / barcode (LATER.md).

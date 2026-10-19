@@ -9,11 +9,11 @@ the operator reads them and decides (decided with Adem, October 2026).
 """
 
 import frappe
+from dz_core.phone import normalize_phone
 from frappe import _
 from frappe.utils import get_link_to_form
 
 from dz_cod.cod import states as S
-from dz_cod.cod.phone import normalize_phone
 from dz_cod.features import is_enabled
 
 
@@ -57,7 +57,9 @@ def warn_refused_parcels(order):
 
 def warn_duplicate_customer(customer, method=None):
 	"""Customer "validate" hook (hooks.py): another customer has this phone."""
-	customer.dz_phone = normalize_phone(customer.dz_phone)  # always (base)
+	# dz_core's own Customer hook normalizes the phone first; done again here
+	# so the comparison never depends on the order the hooks run in
+	customer.dz_phone = normalize_phone(customer.dz_phone)
 	if not is_enabled("phone_checks"):
 		return
 	if not customer.dz_phone or not (customer.is_new() or customer.has_value_changed("dz_phone")):

@@ -5,20 +5,22 @@ Newest decisions are added at the bottom of each section.
 
 ## Platform
 
-- **ERPNext v16 (16.50.0) on Frappe v16 (16.51.0)**: v16 is the latest stable major (branch `version-16`, October 2026). `develop` is the future v17 and is not stable.
+- **ERPNext v16 on Frappe v16** (built on 16.50.0 / 16.51.0, also tested on 16.51 / 16.52): v16 is the latest stable major (branch `version-16`, October 2026). `develop` is the future v17 and is not stable.
 - **Python 3.14, Node 24, MariaDB 10.11, Redis 7**: Frappe v16 requires Python 3.14 and Node ≥ 24 and supports MariaDB 10.6 to 11.8. Ubuntu 24.04 ships MariaDB 10.11.
 - **Ubuntu 24.04 LTS for the server guide**: that is what everything was tested on. Ubuntu 26.04 LTS should work but was not tested.
-- **The GitHub repo is the Frappe app itself** (the `dz_cod` package sits at the root): `bench get-app https://github.com/adem-max/dz-cod` works directly.
-- **No core changes, everything in `dz_cod`**: project rule. We use hooks, custom fields, a Workflow, Webhooks and three small doctypes.
+- **The GitHub repo is the Frappe app itself** (the `dz_cod` package sits at the root): `bench get-app https://github.com/adem-max/dafter-cod` works directly.
+- **No core changes, everything in `dz_cod`** (or in dz_core for what every client needs): project rule. We use hooks, custom fields, a Workflow, Webhooks and a few small doctypes.
 - **Runs on top of dz_core** (repo dafter-core, October 2026): `required_apps = ["erpnext", "dz_core"]`. dz_core is the base every client gets (setup wizard, sector template, tax regime, legal invoices, import workbook); this app adds only the online-sales part. `new_client.prepare` calls dz_core's prepare first, so the wizard and the tax step live in one place. Producers who sell by phone or wholesale get dz_core alone, without this app's Sales Order workflow.
 - **Repos renamed dafter-cod and dafter-core, app names unchanged** (`dz_cod`, `dz_core`): renaming a Frappe app means renaming its Python package on every live site; the brand lives in the repo names. `bench get-app` still puts the code in `apps/dz_cod`.
 - **IFU replaces "remove the default 19 % VAT"**: dz_core's tax regime does the same for IFU clients and keeps 19 % for régime réel clients.
 - **Orders leave from dz_core's "Produits finis"** on new client sites, instead of a separate "Stock principal". The demo shop keeps its own warehouses.
-- **Default warehouse on the Company, not Stock Settings**: ERPNext v16 moved it; writing Stock Settings `default_warehouse` did nothing.
+- **Default warehouse on the Company, not Stock Settings**: ERPNext 16.51 moved it; writing Stock Settings `default_warehouse` did nothing there. Up to 16.50 the Company has no such field, so the demo loader writes whichever exists (19 October 2026: the 16.50 test bench failed on the Company-only version).
+- **The split with dz_core is finished** (19 October 2026, dafter-core docs/SPLIT.md): the wilaya list (doctype DZ Wilaya), phone formatting, the Customer phone and wilaya fields, the backup scripts, the restore check and the server guide live in dz_core. This app keeps what only an online seller needs: the rate fields on each wilaya, commune and address on the Customer, the courier communes and offices (DZ Commune, DZ Stop Desk), and the feature switches.
+- **Feature switches stay here**: every switch is a COD feature, the hub reads `dz_cod.features` and calls `dz-cod-features`, and the site_config key is `dz_cod_features`. The mechanism moves to dz_core only when dz_core gets an optional feature of its own.
 
 ## Reference data
 
-- **69 wilayas, not 58**: law 26-06 of 4 April 2026 (JO n° 25) created 11 wilayas, and decree 26-206 (JO n° 40) set their numbers 59 to 69. I could not open the Journal officiel itself; numbers and names come from several Algerian press articles quoting the decree. **Double-check them.**
+- **69 wilayas, not 58** (the list now lives in dz_core, `dz_core/setup/wilayas.py`; the zones and example rates stay here, `setup/wilayas.py`): law 26-06 of 4 April 2026 (JO n° 25) created 11 wilayas, and decree 26-206 (JO n° 40) set their numbers 59 to 69. I could not open the Journal officiel itself; numbers and names come from several Algerian press articles quoting the decree. **Double-check them.**
 - **Each new wilaya remembers its parent wilaya**: couriers may keep the 58-wilaya codes for a while (the transfer runs until 31 December 2026).
 - **Parent wilayas of 59–69 come from press reports**, not from the law text. **Double-check them.**
 - **Communes are free text**, not a master list: the 1,541 communes would need a verified source; listed in LATER.md.
@@ -29,7 +31,7 @@ Newest decisions are added at the bottom of each section.
 
 ## New doctypes (rule 3: only when a standard one does not fit)
 
-- **DZ Wilaya** (label "Wilaya"): ERPNext has no list of Algerian provinces with rates. `Territory` was considered but it is ERPNext's sales-hierarchy tree; mixing addresses and courier rates into it would confuse sales targets and pricing rules.
+- **DZ Wilaya** (label "Wilaya", a dz_core doctype since October 2026; its rate fields are this app's custom fields): ERPNext has no list of Algerian provinces with rates. `Territory` was considered but it is ERPNext's sales-hierarchy tree; mixing addresses and courier rates into it would confuse sales targets and pricing rules.
 - **COD Settings** (label "Paramètres COD", single record): rule 4 — per-client differences must live in settings, not code.
 - **Courier Settlement + Courier Settlement Item** (label "Versement"): nothing standard matches "a third party's statement matched line by line against our orders". Payment Entry is per party (one customer) and full accounting is out of scope; Bank Reconciliation works on bank lines, not parcels.
 - **DZ Commune and DZ Stop Desk**: the courier's communes and offices, imported from Yalidine. No standard doctype lists Algerian communes or courier offices; Address and Territory were rejected for the same reasons as for DZ Wilaya. The record name is Yalidine's id (commune id, center id), so a new import updates instead of duplicating, and the order stores the office id Yalidine needs.
@@ -68,7 +70,7 @@ Newest decisions are added at the bottom of each section.
 - **Wilayas 59–69 sent as their parent** to Yalidine, unless imported communes show Yalidine knows them: its docs list 58 wilayas.
 - **ZR Express: "coming soon", new platform only** (15 October 2026): ZR is moving its merchants from the old Procolis API to api.zrexpress.app, so a Procolis connector would be thrown away soon. The connector option "ZR Express" exists now and behaves like Manuel (with a notice on the courier form); the real connector will target the new platform once its official docs are available. What was learned about Procolis is kept in docs/COURIER_INTEGRATION.md §5.
 - **Courier prices are per account, not public**: Yalidine prices depend on the departure wilaya and the destination commune and can be imported from its fees API; ZR Express rates are negotiated. The wilaya table stays the single place for rates, filled by import (Yalidine) or by hand (ZR).
-- **ERPNext manufacturing is left installed and untouched**: out of scope for this phase, nothing in dz_cod depends on it or disables it, so it can be used later for the print workshop.
+- **ERPNext manufacturing is left installed and untouched by this app**: nothing in dz_cod depends on it or disables it. Manufacturing (BOMs, work orders, sector templates) is dz_core's job since October 2026.
 - **Courier settings live on the Supplier** (custom fields shown when "Is Transporter" is ticked): a courier is a supplier in ERPNext, no new doctype needed.
 - **Hourly status sync is off by default** (setting) and uses the normal workflow actions, so webhooks and stock movements behave as if a person clicked.
 
@@ -100,7 +102,7 @@ Newest decisions are added at the bottom of each section.
 - **A "COD" module sidebar** groups orders, settlements, reports and settings. No desktop icon: the icon grid is being retired in v16.
 - **The COD sidebar is mounted on ERPNext's left rail** (`dz_cod/dock/dz_cod/dz_cod.json`, a v16 "Dock" with `mount_on: erpnext`): a truck icon next to Vente/Stock. Without it a normal user had no way to reach the COD menu (it only opened from a direct link). Mounting rather than adding a separate "COD" app tile keeps one app and one rail for the client.
 - **A COD home page ("Accueil", the first item of the COD menu)**, built like ERPNext's own module home pages: a standard Workspace (`dz_cod/dz_cod/workspace/cod/`) holding a "life of an order" overview, an onboarding checklist (`module_onboarding/`, `onboarding_step/`), four live counters (`number_card/`: to confirm, to ship, in transit, money held by couriers), two charts (`dashboard_chart/`) and link cards. All standard Frappe records, shipped as files and loaded by `bench migrate`. The overview is a Custom HTML Block, which Frappe cannot ship as a file, so `setup/install.py` creates it from `setup/home_block/` on install and migrate. Onboarding steps tick themselves when the matching record exists (a courier, an item, an order...), so an already-running shop sees most steps done. Each user can fold the overview (**Réduire**) or close it (**✕**); the choice is a per-user default saved on the server (`cod/home.py`), so it follows them on every device, and **Paramètres COD → Réafficher le guide d'accueil** brings it back. An administrator can also remove the block for everyone with the page's standard *Edit* mode.
-- **No VAT by default**: ERPNext's setup wizard makes "Algeria TVA 19%" the default sales tax template, which the order form adds to every order typed by hand. The demo loader unticks it; for a client site it is a step of the new-client checklist (docs/DEPLOY.md, section 13), not code, so a VAT-registered client can keep it.
+- **No VAT by default**: ERPNext's setup wizard makes "Algeria TVA 19%" the default sales tax template, which the order form adds to every order typed by hand. Since October 2026 this is dz_core's tax regime, chosen in `prepare`: IFU (the usual case) unticks it, régime réel keeps it. The demo loader uses dz_core's `unset_default_templates` (the demo shop is IFU).
 
 ## Demo data
 
