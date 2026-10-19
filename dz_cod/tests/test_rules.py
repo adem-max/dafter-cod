@@ -1,4 +1,5 @@
-"""Unit tests for the pure rules (no database needed).
+"""Unit tests for the pure rules (no database needed). Phone and wilaya-list
+rules moved to dz_core with their tests (dz_core/tests/test_places_and_phones.py).
 
 Run: bench --site <site> run-tests --module dz_cod.tests.test_rules
 """
@@ -7,31 +8,11 @@ from frappe.tests import UnitTestCase
 
 from dz_cod.cod import settlement as rules
 from dz_cod.cod import states as S
-from dz_cod.cod.phone import is_valid_phone, normalize_phone
 from dz_cod.demo.loader import combinations
-from dz_cod.setup.wilayas import WILAYAS
+from dz_cod.setup.wilayas import ZONE_RATES, ZONES
 from dz_cod.setup.workflow import STATES, TRANSITIONS
 
 COURIER = "Rapide"
-
-
-class TestPhone(UnitTestCase):
-	def test_normalize_international_formats(self):
-		self.assertEqual(normalize_phone("+213 555 12 34 56"), "0555123456")
-		self.assertEqual(normalize_phone("00213-661-12-34-56"), "0661123456")
-		self.assertEqual(normalize_phone("0770 12 34 56"), "0770123456")
-
-	def test_unknown_format_is_kept(self):
-		# We never destroy what the operator typed
-		self.assertEqual(normalize_phone(" 12345 "), "12345")
-		self.assertIsNone(normalize_phone(None))
-
-	def test_validity(self):
-		self.assertTrue(is_valid_phone("0555123456"))  # mobile
-		self.assertTrue(is_valid_phone("021234567"))  # landline (9 digits)
-		self.assertFalse(is_valid_phone("0855123456"))  # 08 is not a mobile prefix
-		self.assertFalse(is_valid_phone("055512345"))  # too short for a mobile
-		self.assertFalse(is_valid_phone(""))
 
 
 class TestSettlementRules(UnitTestCase):
@@ -107,17 +88,12 @@ class TestWorkflowDefinition(UnitTestCase):
 
 
 class TestReferenceData(UnitTestCase):
-	def test_69_wilayas_with_unique_codes(self):
-		codes = [code for code, *_ in WILAYAS]
-		self.assertEqual(len(codes), 69)
-		self.assertEqual(codes, [f"{n:02d}" for n in range(1, 70)])
+	def test_every_wilaya_has_a_rate_zone(self):
+		# The list itself is dz_core's (tested there); the zones are ours
+		from dz_core.setup.wilayas import WILAYAS
 
-	def test_new_wilayas_have_an_existing_parent(self):
-		codes = {code for code, *_ in WILAYAS}
-		for code, _name, _zone, parent in WILAYAS:
-			if int(code) > 58:
-				self.assertIn(parent, codes)
-				self.assertLessEqual(int(parent), 58)
+		self.assertEqual(set(ZONES), {code for code, *_ in WILAYAS})
+		self.assertTrue(set(ZONES.values()) <= set(ZONE_RATES))
 
 	def test_variant_combinations(self):
 		combos = combinations([("Taille", ["S", "M"]), ("Couleur", ["Noir", "Blanc"])])

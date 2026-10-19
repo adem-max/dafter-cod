@@ -12,7 +12,8 @@ app_email = "adembenlecheb1@gmail.com"
 app_license = "mit"
 
 # dz_core is the base every client gets (setup wizard, sector, tax regime,
-# invoices, import workbook); dz_cod adds the online-sales part on top
+# invoices, import workbook, wilayas, phone numbers, backups); dz_cod adds the
+# online-sales part on top
 required_apps = ["erpnext", "dz_core"]
 
 # Where to land after login. COD is docked on ERPNext's rail, so Frappe keeps
@@ -63,6 +64,10 @@ scheduler_events = {
 
 # code128_svg() in print formats: the barcode on the "Bordereau COD" label
 jinja = {"methods": ["dz_cod.cod.barcode.code128_svg"]}
+
+# What dz_core's restore drill (scripts/restore_test.sh) also compares on a COD site
+dz_restore_check_counted = ["Sales Order", "Courier Settlement"]
+dz_restore_check_last = ["Sales Order"]
 
 # Courier webhook events are kept 30 days (Log Settings), enough to spot an
 # event delivered twice: Yalidine retries a delivery for 40 hours at most

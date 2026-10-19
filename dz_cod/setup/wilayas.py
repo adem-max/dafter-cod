@@ -1,18 +1,15 @@
-"""The 69 wilayas of Algeria, with example shipping rates.
+"""Example delivery rates per wilaya, by zone.
 
-Source of the list:
-- Wilayas 01 to 58: law 84-09 as amended in 2019 (58 wilayas).
-- Wilayas 59 to 69: law 26-06 of 4 April 2026 (JO n° 25 of 5 April 2026)
-  and presidential decree 26-206 of 25 May 2026 (JO n° 40), which set their
-  names and numbers. The new wilayas take over from their "parent" wilaya
-  progressively until 31 December 2026.
-
-Couriers may keep using the old 58-wilaya codes for a while, so each new
-wilaya remembers its parent wilaya (field `parent_wilaya`).
+The list of wilayas itself lives in dz_core (dz_core/setup/wilayas.py, doctype
+DZ Wilaya); this app adds the rate fields to it (setup/custom_fields.py) and
+fills them once per wilaya with the example rates of its zone.
 
 The rates below are EXAMPLES grouped by zone. Replace them with the real rate
 card of each client's courier (Wilaya list -> edit the 4 rate columns).
 """
+
+import frappe
+from dz_core.setup.wilayas import WILAYAS, wilaya_docname
 
 # Example rates in DZD per zone: (home delivery, stop desk)
 ZONE_RATES = {
@@ -24,82 +21,100 @@ ZONE_RATES = {
 	6: (1400, 900),  # Far south
 }
 
-# (code, name, zone, parent wilaya code for the 2026 wilayas)
-WILAYAS = [
-	("01", "Adrar", 5, None),
-	("02", "Chlef", 3, None),
-	("03", "Laghouat", 4, None),
-	("04", "Oum El Bouaghi", 3, None),
-	("05", "Batna", 4, None),
-	("06", "Béjaïa", 3, None),
-	("07", "Biskra", 4, None),
-	("08", "Béchar", 5, None),
-	("09", "Blida", 2, None),
-	("10", "Bouira", 3, None),
-	("11", "Tamanrasset", 6, None),
-	("12", "Tébessa", 4, None),
-	("13", "Tlemcen", 3, None),
-	("14", "Tiaret", 4, None),
-	("15", "Tizi Ouzou", 3, None),
-	("16", "Alger", 1, None),
-	("17", "Djelfa", 4, None),
-	("18", "Jijel", 3, None),
-	("19", "Sétif", 3, None),
-	("20", "Saïda", 4, None),
-	("21", "Skikda", 3, None),
-	("22", "Sidi Bel Abbès", 3, None),
-	("23", "Annaba", 3, None),
-	("24", "Guelma", 3, None),
-	("25", "Constantine", 3, None),
-	("26", "Médéa", 3, None),
-	("27", "Mostaganem", 3, None),
-	("28", "M'Sila", 4, None),
-	("29", "Mascara", 3, None),
-	("30", "Ouargla", 5, None),
-	("31", "Oran", 3, None),
-	("32", "El Bayadh", 4, None),
-	("33", "Illizi", 6, None),
-	("34", "Bordj Bou Arréridj", 3, None),
-	("35", "Boumerdès", 2, None),
-	("36", "El Tarf", 3, None),
-	("37", "Tindouf", 6, None),
-	("38", "Tissemsilt", 3, None),
-	("39", "El Oued", 5, None),
-	("40", "Khenchela", 4, None),
-	("41", "Souk Ahras", 3, None),
-	("42", "Tipaza", 2, None),
-	("43", "Mila", 3, None),
-	("44", "Aïn Defla", 3, None),
-	("45", "Naâma", 4, None),
-	("46", "Aïn Témouchent", 3, None),
-	("47", "Ghardaïa", 5, None),
-	("48", "Relizane", 3, None),
-	("49", "Timimoun", 5, None),
-	("50", "Bordj Badji Mokhtar", 6, None),
-	("51", "Ouled Djellal", 4, None),
-	("52", "Béni Abbès", 5, None),
-	("53", "In Salah", 6, None),
-	("54", "In Guezzam", 6, None),
-	("55", "Touggourt", 5, None),
-	("56", "Djanet", 6, None),
-	("57", "El M'Ghair", 5, None),
-	("58", "El Meniaa", 5, None),
-	# Created by law 26-06 (2026). Parent wilayas: please double-check against
-	# the Journal officiel, they come from press reports of the law.
-	("59", "Aflou", 4, "03"),
-	("60", "Barika", 4, "05"),
-	("61", "El Kantara", 4, "07"),
-	("62", "Bir El Ater", 4, "12"),
-	("63", "El Aricha", 4, "13"),
-	("64", "Ksar Chellala", 4, "14"),
-	("65", "Aïn Ouessara", 4, "17"),
-	("66", "Messaad", 4, "17"),
-	("67", "Ksar El Boukhari", 3, "26"),
-	("68", "Bou Saâda", 4, "28"),
-	("69", "El Abiodh Sidi Cheikh", 4, "32"),
-]
+# Rate zone of each wilaya, by code
+ZONES = {
+	"01": 5,  # Adrar
+	"02": 3,  # Chlef
+	"03": 4,  # Laghouat
+	"04": 3,  # Oum El Bouaghi
+	"05": 4,  # Batna
+	"06": 3,  # Béjaïa
+	"07": 4,  # Biskra
+	"08": 5,  # Béchar
+	"09": 2,  # Blida
+	"10": 3,  # Bouira
+	"11": 6,  # Tamanrasset
+	"12": 4,  # Tébessa
+	"13": 3,  # Tlemcen
+	"14": 4,  # Tiaret
+	"15": 3,  # Tizi Ouzou
+	"16": 1,  # Alger
+	"17": 4,  # Djelfa
+	"18": 3,  # Jijel
+	"19": 3,  # Sétif
+	"20": 4,  # Saïda
+	"21": 3,  # Skikda
+	"22": 3,  # Sidi Bel Abbès
+	"23": 3,  # Annaba
+	"24": 3,  # Guelma
+	"25": 3,  # Constantine
+	"26": 3,  # Médéa
+	"27": 3,  # Mostaganem
+	"28": 4,  # M'Sila
+	"29": 3,  # Mascara
+	"30": 5,  # Ouargla
+	"31": 3,  # Oran
+	"32": 4,  # El Bayadh
+	"33": 6,  # Illizi
+	"34": 3,  # Bordj Bou Arréridj
+	"35": 2,  # Boumerdès
+	"36": 3,  # El Tarf
+	"37": 6,  # Tindouf
+	"38": 3,  # Tissemsilt
+	"39": 5,  # El Oued
+	"40": 4,  # Khenchela
+	"41": 3,  # Souk Ahras
+	"42": 2,  # Tipaza
+	"43": 3,  # Mila
+	"44": 3,  # Aïn Defla
+	"45": 4,  # Naâma
+	"46": 3,  # Aïn Témouchent
+	"47": 5,  # Ghardaïa
+	"48": 3,  # Relizane
+	"49": 5,  # Timimoun
+	"50": 6,  # Bordj Badji Mokhtar
+	"51": 4,  # Ouled Djellal
+	"52": 5,  # Béni Abbès
+	"53": 6,  # In Salah
+	"54": 6,  # In Guezzam
+	"55": 5,  # Touggourt
+	"56": 6,  # Djanet
+	"57": 5,  # El M'Ghair
+	"58": 5,  # El Meniaa
+	"59": 4,  # Aflou
+	"60": 4,  # Barika
+	"61": 4,  # El Kantara
+	"62": 4,  # Bir El Ater
+	"63": 4,  # El Aricha
+	"64": 4,  # Ksar Chellala
+	"65": 4,  # Aïn Ouessara
+	"66": 4,  # Messaad
+	"67": 3,  # Ksar El Boukhari
+	"68": 4,  # Bou Saâda
+	"69": 4,  # El Abiodh Sidi Cheikh
+}
 
 
-def wilaya_docname(code, name):
-	"""Record name used for a wilaya, for example "16 - Alger"."""
-	return f"{code} - {name}"
+def setup_wilaya_rates():
+	"""Give each wilaya its zone and the example rates of that zone, once: a
+	wilaya that already has a zone is left alone (its rates are the client's)."""
+	for code, name, _parent in WILAYAS:
+		docname = wilaya_docname(code, name)
+		if not frappe.db.exists("DZ Wilaya", docname) or frappe.db.get_value("DZ Wilaya", docname, "zone"):
+			continue
+		zone = ZONES[code]
+		home, stopdesk = ZONE_RATES[zone]
+		frappe.db.set_value(
+			"DZ Wilaya",
+			docname,
+			{
+				"zone": zone,
+				"enabled": 1,
+				"stopdesk_available": 1,
+				"home_rate": home,
+				"stopdesk_rate": stopdesk,
+				# By default we charge the customer what the courier charges us
+				"home_courier_cost": home,
+				"stopdesk_courier_cost": stopdesk,
+			},
+		)

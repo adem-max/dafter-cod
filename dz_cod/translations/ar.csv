@@ -106,9 +106,6 @@ Déjà réglée,مُسدّدة من قبل
 Invalide,غير صالحة
 Accepter,قبول
 Cocher pour accepter l'écart : la commande sera quand même marquée Réglée.,حدّد لقبول الفرق: ستُسجَّل الطلبية كمُسدّدة رغم ذلك.
-Nom de la wilaya,اسم الولاية
-Wilaya d'origine,الولاية الأصلية
-Pour les wilayas créées en 2026 : wilaya d'origine (certains transporteurs utilisent encore l'ancien découpage).,للولايات المُستحدثة في 2026: الولاية التي انبثقت منها (بعض شركات التوصيل لا تزال تعتمد التقسيم القديم).
 Livrable,قابلة للتوصيل
 Décocher si vous ne livrez pas dans cette wilaya.,ألغِ التحديد إذا كنت لا توصل إلى هذه الولاية.
 Zone tarifaire,منطقة التسعير
@@ -209,7 +206,6 @@ Article,الصنف
 Bon état,سليم
 Abîmé,تالف
 Valider l'inspection,تأكيد الفحص
-Coordonnées COD,بيانات الاتصال COD
 Téléphone,الهاتف
 Adresse,العنوان
 Livraison COD,التوصيل COD
@@ -250,7 +246,6 @@ Masquer ce guide ? Vous pourrez le réafficher depuis Paramètres COD.,إخفا�
 Wilaya,الولاية
 Commune,البلدية
 Stop desk,المكتب (Stop desk)
-DZ Wilaya,الولاية
 COD Settings,إعدادات COD
 Courier Settlement,التسديد
 Courier Settlement Item,سطر التسديد

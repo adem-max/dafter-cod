@@ -1,7 +1,8 @@
 """Shipping charges: look up the rate table and add the fee to the order.
 
-The rate table is the list of wilayas (doctype "DZ Wilaya"): each wilaya has a
-home-delivery rate and a stop-desk rate.
+The rate table is the list of wilayas (doctype "DZ Wilaya", from dz_core): this
+app gives each wilaya a home-delivery rate and a stop-desk rate, plus what the
+courier keeps (custom fields, setup/custom_fields.py).
 
 The fee is added to the order as a line in the standard "Taxes and Charges"
 table (type "Actual"), exactly like ERPNext's own Shipping Rule does. This way
@@ -16,6 +17,7 @@ from frappe.utils import flt
 from dz_cod.dz_cod.doctype.cod_settings.cod_settings import get_settings
 
 SHIPPING_DESCRIPTION = "Frais de livraison"
+STOP_DESK = "Stop desk"
 
 
 def get_rates(wilaya, delivery_type):
@@ -25,7 +27,16 @@ def get_rates(wilaya, delivery_type):
 	"""
 	if not wilaya:
 		return 0, 0
-	return frappe.get_cached_doc("DZ Wilaya", wilaya).get_rates(delivery_type)
+	doc = frappe.get_cached_doc("DZ Wilaya", wilaya)
+	if not doc.enabled:
+		frappe.throw(_("La wilaya {0} n'est pas livrable.").format(doc.name))
+
+	if delivery_type == STOP_DESK:
+		if not doc.stopdesk_available:
+			frappe.throw(_("Pas de stop desk disponible dans la wilaya {0}.").format(doc.name))
+		return doc.stopdesk_rate, doc.stopdesk_courier_cost
+
+	return doc.home_rate, doc.home_courier_cost
 
 
 def apply_shipping_charge(order):

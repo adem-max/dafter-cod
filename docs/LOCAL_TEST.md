@@ -1,7 +1,7 @@
 # Run it on your Fedora laptop
 
-Goal: a local copy of the whole stack (Frappe v16 + ERPNext v16 + dz_cod +
-demo shop) to practise, break things and test changes before they go to a
+Goal: a local copy of the whole stack (Frappe v16 + ERPNext v16 + dz_core +
+dz_cod + demo shop) to practise, break things and test changes before they go to a
 client server.
 
 **Approach: an Ubuntu 24.04 container with distrobox.** Everything in this
@@ -13,6 +13,12 @@ on Fedora.
 > Honesty note: the commands *inside* the Ubuntu container are the ones that
 > were run while building this kit. The two Fedora commands at the start
 > (installing distrobox, creating the box) were not run on a Fedora machine.
+
+**On Windows** the same Ubuntu commands run in WSL (`wsl --install -d
+Ubuntu-24.04`): skip section 1, MariaDB starts as a normal service there
+(`sudo systemctl start mariadb` instead of `mysqld_safe`). That is the set-up
+in use in October 2026: bench at `~/frappe-bench` in WSL, with `apps/dz_core`
+and `apps/dz_cod` linked to the git clones on the Windows side.
 
 ## 1. Create the Ubuntu box (Fedora side)
 
@@ -109,18 +115,21 @@ Check which site is shown: `grep default_site sites/common_site_config.json`.
 In a second terminal (`distrobox enter erp`, `cd ~/frappe-bench`):
 
 ```bash
-bench --site test.localhost run-tests --app dz_cod                         # all 104 tests (~40 s)
+bench --site test.localhost run-tests --app dz_cod                         # all 98 tests (~40 s)
+bench --site test.localhost run-tests --app dz_core                        # the base: 23 tests
 bench --site test.localhost run-tests --module dz_cod.tests.test_rules     # only the fast rule tests
 bench --site test.localhost run-tests --module dz_cod.tests.test_order_flow --test test_confirm_reserves_stock
                                                                            # one single test
 ```
 
-Expected end of output: `OK` after "Ran 25 tests" and after "Ran 79 tests".
+Expected end of output for dz_cod: `OK` after "Ran 21 tests" and after
+"Ran 77 tests"; for dz_core: "Ran 6 tests" and "Ran 17 tests".
 
 ## 7. Change the code and see the result
 
-The app's code is in `~/frappe-bench/apps/dz_cod` (a normal git clone of
-this repository). Open that folder in VS Code on Fedora.
+The app's code is in `~/frappe-bench/apps/dz_cod` and the base's in
+`~/frappe-bench/apps/dz_core` (normal git clones of the two repositories).
+Open them in VS Code on Fedora.
 
 | You changed | Then run |
 |-------------|----------|
@@ -129,7 +138,8 @@ this repository). Open that folder in VS Code on Fedora.
 | a doctype JSON, `setup/custom_fields.py`, `setup/workflow.py` | `bench --site demo.localhost migrate` |
 | `translations/fr.csv` | `bench --site demo.localhost clear-cache` |
 
-Commit and push from `~/frappe-bench/apps/dz_cod` like any git repository.
+Commit and push from each app folder like any git repository. A change that
+every client needs belongs in dz_core, not here.
 
 ## 8. If something fails
 

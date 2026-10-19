@@ -396,7 +396,10 @@ that is the whole stock model of the kit.
 
 ## 5. Shipping rates
 
-Read `dz_cod/cod/shipping.py` and `dz_cod/dz_cod/doctype/dz_wilaya/`.
+Read `dz_cod/cod/shipping.py` and `dz_cod/setup/wilayas.py`. The wilaya list
+itself is dz_core's (doctype DZ Wilaya, `dz_core/setup/wilayas.py` in
+dafter-core); this app adds the rate fields to it (`DZ_WILAYA_FIELDS` in
+`setup/custom_fields.py`).
 
 ### Mental model
 
@@ -570,7 +573,7 @@ amount − expected fee). A courier who collects correctly but over-charges
 its fee is caught too.
 
 The rules are in a separate file with **no database access**, so they are
-easy to test (17 fast tests in `tests/test_rules.py`). Keep that separation
+easy to test (the fast tests in `tests/test_rules.py`). Keep that separation
 when you add rules.
 
 ### Break it on purpose
@@ -769,9 +772,9 @@ boring setup.
 
 ### Break it on purpose
 
-In `dz_cod/dz_cod/doctype/dz_wilaya/dz_wilaya.py`, in `get_rates`, change
-`return self.stopdesk_rate, self.stopdesk_courier_cost` to
-`return self.home_rate, self.home_courier_cost`. Run
+In `dz_cod/cod/shipping.py`, in `get_rates`, change
+`return doc.stopdesk_rate, doc.stopdesk_courier_cost` to
+`return doc.home_rate, doc.home_courier_cost`. Run
 `bench --site test.localhost run-tests --module dz_cod.tests.test_order_flow`:
 `test_stop_desk_rate` fails and tells you expected 250, got 400. Undo.
 
@@ -790,7 +793,8 @@ Write `test_cancel_releases_stock_from_unreachable` : an order that was
 
 ## 12. Production
 
-Read `docs/DEPLOY.md`.
+Read dafter-core's `docs/DEPLOY.md` (the server, backups, restore) and this
+repo's `docs/DEPLOY.md` (what COD adds).
 
 ### Mental model
 
@@ -803,7 +807,7 @@ Read `docs/DEPLOY.md`.
 | nginx | front door, HTTPS, chooses the site by domain name | the HTTP server / load balancer |
 
 **Backup = database + files + site config (encryption key).** A backup is
-only proven by a restore; DEPLOY.md section 10 is the procedure that was run.
+only proven by a restore; dafter-core's DEPLOY.md section 10 is the procedure that was run.
 
 ### The lines that matter
 

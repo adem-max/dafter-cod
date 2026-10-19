@@ -213,30 +213,9 @@ SALES_ORDER_FIELDS = [
 	),
 ]
 
+# The section, the phone and the wilaya are dz_core's (every client has them);
+# commune and address are the delivery details orders copy
 CUSTOMER_FIELDS = [
-	{
-		"fieldname": "dz_section",
-		"label": "Coordonnées COD",
-		"fieldtype": "Section Break",
-		"insert_after": "customer_group",
-	},
-	{
-		"fieldname": "dz_phone",
-		"label": "Téléphone",
-		"fieldtype": "Data",
-		"options": "Phone",
-		"insert_after": "dz_section",
-		"in_standard_filter": 1,
-		"in_global_search": 1,
-	},
-	{
-		"fieldname": "dz_wilaya",
-		"label": "Wilaya",
-		"fieldtype": "Link",
-		"options": "DZ Wilaya",
-		"insert_after": "dz_phone",
-		"in_standard_filter": 1,
-	},
 	{"fieldname": "dz_column", "fieldtype": "Column Break", "insert_after": "dz_wilaya"},
 	{"fieldname": "dz_commune", "label": "Commune", "fieldtype": "Data", "insert_after": "dz_column"},
 	{"fieldname": "dz_address", "label": "Adresse", "fieldtype": "Small Text", "insert_after": "dz_commune"},
@@ -297,6 +276,79 @@ STOCK_ENTRY_FIELDS = [
 ]
 
 
+# The list of wilayas is dz_core's (doctype DZ Wilaya); the rate table is ours.
+# Filled with example rates by setup/wilayas.py.
+DZ_WILAYA_FIELDS = [
+	{
+		"fieldname": "enabled",
+		"label": "Livrable",
+		"fieldtype": "Check",
+		"default": "1",
+		"description": "Décocher si vous ne livrez pas dans cette wilaya.",
+		"insert_after": "parent_wilaya",
+		"in_list_view": 1,
+	},
+	{
+		"fieldname": "zone",
+		"label": "Zone tarifaire",
+		"fieldtype": "Int",
+		"insert_after": "enabled",
+		"in_standard_filter": 1,
+	},
+	{
+		"fieldname": "rates_section",
+		"label": "Tarifs de livraison (DA)",
+		"fieldtype": "Section Break",
+		"insert_after": "zone",
+	},
+	{
+		"fieldname": "home_rate",
+		"label": "Tarif domicile",
+		"fieldtype": "Currency",
+		"options": "DZD",
+		"non_negative": 1,
+		"description": "Prix facturé au client pour une livraison à domicile.",
+		"insert_after": "rates_section",
+		"in_list_view": 1,
+	},
+	{
+		"fieldname": "stopdesk_rate",
+		"label": "Tarif stop desk",
+		"fieldtype": "Currency",
+		"options": "DZD",
+		"non_negative": 1,
+		"description": "Prix facturé au client pour un retrait au bureau du transporteur.",
+		"insert_after": "home_rate",
+		"in_list_view": 1,
+	},
+	{
+		"fieldname": "stopdesk_available",
+		"label": "Stop desk disponible",
+		"fieldtype": "Check",
+		"default": "1",
+		"insert_after": "stopdesk_rate",
+	},
+	{"fieldname": "column_break_rates", "fieldtype": "Column Break", "insert_after": "stopdesk_available"},
+	{
+		"fieldname": "home_courier_cost",
+		"label": "Coût transporteur domicile",
+		"fieldtype": "Currency",
+		"options": "DZD",
+		"non_negative": 1,
+		"description": "Ce que le transporteur vous retient par colis livré à domicile.",
+		"insert_after": "column_break_rates",
+	},
+	{
+		"fieldname": "stopdesk_courier_cost",
+		"label": "Coût transporteur stop desk",
+		"fieldtype": "Currency",
+		"options": "DZD",
+		"non_negative": 1,
+		"description": "Ce que le transporteur vous retient par colis livré en stop desk.",
+		"insert_after": "home_courier_cost",
+	},
+]
+
 # ERPNext's own Sales Order fields that mean little for a COD seller: hide them
 # from the Commandes list filters and columns, so orders start higher up.
 # (fieldname, property, value)
@@ -322,6 +374,7 @@ def setup_custom_fields():
 			"Customer": CUSTOMER_FIELDS,
 			"Supplier": SUPPLIER_FIELDS,
 			"Stock Entry": STOCK_ENTRY_FIELDS,
+			"DZ Wilaya": DZ_WILAYA_FIELDS,
 		},
 		update=True,
 	)
