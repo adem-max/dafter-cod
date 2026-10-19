@@ -3,8 +3,8 @@
 frappe.ui.form.on("COD Settings", {
 	refresh(frm) {
 		// Settings of optional features this site doesn't have stay hidden
-		// (dz_cod/features.py, frappe.boot.dz_cod_features)
-		const has = (feature) => (frappe.boot.dz_cod_features || []).includes(feature);
+		// (dz_core/features.py, frappe.boot.dz_features)
+		const has = (feature) => (frappe.boot.dz_features || []).includes(feature);
 		frm.toggle_display("refused_warning_threshold", has("phone_checks"));
 		frm.toggle_display("auto_sync_courier_status", has("courier_api"));
 

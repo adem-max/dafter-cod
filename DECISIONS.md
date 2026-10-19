@@ -16,7 +16,7 @@ Newest decisions are added at the bottom of each section.
 - **Orders leave from dz_core's "Produits finis"** on new client sites, instead of a separate "Stock principal". The demo shop keeps its own warehouses.
 - **Default warehouse on the Company, not Stock Settings**: ERPNext 16.51 moved it; writing Stock Settings `default_warehouse` did nothing there. Up to 16.50 the Company has no such field, so the demo loader writes whichever exists (19 October 2026: the 16.50 test bench failed on the Company-only version).
 - **The split with dz_core is finished** (19 October 2026, dafter-core docs/SPLIT.md): the wilaya list (doctype DZ Wilaya), phone formatting, the Customer phone and wilaya fields, the backup scripts, the restore check and the server guide live in dz_core. This app keeps what only an online seller needs: the rate fields on each wilaya, commune and address on the Customer, the courier communes and offices (DZ Commune, DZ Stop Desk), and the feature switches.
-- **Feature switches stay here**: every switch is a COD feature, the hub reads `dz_cod.features` and calls `dz-cod-features`, and the site_config key is `dz_cod_features`. The mechanism moves to dz_core only when dz_core gets an optional feature of its own.
+- **Feature switches moved to dz_core** (19 October 2026, right after the split, where they had first been kept here): the hub became dz_hub and manages every client, most without this app, so the mechanism belongs to the base. This app declares its four features with `dz_features = ["dz_cod.features.FEATURES"]` and keeps the courier and webhook guards; `dz_cod.features` still exposes `is_enabled` & co. so COD modules did not change. `dz-cod-features` is an alias of dz_core's `dz-features`; the site_config key became `dz_features` (the old one is moved on migrate).
 
 ## Reference data
 
@@ -125,11 +125,11 @@ Newest decisions are added at the bottom of each section.
 
 - **À la carte, not tiers** (16 October 2026, Adem's choice): base for everyone, plus a hand-picked list of
   4 optional features per client (`courier_api`, `phone_checks`, `n8n_webhooks`, `labels_reports`).
-- **The list lives in site_config.json** (`dz_cod_features`): only the vendor, who has the server, can change
+- **The list lives in site_config.json** (`dz_features`, was `dz_cod_features`): only the vendor, who has the server, can change
   it; clients are never System Manager. Key missing = everything on, so demo, test and older sites keep working.
 - **Hidden, not greyed out**: reports and print formats are switched off with their own `disabled` field
   (Frappe then removes them from sidebar, workspace and print menu and refuses them by URL), buttons are
-  hidden from `frappe.boot.dz_cod_features`. Filtering the sidebar in the boot hook was rejected: Frappe sends
+  hidden from `frappe.boot.dz_features`. Filtering the sidebar in the boot hook was rejected: Frappe sends
   freshly built sidebars by other paths that would bring the links back.
 - **A downgrade never breaks orders**: a courier set to Yalidine works as Manuel when `courier_api` is off;
   the n8n webhooks remember whether they were on and come back as they were.
