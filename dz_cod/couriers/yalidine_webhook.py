@@ -156,7 +156,11 @@ def handle_event(event):
 		status = with_reason(data.get("status"), data.get("reason"))
 		order = update_order(tracking, status=status, status_on=event.occurred_at)
 		if not order:
-			return IGNORED, None, "Aucune commande avec ce n° de suivi, ou statut plus ancien que celui connu."
+			return (
+				IGNORED,
+				None,
+				"Aucune commande avec ce n° de suivi, ou statut plus ancien que celui connu.",
+			)
 		move(order, map_status(data.get("status")))
 		return DONE, order, None
 

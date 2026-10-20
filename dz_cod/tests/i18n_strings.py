@@ -61,6 +61,7 @@ SAME_IN_ENGLISH = {
 def skipped(lang):
 	return NOT_TRANSLATED | (SAME_IN_ENGLISH if lang == "en" else set())
 
+
 DOCTYPE_TEXT_KEYS = ("label", "description")
 STEP_TEXT_KEYS = ("title", "description", "action_label", "report_description")
 
