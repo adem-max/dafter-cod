@@ -104,13 +104,18 @@ def update_courier_costs(adapter):
 		if i:
 			time.sleep(PAUSE)
 		fees = adapter.call(
-			"GET", "fees/", params={"from_wilaya_id": from_id, "to_wilaya_id": yalidine_wilaya["id"]}, max_wait=60
+			"GET",
+			"fees/",
+			params={"from_wilaya_id": from_id, "to_wilaya_id": yalidine_wilaya["id"]},
+			max_wait=60,
 		)
 		home, desk = chef_lieu_prices(fees, yalidine_wilaya.get("name"))
 		# A 2026 wilaya Yalidine does not know is delivered as its parent: same price
 		children = [
 			child.name
-			for child in frappe.get_all("DZ Wilaya", filters={"parent_wilaya": wilaya}, fields=["name", "code"])
+			for child in frappe.get_all(
+				"DZ Wilaya", filters={"parent_wilaya": wilaya}, fields=["name", "code"]
+			)
 			if cint(child.code) not in known_codes
 		]
 		for name in [wilaya, *children]:

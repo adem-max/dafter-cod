@@ -80,7 +80,9 @@ class FakeYalidine:
 
 	def __call__(self, method, url, headers=None, params=None, json=None, timeout=None):
 		path = url.removeprefix(BASE_URL)
-		self.calls.append(SimpleNamespace(method=method, path=path, params=params or {}, json=json, headers=headers))
+		self.calls.append(
+			SimpleNamespace(method=method, path=path, params=params or {}, json=json, headers=headers)
+		)
 		answer = self.routes[(method, path)]
 		if callable(answer):
 			answer = answer(params or {}, json)
@@ -177,7 +179,9 @@ class TestYalidineShipping(IntegrationTestCase):
 		adapter()  # clears the quota memory of earlier tests
 
 	def test_create_shipment_sends_the_parcel(self):
-		order = h.act(h.make_order(courier=YALIDINE, dz_phone_2="0661234567"), S.ACTION_CONFIRM, S.ACTION_PREPARE)
+		order = h.act(
+			h.make_order(courier=YALIDINE, dz_phone_2="0661234567"), S.ACTION_CONFIRM, S.ACTION_PREPARE
+		)
 		with fake_api(SHIP_ROUTES) as api:
 			order = h.act(order, S.ACTION_SHIP)
 
@@ -243,7 +247,9 @@ class TestYalidineShipping(IntegrationTestCase):
 		with self.assertRaises(frappe.ValidationError) as error:
 			adapter().build_parcel(order)
 		# Compared in the active language: another test may have switched it
-		self.assertEqual(str(error.exception), _("Choisissez le bureau stop desk de la commande avant d'expédier."))
+		self.assertEqual(
+			str(error.exception), _("Choisissez le bureau stop desk de la commande avant d'expédier.")
+		)
 
 		order.dz_stopdesk_id = "163001"
 		sent = adapter().build_parcel(order)
@@ -427,16 +433,51 @@ class TestYalidineImports(IntegrationTestCase):
 				{
 					"has_more": True,
 					"data": [
-						{"id": 1601, "name": "Alger Centre", "wilaya_id": 16, "wilaya_name": "Alger", "has_stop_desk": 1, "is_deliverable": 1},
-						{"id": 1630, "name": "Bordj El Kiffan", "wilaya_id": 16, "wilaya_name": "Alger", "has_stop_desk": 1, "is_deliverable": 1},
+						{
+							"id": 1601,
+							"name": "Alger Centre",
+							"wilaya_id": 16,
+							"wilaya_name": "Alger",
+							"has_stop_desk": 1,
+							"is_deliverable": 1,
+						},
+						{
+							"id": 1630,
+							"name": "Bordj El Kiffan",
+							"wilaya_id": 16,
+							"wilaya_name": "Alger",
+							"has_stop_desk": 1,
+							"is_deliverable": 1,
+						},
 					],
 				},
 				{
 					"has_more": False,
 					"data": [
-						{"id": 1615, "name": "Kouba", "wilaya_id": 16, "wilaya_name": "Alger", "has_stop_desk": 0, "is_deliverable": 1},
-						{"id": 1699, "name": "Ile Fermée", "wilaya_id": 16, "wilaya_name": "Alger", "has_stop_desk": 0, "is_deliverable": 0},
-						{"id": 301, "name": "Aflou", "wilaya_id": 3, "wilaya_name": "Laghouat", "has_stop_desk": 1, "is_deliverable": 1},
+						{
+							"id": 1615,
+							"name": "Kouba",
+							"wilaya_id": 16,
+							"wilaya_name": "Alger",
+							"has_stop_desk": 0,
+							"is_deliverable": 1,
+						},
+						{
+							"id": 1699,
+							"name": "Ile Fermée",
+							"wilaya_id": 16,
+							"wilaya_name": "Alger",
+							"has_stop_desk": 0,
+							"is_deliverable": 0,
+						},
+						{
+							"id": 301,
+							"name": "Aflou",
+							"wilaya_id": 3,
+							"wilaya_name": "Laghouat",
+							"has_stop_desk": 1,
+							"is_deliverable": 1,
+						},
 					],
 				},
 			]
@@ -536,7 +577,10 @@ class TestYalidineWebhook(IntegrationTestCase):
 
 	def test_signed_status_event_moves_the_order(self):
 		order = shipped_yalidine_order()
-		payload = {"type": "parcel_status_updated", "events": [status_event("evt-ok-1", order.dz_tracking_number, "Livré")]}
+		payload = {
+			"type": "parcel_status_updated",
+			"events": [status_event("evt-ok-1", order.dz_tracking_number, "Livré")],
+		}
 		answer, queued = self.deliver(*signed(payload))
 
 		self.assertEqual(answer.status_code, 200)
@@ -548,7 +592,10 @@ class TestYalidineWebhook(IntegrationTestCase):
 
 	def test_bad_or_missing_signature_is_rejected(self):
 		order = shipped_yalidine_order()
-		payload = {"type": "parcel_status_updated", "events": [status_event("evt-bad-1", order.dz_tracking_number, "Livré")]}
+		payload = {
+			"type": "parcel_status_updated",
+			"events": [status_event("evt-bad-1", order.dz_tracking_number, "Livré")],
+		}
 		for headers in (signed(payload, secret="not-the-secret")[1], {}):
 			answer, queued = self.deliver(json.dumps(payload).encode(), headers)
 			self.assertEqual(answer.status_code, 400)
@@ -558,7 +605,10 @@ class TestYalidineWebhook(IntegrationTestCase):
 
 	def test_duplicate_event_is_handled_once(self):
 		order = shipped_yalidine_order()
-		payload = {"type": "parcel_status_updated", "events": [status_event("evt-dup-1", order.dz_tracking_number, "Centre")]}
+		payload = {
+			"type": "parcel_status_updated",
+			"events": [status_event("evt-dup-1", order.dz_tracking_number, "Centre")],
+		}
 		first, queued_first = self.deliver(*signed(payload))
 		again, queued_again = self.deliver(*signed(payload))
 		self.assertEqual((first.status_code, again.status_code), (200, 200))
@@ -567,7 +617,13 @@ class TestYalidineWebhook(IntegrationTestCase):
 	def test_older_event_does_not_overwrite_a_newer_status(self):
 		order = shipped_yalidine_order()
 		events = [
-			status_event("evt-new", order.dz_tracking_number, "Tentative échouée", "2026-10-15 16:00:00", "Client absent (reporté)"),
+			status_event(
+				"evt-new",
+				order.dz_tracking_number,
+				"Tentative échouée",
+				"2026-10-15 16:00:00",
+				"Client absent (reporté)",
+			),
 			status_event("evt-old", order.dz_tracking_number, "Sorti en livraison", "2026-10-15 09:00:00"),
 		]
 		self.deliver(*signed({"type": "parcel_status_updated", "events": events}))
@@ -585,7 +641,11 @@ class TestYalidineWebhook(IntegrationTestCase):
 				{
 					"event_id": "evt-pay-1",
 					"occurred_at": "2026-10-15 12:01:26",
-					"data": {"tracking": order.dz_tracking_number, "status": "receivable", "payment_id": "pmt-123456"},
+					"data": {
+						"tracking": order.dz_tracking_number,
+						"status": "receivable",
+						"payment_id": "pmt-123456",
+					},
 				}
 			],
 		}
@@ -593,4 +653,6 @@ class TestYalidineWebhook(IntegrationTestCase):
 		values = frappe.db.get_value(
 			"Sales Order", order.name, ["dz_courier_payment_status", "dz_courier_payment_id"], as_dict=True
 		)
-		self.assertEqual((values.dz_courier_payment_status, values.dz_courier_payment_id), ("receivable", "pmt-123456"))
+		self.assertEqual(
+			(values.dz_courier_payment_status, values.dz_courier_payment_id), ("receivable", "pmt-123456")
+		)

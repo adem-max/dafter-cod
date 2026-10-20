@@ -38,7 +38,7 @@ def simplify(text):
 	"""'Bordj El-Kiffan ' and 'bordj el kiffan' compare equal, so do 'Béjaïa' and 'Bejaia'."""
 	text = unicodedata.normalize("NFKD", text or "")
 	text = "".join(c for c in text if not unicodedata.combining(c)).lower()
-	for sign in "-'’":
+	for sign in ("-", "'", "\u2019"):  # \u2019: the typographic apostrophe
 		text = text.replace(sign, " ")
 	return " ".join(text.split())
 
@@ -71,7 +71,9 @@ def stopdesk_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_list(
 		"DZ Stop Desk",
 		filters=conditions,
-		or_filters={"center_name": ["like", f"%{txt}%"], "commune_name": ["like", f"%{txt}%"]} if txt else None,
+		or_filters={"center_name": ["like", f"%{txt}%"], "commune_name": ["like", f"%{txt}%"]}
+		if txt
+		else None,
 		fields=["name", "center_name", "commune_name"],
 		order_by="center_name asc",
 		offset=start,

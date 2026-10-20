@@ -204,7 +204,9 @@ SALES_ORDER_FIELDS = [
 		"dz_settled_on",
 		description="Ex. « Retour vers vendeur » : le colis revient, mais n'est pas encore arrivé.",
 	),
-	after_submit_readonly("dz_courier_status_on", "Statut transporteur mis à jour le", "Datetime", "dz_courier_status"),
+	after_submit_readonly(
+		"dz_courier_status_on", "Statut transporteur mis à jour le", "Datetime", "dz_courier_status"
+	),
 	after_submit_readonly(
 		"dz_courier_payment_status", "Paiement chez le transporteur", "Data", "dz_courier_status_on"
 	),

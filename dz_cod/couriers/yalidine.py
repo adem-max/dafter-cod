@@ -95,7 +95,9 @@ class YalidineAdapter(CourierAdapter):
 	def headers(self):
 		token = self.courier.get_password("dz_api_token", raise_exception=False)
 		if not (self.courier.get("dz_api_id") and token):
-			frappe.throw(_("Renseignez l'API ID et l'API Token du transporteur {0}.").format(self.courier.name))
+			frappe.throw(
+				_("Renseignez l'API ID et l'API Token du transporteur {0}.").format(self.courier.name)
+			)
 		return {"X-API-ID": self.courier.dz_api_id, "X-API-TOKEN": token}
 
 	def quota_key(self, header):
@@ -150,7 +152,11 @@ class YalidineAdapter(CourierAdapter):
 		the communes imported from Yalidine show that Yalidine knows it.
 		UNVERIFIED: whether Yalidine has added wilayas 59-69 (GET wilayas/)."""
 		doc = frappe.get_cached_doc("DZ Wilaya", wilaya)
-		if cint(doc.code) > 58 and doc.parent_wilaya and not frappe.db.exists("DZ Commune", {"wilaya": wilaya}):
+		if (
+			cint(doc.code) > 58
+			and doc.parent_wilaya
+			and not frappe.db.exists("DZ Commune", {"wilaya": wilaya})
+		):
 			return self.yalidine_wilaya(doc.parent_wilaya)
 		name = frappe.db.get_value("DZ Commune", {"wilaya": wilaya}, "yalidine_wilaya_name")
 		return cint(doc.code), name or doc.wilaya_name
@@ -164,9 +170,9 @@ class YalidineAdapter(CourierAdapter):
 		commune = places.match_commune(communes, name)
 		if not commune:
 			frappe.throw(
-				_("Commune « {0} » inconnue de Yalidine dans la wilaya {1}. Choisissez-la dans la liste.").format(
-					name, wilaya
-				)
+				_(
+					"Commune « {0} » inconnue de Yalidine dans la wilaya {1}. Choisissez-la dans la liste."
+				).format(name, wilaya)
 			)
 		if not commune.is_deliverable:
 			frappe.throw(_("Yalidine ne livre pas la commune {0}.").format(commune.commune_name))
@@ -193,7 +199,9 @@ class YalidineAdapter(CourierAdapter):
 			result = (answer or {}).get(order.name) or {}
 			if not result.get("success") or not result.get("tracking"):
 				frappe.throw(
-					_("Yalidine a refusé le colis : {0}").format(result.get("message") or _("réponse inattendue")),
+					_("Yalidine a refusé le colis : {0}").format(
+						result.get("message") or _("réponse inattendue")
+					),
 					title=_("Expédition impossible"),
 				)
 		order.dz_label_url = result.get("label")
