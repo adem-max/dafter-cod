@@ -40,6 +40,11 @@ Then open `http://demo.localhost:8000` and log in as `Administrator`.
 On a laptop, `bench start` shows only the site chosen with `bench use`
 (see docs/LOCAL_TEST.md, section 5).
 
+The loader makes no demo login. dafter-core's `scripts/demo_tunnels.sh`
+(which shows the three demo sites on public links, dafter-core docs/DEMO.md)
+adds `gerant@demo.localhost` with the manager and user roles of sales, stock
+and accounts, password `Demo-2026!`, the same as the producer demos.
+
 ## Change the return rate
 
 ```bash
