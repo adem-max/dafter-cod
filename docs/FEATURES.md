@@ -26,8 +26,10 @@ site's `site_config.json`, key `dz_features` (sites made before 19 October
 2026 had `dz_cod_features`; migrate moves it). Clients cannot edit it from
 the screen (they are not System Manager and have no server access).
 
-- Key missing: **everything is on** (demo, test, and sites made before the
-  switches).
+- Key missing: **the base only**, no option (a site made by hand, or restored
+  without its site_config, gets nothing it does not pay for).
+- `"all"`: **everything is on** (demo and test sites; sites made before
+  20 October 2026 got it on migrate, when the rule changed).
 - A list, even empty: exactly that list.
 
 ## The command
@@ -38,7 +40,7 @@ bench --site client1.localhost dz-features --enable phone_checks  # add one (rep
 bench --site client1.localhost dz-features --disable labels_reports
 bench --site client1.localhost dz-features --set courier_api,phone_checks   # exact list
 bench --site client1.localhost dz-features --set ""               # base only
-bench --site client1.localhost dz-features --all                  # everything (removes the key)
+bench --site client1.localhost dz-features --all                  # everything ("all": demo and test sites)
 bench --site client1.localhost dz-features --json                 # for scripts and the hub
 ```
 

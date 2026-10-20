@@ -99,8 +99,12 @@ def before_tests():
 	"""hooks.py before_tests: the fixtures are kept on the test site (company,
 	COD Settings, couriers, stock), so a fresh site (CI) is like test.localhost.
 	dz_core's suite runs on the same site, and every sales order there goes
-	through dz_cod, which needs COD Settings."""
+	through dz_cod, which needs COD Settings. The test site has every feature
+	("all"): a site without a list would have the base only."""
+	from dz_cod.features import ALL, set_features
+
 	setup_fixtures()
+	set_features(ALL)
 	frappe.db.commit()
 
 

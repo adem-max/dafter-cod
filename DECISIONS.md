@@ -126,7 +126,8 @@ Newest decisions are added at the bottom of each section.
 - **À la carte, not tiers** (16 October 2026, Adem's choice): base for everyone, plus a hand-picked list of
   4 optional features per client (`courier_api`, `phone_checks`, `n8n_webhooks`, `labels_reports`).
 - **The list lives in site_config.json** (`dz_features`, was `dz_cod_features`): only the vendor, who has the server, can change
-  it; clients are never System Manager. Key missing = everything on, so demo, test and older sites keep working.
+  it; clients are never System Manager. Key missing = the base only (20 October 2026; it was "everything", which gave a
+  site made by hand or restored without its site_config every option for free); `"all"` = everything, for demo and test sites.
 - **Hidden, not greyed out**: reports and print formats are switched off with their own `disabled` field
   (Frappe then removes them from sidebar, workspace and print menu and refuses them by URL), buttons are
   hidden from `frappe.boot.dz_features`. Filtering the sidebar in the boot hook was rejected: Frappe sends

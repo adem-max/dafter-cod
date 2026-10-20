@@ -37,6 +37,7 @@ from frappe.utils.nestedset import get_root_of
 from dz_cod.cod import states as S
 from dz_cod.cod.stock import get_returned_items, inspect_return
 from dz_cod.demo import data as D
+from dz_cod.features import ALL, configured, set_features
 from dz_cod.setup.new_client import make_cod_the_home_page
 
 DAYS_OF_HISTORY = 60
@@ -67,6 +68,9 @@ def load(return_rate=0.2, seed=SEED):
 	print("1/6 Société et paramètres...")
 	setup_company()
 	setup_settings()
+	# A demo shows every option; a site without a list would have the base only
+	if configured() is None:
+		set_features(ALL)
 	print("2/6 Articles...")
 	setup_items()
 	print("3/6 Clients et transporteurs...")
