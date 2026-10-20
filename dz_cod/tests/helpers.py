@@ -140,8 +140,8 @@ def set_stock(qty):
 	entry.submit()
 
 
-def make_order(qty=1, courier=MOCK_COURIER, **values):
-	"""A new draft COD order (state Nouvelle)."""
+def make_order(qty=1, courier=MOCK_COURIER, item=ITEM, **values):
+	"""A new draft COD order (state Nouvelle) of one line."""
 	order = frappe.new_doc("Sales Order")
 	order.update(
 		{
@@ -158,7 +158,7 @@ def make_order(qty=1, courier=MOCK_COURIER, **values):
 		}
 	)
 	order.update(values)
-	order.append("items", {"item_code": ITEM, "qty": qty, "rate": ITEM_PRICE, "delivery_date": today()})
+	order.append("items", {"item_code": item, "qty": qty, "rate": ITEM_PRICE, "delivery_date": today()})
 	order.insert()
 	return order
 

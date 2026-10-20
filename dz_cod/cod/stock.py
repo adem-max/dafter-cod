@@ -59,11 +59,24 @@ def create_delivery_note(order, posting_date=None):
 	dn.transporter = order.dz_courier
 	dn.lr_no = order.dz_tracking_number
 	dn.lr_date = posting_date or today()
+	let_erpnext_pick_lots(dn)
 	# The workflow already checked that the user may ship this order
 	dn.flags.ignore_permissions = True
 	dn.insert()
 	dn.submit()
 	return dn.name
+
+
+def let_erpnext_pick_lots(doc):
+	"""Lines of batch-tracked items (a food producer selling online): with the
+	line's "use serial / batch fields" on, ERPNext 16 fills in ONE lot when the
+	document is saved, and refuses a line that one lot cannot cover. Off, its
+	own outward bundle (Stock Settings, on by default) takes the lots oldest
+	first, as many as the line needs."""
+	for row in doc.items:
+		if frappe.get_cached_value("Item", row.item_code, "has_batch_no"):
+			row.batch_no = None
+			row.use_serial_batch_fields = 0
 
 
 def create_return(order, posting_date=None):
@@ -172,6 +185,7 @@ def make_stock_entry(order, entry_type, lines, source, target, posting_date=None
 		entry.append(
 			"items", {"item_code": item_code, "qty": qty, "s_warehouse": source, "t_warehouse": target}
 		)
+	let_erpnext_pick_lots(entry)
 	entry.insert()
 	entry.submit()
 	return entry.name
