@@ -15,7 +15,7 @@ Roughly in order of value for a COD seller.
 8. ~~Shipping label~~: **done** (October 2026): print format "Bordereau COD" (100 x 150 mm, Code 128 barcode of the tracking number), button *Bordereau* on confirmed orders. Not yet printed on a real thermal printer: check the size and the barcode scan with the client's printer and the courier's scanner.
 9. ~~Dashboard with number cards~~: **done** (October 2026): the COD home page (Accueil) has counters for to confirm, to ship, in transit and money held by couriers, plus two charts. Possible next step: orders today.
 10. **Hard stock reservation** (ERPNext Stock Reservation Entries) if overselling the last pieces becomes a problem.
-11. **Arabic names of wilayas** (the Arabic interface is **done**, October 2026: `translations/ar.csv`, per user). The wilaya list is dz_core's now: add the Arabic names there.
+11. ~~Arabic names of wilayas~~: **moved** (20 October 2026) to dafter-core's ROADMAP ("French and Arabic labels"), since the wilaya list is dz_core's. The Arabic interface itself is done (October 2026: `translations/ar.csv`, per user).
 12. ~~Webhook template updates~~: **done** (October 2026): `bench migrate` refreshes the template and condition of webhooks nobody edited; URL, Enabled and headers are never touched.
 13. **SMS confirmation** of the order to the customer (through n8n).
 

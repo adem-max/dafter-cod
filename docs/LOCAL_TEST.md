@@ -116,14 +116,14 @@ In a second terminal (`distrobox enter erp`, `cd ~/frappe-bench`):
 
 ```bash
 bench --site test.localhost run-tests --app dz_cod                         # all 98 tests (~40 s)
-bench --site test.localhost run-tests --app dz_core                        # the base: 23 tests
+bench --site test.localhost run-tests --app dz_core                        # the base: 59 tests
 bench --site test.localhost run-tests --module dz_cod.tests.test_rules     # only the fast rule tests
 bench --site test.localhost run-tests --module dz_cod.tests.test_order_flow --test test_confirm_reserves_stock
                                                                            # one single test
 ```
 
 Expected end of output for dz_cod: `OK` after "Ran 21 tests" and after
-"Ran 77 tests"; for dz_core: "Ran 6 tests" and "Ran 17 tests".
+"Ran 77 tests"; for dz_core: "Ran 13 tests" and "Ran 46 tests".
 
 ## 7. Change the code and see the result
 

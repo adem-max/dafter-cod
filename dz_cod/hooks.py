@@ -19,7 +19,9 @@ required_apps = ["erpnext", "dz_core"]
 # Where to land after login. COD is docked on ERPNext's rail, so Frappe keeps
 # it off the apps screen, but this route is used when COD is the site's
 # default app (System Settings > default_app = dz_cod, set by new_client and
-# the demo loader): sellers then open straight on the COD home page.
+# the demo loader): sellers then open straight on the COD home page. Frappe 16
+# alone sends desk users to /desk; dz_core's get_website_user_home_page hook
+# sends them to the default app's route.
 add_to_apps_screen = [
 	{
 		"name": "dz_cod",
