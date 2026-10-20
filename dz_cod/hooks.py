@@ -75,3 +75,7 @@ dz_restore_check_last = ["Sales Order"]
 # Courier webhook events are kept 30 days (Log Settings), enough to spot an
 # event delivered twice: Yalidine retries a delivery for 40 hours at most
 default_log_clearing_doctypes = {"Courier Webhook Event": 30}
+
+# A fresh test site gets the test company, COD Settings and couriers before
+# the tests (dz_cod/tests/helpers.py)
+before_tests = "dz_cod.tests.helpers.before_tests"

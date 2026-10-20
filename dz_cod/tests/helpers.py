@@ -95,6 +95,15 @@ def setup_fixtures():
 	set_stock(STOCK_QTY)
 
 
+def before_tests():
+	"""hooks.py before_tests: the fixtures are kept on the test site (company,
+	COD Settings, couriers, stock), so a fresh site (CI) is like test.localhost.
+	dz_core's suite runs on the same site, and every sales order there goes
+	through dz_cod, which needs COD Settings."""
+	setup_fixtures()
+	frappe.db.commit()
+
+
 def main_warehouse():
 	return frappe.db.get_single_value("COD Settings", "main_warehouse")
 

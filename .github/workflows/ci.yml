@@ -1,0 +1,102 @@
+# Lint and tests on every push. Based on the workflow `bench new-app` writes
+# (Frappe 16, frappe/utils/boilerplate.py), with Frappe and ERPNext on version-16.
+# dz_cod runs on dz_core: dafter-core is taken at the branch of the same name
+# when it exists (work that spans both repos), else at main.
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (pre-commit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: pre-commit/action@v3.0.1
+
+  tests:
+    name: Tests (dz_cod, then dz_core on the same site)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      redis-cache:
+        image: redis:alpine
+        ports:
+          - 13000:6379
+      redis-queue:
+        image: redis:alpine
+        ports:
+          - 11000:6379
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          check-latest: true
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: MariaDB client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client
+
+      - name: Bench with Frappe, ERPNext 16 and dafter-core
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          CORE=main
+          if git ls-remote --exit-code --heads https://github.com/adem-max/dafter-core "$BRANCH" > /dev/null; then CORE="$BRANCH"; fi
+          echo "dafter-core at $CORE"
+          pip install frappe-bench
+          bench init --skip-redis-config-generation --skip-assets --frappe-branch version-16 --python "$(which python)" ~/frappe-bench
+          cd ~/frappe-bench
+          bench get-app --skip-assets --branch version-16 erpnext
+          bench get-app --skip-assets --branch "$CORE" https://github.com/adem-max/dafter-core
+          bench get-app --skip-assets dz_cod "$GITHUB_WORKSPACE"
+          bench setup requirements --dev
+          bench build
+
+      - name: Test site (ERPNext + dz_core + dz_cod)
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench new-site --db-root-password root --admin-password admin test_site
+          bench --site test_site install-app erpnext dz_cod
+          bench --site test_site set-config allow_tests true
+
+      - name: dz_cod tests
+        working-directory: /home/runner/frappe-bench
+        run: bench --site test_site run-tests --app dz_cod
+
+      - name: dz_core tests on the same site (dz_cod must not break the base)
+        working-directory: /home/runner/frappe-bench
+        run: bench --site test_site run-tests --app dz_core
