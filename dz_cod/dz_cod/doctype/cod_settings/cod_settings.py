@@ -8,6 +8,14 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+ACCOUNT_FIELDS = (
+	"shipping_income_account",
+	"settlement_bank_account",
+	"courier_fee_account",
+	"settlement_difference_account",
+	"unmatched_settlement_account",
+)
+
 
 class CODSettings(Document):
 	def validate(self):
@@ -21,6 +29,14 @@ class CODSettings(Document):
 
 		if self.main_warehouse == self.returns_warehouse:
 			frappe.throw(_("L'entrepôt des retours doit être différent de l'entrepôt principal."))
+
+		# The accounts the invoices and Versements are booked to (cod/invoicing.py)
+		for fieldname in ACCOUNT_FIELDS:
+			account = self.get(fieldname)
+			if account and frappe.db.get_value("Account", account, "company") != self.company:
+				frappe.throw(
+					_("Le compte {0} n'appartient pas à la société {1}.").format(account, self.company)
+				)
 
 
 def get_settings():

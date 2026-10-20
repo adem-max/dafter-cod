@@ -3,14 +3,28 @@ frappe.ui.form.on("Courier Settlement", {
 	setup(frm) {
 		// Only couriers (suppliers marked "Is Transporter") in the courier field
 		frm.set_query("courier", () => ({ filters: { is_transporter: 1 } }));
+		frm.set_query("bank_account", () => ({
+			filters: {
+				company: frm.doc.company,
+				is_group: 0,
+				account_type: ["in", ["Bank", "Cash"]],
+			},
+		}));
 	},
 
 	onload(frm) {
-		// New Versement: take the company from COD Settings
-		if (frm.is_new() && !frm.doc.company) {
-			frappe.db
-				.get_single_value("COD Settings", "company")
-				.then((company) => company && frm.set_value("company", company));
+		// New Versement: company and bank account from COD Settings
+		if (frm.is_new()) {
+			for (const [field, setting] of [
+				["company", "company"],
+				["bank_account", "settlement_bank_account"],
+			]) {
+				if (!frm.doc[field]) {
+					frappe.db
+						.get_single_value("COD Settings", setting)
+						.then((value) => value && frm.set_value(field, value));
+				}
+			}
 		}
 	},
 

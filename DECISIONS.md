@@ -33,7 +33,7 @@ Newest decisions are added at the bottom of each section.
 
 - **DZ Wilaya** (label "Wilaya", a dz_core doctype since October 2026; its rate fields are this app's custom fields): ERPNext has no list of Algerian provinces with rates. `Territory` was considered but it is ERPNext's sales-hierarchy tree; mixing addresses and courier rates into it would confuse sales targets and pricing rules.
 - **COD Settings** (label "Paramètres COD", single record): rule 4 — per-client differences must live in settings, not code.
-- **Courier Settlement + Courier Settlement Item** (label "Versement"): nothing standard matches "a third party's statement matched line by line against our orders". Payment Entry is per party (one customer) and full accounting is out of scope; Bank Reconciliation works on bank lines, not parcels.
+- **Courier Settlement + Courier Settlement Item** (label "Versement"): nothing standard matches "a third party's statement matched line by line against our orders". Payment Entry is per party (one customer); Bank Reconciliation works on bank lines, not parcels. The money itself is booked by one Journal Entry per Versement (COD accounting, below).
 - **DZ Commune and DZ Stop Desk**: the courier's communes and offices, imported from Yalidine. No standard doctype lists Algerian communes or courier offices; Address and Territory were rejected for the same reasons as for DZ Wilaya. The record name is Yalidine's id (commune id, center id), so a new import updates instead of duplicating, and the order stores the office id Yalidine needs.
 - **Courier Webhook Event**: one line per event pushed by Yalidine, named by its event id, so a duplicate delivery is refused by the database itself. Frappe's Webhook Request Log only records webhooks we send, and Integration Request has no unique key on the event id. Cleared after 30 days (Log Settings).
 
@@ -47,7 +47,7 @@ Newest decisions are added at the bottom of each section.
 - **Expédier creates and submits the Delivery Note immediately**: stock leaves the main warehouse when the parcel leaves. Courier and tracking number are copied to the standard "Transporter" and "Transport Receipt No" fields.
 - **Retournée creates a return Delivery Note into the "Retours" warehouse** and then closes the Sales Order, so ERPNext never reserves that stock again.
 - **Inspection uses standard Stock Entries**: Material Transfer (Retours → main) for good pieces, Material Issue for damaged ones, linked back to the order with a custom field.
-- **No Sales Invoice and no Payment Entry**: full accounting is out of scope. Consequence: sales revenue is not in the general ledger and delivered orders show ERPNext status "To Bill". Listed first in LATER.md.
+- **Invoiced at Livrée, booked at the Versement** (20 October 2026; until then no invoice was made, revenue stayed out of the general ledger and dz_core's sales reports missed online sales): see "COD accounting" below.
 - **Delivery details are stored on the order** (phone, wilaya, commune, address), copied from the customer when empty: the courier needs a snapshot per order, and COD order entry must be fast. ERPNext's Address and Contact doctypes are not used for COD.
 - **Unanswered calls are counted by the Workflow itself** (the "update field" option of the "Injoignable" state), with no code. The "Pas de réponse" button disappears at the maximum set in COD Settings (default 3).
 - **Standard roles only**: Sales User confirms, Stock User prepares/ships/delivers/returns, Accounts User settles, Sales Manager may edit cancelled orders. "Allow self approval" is on because the shops are tiny teams.
@@ -74,6 +74,13 @@ Newest decisions are added at the bottom of each section.
 - **ERPNext manufacturing is left installed and untouched by this app**: nothing in dz_cod depends on it or disables it. Manufacturing (BOMs, work orders, sector templates) is dz_core's job since October 2026.
 - **Courier settings live on the Supplier** (custom fields shown when "Is Transporter" is ticked): a courier is a supplier in ERPNext, no new doctype needed.
 - **Hourly status sync is off by default** (setting) and uses the normal workflow actions, so webhooks and stock movements behave as if a person clicked.
+
+## COD accounting (20 October 2026)
+
+- **The invoice is made when the order becomes Livrée** (`cod/invoicing.py`), from its delivery note with ERPNext's `make_sales_invoice`, dated the delivery and due that day, payment mode "Contre-remboursement" (dz_core's field). It is the legal invoice (Facture DZ), and dz_core's "Ventes du jour", "Ventes par mois" and "Factures en retard" count it. At Livrée, not at Expédiée: a parcel sent back never had an invoice, so a return needs no credit note.
+- **One Journal Entry per Versement**, on submit: the bank (amount received) and the courier's fees on the debit side; each order's invoice credited with what the courier collected (capped at what is due). An accepted short payment is written off to "Écarts sur versements", which also takes what was paid too much; a difference not accepted leaves the rest due on the invoice, as the order stays Livrée. Money for a parcel with no invoiced order (Inconnue, Invalide, Déjà réglée, delivered before 20 October 2026) and a gap between the transfer and the statement go to "Versements à identifier". One entry, not one Payment Entry per order: it matches the courier's single transfer. Cancelling the Versement cancels it.
+- **The accounts are settings** (COD Settings, section Comptabilité), made by `prepare` and on migrate: the bank is the company's default one. Switch "Facturer à la livraison" off and none of this happens.
+- **To check with the accountant**: the names and places of the three accounts in the chart; whether the delivery fee carries TVA (it is a charge line after the TVA lines today); invoices for individual buyers (one is made for every delivered order); stamp duty on cash collected by couriers.
 
 ## Settlement (Versement)
 

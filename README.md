@@ -33,6 +33,7 @@ Nouvelle ──Confirmer──> Confirmée ──Préparer──> Préparée ─
 - **Confirmée**: phone, wilaya and address checked; stock reserved (ERPNext reserved qty); optional block if stock is short.
 - **Injoignable**: each "Pas de réponse" adds 1 to the call counter; the button disappears at the maximum (default 3).
 - **Expédiée**: courier + tracking number (typed, or given by the courier connector); a Delivery Note takes the stock out.
+- **Livrée**: the order's invoice (Facture DZ, payment mode Contre-remboursement) is made from its Delivery Note; dz_core's sales reports count it.
 - **Retournée**: a return Delivery Note brings the parcel into the **Retours** warehouse; then **Inspecter le retour** puts good pieces back in stock and writes damaged ones off.
 - **Réglée**: set by a courier settlement (Versement).
 - **Direct sales** (wholesale, shop: *Canal* = Vente directe, from the customer or COD Settings) skip all of this: *Valider* → **Validée**, then ERPNext's usual delivery note and invoice. A producer who also sells online gets both on one site.
@@ -43,7 +44,8 @@ to each order automatically (editable "manual rate" for free delivery).
 
 **Versement (courier settlement)** — record a courier's statement, match each
 parcel to its order (by tracking number), see what is **paid**, **disputed**
-and **missing**; submitting marks paid orders "Réglée".
+and **missing**; submitting marks paid orders "Réglée" and books the money in one
+Journal Entry (bank, courier fees, each invoice paid; accounts in COD Settings).
 
 **Courier connectors** — one interface (create shipment, get status, get
 tracking); **Manuel** (default), **Mock** (offline, for tests and demos),
@@ -142,6 +144,6 @@ dz_cod/
 2. Standard doctypes first (Sales Order, Delivery Note, Stock Entry, Customer, Supplier, Item); new doctypes only where nothing fits (justified in DECISIONS.md).
 3. Per-client differences live in settings and data, never in code branches.
 4. Short, plainly commented code, English in code, French for users (English and Arabic available per user: User → Language).
-5. Currency DZD, no VAT logic.
+5. Currency DZD. TVA comes from dz_core's tax regime (régime réel); this app adds none of its own.
 
 License: MIT.

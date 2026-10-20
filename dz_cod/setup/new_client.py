@@ -26,6 +26,11 @@ from frappe.utils.nestedset import get_root_of
 RETURNS_WAREHOUSE = "Retours"
 SHIPPING_ACCOUNT = "Frais de livraison facturés"
 COURIER_GROUP = "Transporteurs"
+# Where the Versements are booked (cod/invoicing.py). Names and places in the
+# chart are to be checked with the accountant: each can be changed in COD Settings
+COURIER_FEES_ACCOUNT = "Frais transporteurs"
+SETTLEMENT_DIFFERENCE_ACCOUNT = "Écarts sur versements"
+UNMATCHED_ACCOUNT = "Versements à identifier"
 
 
 def prepare(company, abbr, courier=None, features=None, sector="Confection", tax_regime="IFU"):
@@ -55,6 +60,11 @@ def prepare(company, abbr, courier=None, features=None, sector="Confection", tax
 			"default_courier": courier or settings.default_courier,
 		}
 	)
+	# The Versements' accounts: keep the ones chosen for this company
+	for field, account in settlement_accounts(company).items():
+		chosen = settings.get(field)
+		if not chosen or frappe.db.get_value("Account", chosen, "company") != company:
+			settings.set(field, account)
 	settings.save()
 	make_cod_the_home_page()
 	frappe.db.commit()
@@ -91,23 +101,47 @@ def create_returns_warehouse(company, abbr):
 	return full_name
 
 
-def create_shipping_account(company, abbr):
-	name = f"{SHIPPING_ACCOUNT} - {abbr}"
+def create_account(company, abbr, account_name, root_type, account_type=None):
+	"""A ledger account under the company's root of that type, if missing."""
+	name = f"{account_name} - {abbr}"
 	if not frappe.db.exists("Account", name):
-		income_root = frappe.db.get_value(
+		root = frappe.db.get_value(
 			"Account",
-			{"company": company, "root_type": "Income", "is_group": 1, "parent_account": ["is", "not set"]},
+			{"company": company, "root_type": root_type, "is_group": 1, "parent_account": ["is", "not set"]},
 		)
 		frappe.get_doc(
 			{
 				"doctype": "Account",
-				"account_name": SHIPPING_ACCOUNT,
+				"account_name": account_name,
 				"company": company,
-				"parent_account": income_root,
-				"account_type": "Income Account",
+				"parent_account": root,
+				"account_type": account_type,
 			}
-		).insert()
+		).insert(ignore_permissions=True)
 	return name
+
+
+def create_shipping_account(company, abbr):
+	return create_account(company, abbr, SHIPPING_ACCOUNT, "Income", "Income Account")
+
+
+def settlement_accounts(company):
+	"""{COD Settings field: account} to book the Versements, the accounts made
+	if missing. The bank is the company's default one, else its first."""
+	abbr = frappe.get_cached_value("Company", company, "abbr")
+	bank = frappe.get_cached_value("Company", company, "default_bank_account") or frappe.db.get_value(
+		"Account", {"company": company, "account_type": "Bank", "is_group": 0}
+	)
+	return {
+		"settlement_bank_account": bank,
+		"courier_fee_account": create_account(
+			company, abbr, COURIER_FEES_ACCOUNT, "Expense", "Expense Account"
+		),
+		"settlement_difference_account": create_account(
+			company, abbr, SETTLEMENT_DIFFERENCE_ACCOUNT, "Expense", "Expense Account"
+		),
+		"unmatched_settlement_account": create_account(company, abbr, UNMATCHED_ACCOUNT, "Liability"),
+	}
 
 
 def create_courier(courier):

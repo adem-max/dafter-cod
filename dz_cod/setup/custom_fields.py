@@ -200,8 +200,10 @@ SALES_ORDER_FIELDS = [
 	after_submit_readonly(
 		"dz_delivery_note", "Bon de livraison", "Link", "dz_courier_fee", options="Delivery Note"
 	),
+	# Made when the order becomes Livrée (cod/invoicing.py)
+	after_submit_readonly("dz_sales_invoice", "Facture", "Link", "dz_delivery_note", options="Sales Invoice"),
 	after_submit_readonly(
-		"dz_return_note", "Bon de retour", "Link", "dz_delivery_note", options="Delivery Note"
+		"dz_return_note", "Bon de retour", "Link", "dz_sales_invoice", options="Delivery Note"
 	),
 	after_submit_readonly("dz_return_inspected", "Retour inspecté", "Check", "dz_return_note"),
 	after_submit_readonly(

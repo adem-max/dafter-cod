@@ -26,8 +26,8 @@ from dz_core.phone import is_valid_phone, normalize_phone
 from frappe import _
 from frappe.utils import flt, today
 
+from dz_cod.cod import invoicing, stock
 from dz_cod.cod import states as S
-from dz_cod.cod import stock
 from dz_cod.cod.channel import default_channel, is_cod
 from dz_cod.cod.phone_checks import warn_refused_parcels
 from dz_cod.cod.shipping import apply_shipping_charge, get_rates, remove_shipping_row
@@ -141,7 +141,7 @@ def before_update_after_submit(order, method=None):
 
 
 def on_update_after_submit(order, method=None):
-	"""Stock movements, AFTER the order is saved in its new state."""
+	"""Stock movements and the invoice, AFTER the order is saved in its new state."""
 	if not is_cod(order) or not order.has_value_changed("workflow_state"):
 		return
 
@@ -149,6 +149,8 @@ def on_update_after_submit(order, method=None):
 	if state == S.SHIPPED:
 		delivery_note = stock.create_delivery_note(order, event_date(order))
 		order.db_set("dz_delivery_note", delivery_note)
+	elif state == S.DELIVERED:
+		invoicing.invoice_delivered_order(order, event_date(order))
 	elif state == S.RETURNED:
 		return_note = stock.create_return(order, event_date(order))
 		order.db_set("dz_return_note", return_note)

@@ -328,3 +328,22 @@ Canal par défaut,Default channel
 "Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.","For a customer without a usual channel. Direct sale: ERPNext's usual delivery note and invoice, without the COD checks."
 Validée,Validated
 Valider,Validate
+Facture,Invoice
+Comptabilité : factures et versements,Accounting: invoices and courier payments
+Facturer à la livraison,Invoice on delivery
+"Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.","When an order becomes Delivered, its invoice (Facture DZ) is made from the delivery note and submitted. Each courier payment is booked as a journal entry."
+Compte des versements,Courier payments account
+Où arrivent les virements des transporteurs.,Where the couriers' transfers arrive.
+Compte des frais transporteurs,Courier fees account
+Ce que les transporteurs retiennent sur chaque colis.,What couriers keep on each parcel.
+Compte des écarts sur versements,Payment differences account
+Écarts acceptés et montants versés en trop.,Accepted differences and amounts paid in excess.
+Compte des versements à identifier,Unmatched payments account
+"Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.","Amounts paid for unknown, invalid or already settled parcels: to check with the courier."
+Compte bancaire,Bank account
+Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).,Where the courier paid the money (by default: the one in COD Settings).
+Écriture comptable,Journal entry
+"Faite à la validation : la banque, les frais du transporteur et le règlement de chaque facture.","Made on submit: the bank, the courier's fees and the payment of each invoice."
+Versement {0} de {1},Courier payment {0} from {1}
+Renseignez dans les Paramètres COD : {0}.,Fill in COD Settings: {0}.
+Le compte {0} n'appartient pas à la société {1}.,Account {0} does not belong to company {1}.

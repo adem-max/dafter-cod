@@ -38,7 +38,7 @@ from dz_cod.cod import states as S
 from dz_cod.cod.stock import get_returned_items, inspect_return
 from dz_cod.demo import data as D
 from dz_cod.features import ALL, configured, set_features
-from dz_cod.setup.new_client import make_cod_the_home_page
+from dz_cod.setup.new_client import make_cod_the_home_page, settlement_accounts
 
 DAYS_OF_HISTORY = 60
 NB_CUSTOMERS = 80
@@ -204,6 +204,10 @@ def setup_settings():
 			"max_call_attempts": settings.max_call_attempts or 3,
 		}
 	)
+	# Where the Versements are booked (cod/invoicing.py)
+	for field, account in settlement_accounts(D.COMPANY).items():
+		if not settings.get(field):
+			settings.set(field, account)
 	settings.save()
 
 	# Default warehouse for stock movements. ERPNext 16.51+ keeps it on the

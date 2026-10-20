@@ -32,6 +32,7 @@ def setup_all():
 	setup_selling_settings()
 	setup_home_block()
 	setup_new_settings_defaults()
+	setup_settlement_accounts()
 	# Last: migrate re-imports our reports and print formats (enabled); switch
 	# off again what this site doesn't have (dz_cod/features.py)
 	apply_features()
@@ -42,13 +43,27 @@ def setup_new_settings_defaults():
 	"""A field added to COD Settings after a site was created gets no default
 	(Frappe only applies defaults to new documents). Set it once, only if it
 	was never saved, so a value chosen later (even 0) is kept."""
-	defaults = {"refused_warning_threshold": 1, "default_channel": "COD"}
+	defaults = {"refused_warning_threshold": 1, "default_channel": "COD", "invoice_on_delivery": 1}
 	for fieldname, value in defaults.items():
 		saved = frappe.db.sql(
 			"SELECT 1 FROM `tabSingles` WHERE doctype = 'COD Settings' AND field = %s", fieldname
 		)
 		if not saved:
 			frappe.db.set_single_value("COD Settings", fieldname, value)
+
+
+def setup_settlement_accounts():
+	"""The accounts the Versements are booked to (cod/invoicing.py), made and
+	set once on a site prepared before they existed. A choice made in COD
+	Settings is kept."""
+	from dz_cod.setup.new_client import settlement_accounts
+
+	company = frappe.db.get_single_value("COD Settings", "company")
+	if not company:
+		return
+	for field, account in settlement_accounts(company).items():
+		if account and not frappe.db.get_single_value("COD Settings", field):
+			frappe.db.set_single_value("COD Settings", field, account)
 
 
 def setup_selling_settings():

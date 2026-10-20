@@ -1,6 +1,24 @@
 // Paramètres COD form.
 
 frappe.ui.form.on("COD Settings", {
+	setup(frm) {
+		// Accounts of the COD company only, never a group
+		const accounts = (filters) => () => ({
+			filters: { company: frm.doc.company, is_group: 0, ...filters },
+		});
+		frm.set_query(
+			"settlement_bank_account",
+			accounts({ account_type: ["in", ["Bank", "Cash"]] })
+		);
+		for (const field of [
+			"courier_fee_account",
+			"settlement_difference_account",
+			"unmatched_settlement_account",
+		]) {
+			frm.set_query(field, accounts({}));
+		}
+	},
+
 	refresh(frm) {
 		// Settings of optional features this site doesn't have stay hidden
 		// (dz_core/features.py, frappe.boot.dz_features)

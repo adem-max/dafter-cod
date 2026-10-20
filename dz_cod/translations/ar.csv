@@ -342,3 +342,22 @@ Canal par défaut,القناة الافتراضية
 "Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",لعميل ليست له قناة معتادة. بيع مباشر: إشعار التسليم والفاتورة المعتادان في ERPNext، دون فحوصات COD.
 Validée,معتمدة
 Valider,اعتماد
+Facture,الفاتورة
+Comptabilité : factures et versements,المحاسبة: الفواتير والتحويلات
+Facturer à la livraison,الفوترة عند التسليم
+"Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.",عندما تصبح الطلبية مُسلَّمة، تُنشأ فاتورتها (Facture DZ) من إشعار التسليم وتُعتمد. ويُسجَّل كل تحويل من شركة التوصيل في قيد محاسبي.
+Compte des versements,حساب التحويلات
+Où arrivent les virements des transporteurs.,الحساب الذي تصل إليه تحويلات شركات التوصيل.
+Compte des frais transporteurs,حساب رسوم شركات التوصيل
+Ce que les transporteurs retiennent sur chaque colis.,ما تقتطعه شركات التوصيل عن كل طرد.
+Compte des écarts sur versements,حساب فروقات التحويلات
+Écarts acceptés et montants versés en trop.,الفروقات المقبولة والمبالغ المدفوعة زيادةً.
+Compte des versements à identifier,حساب التحويلات غير المحددة
+"Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.",مبالغ دُفعت عن طرود مجهولة أو غير صالحة أو مسدَّدة سابقاً: يجب مراجعتها مع شركة التوصيل.
+Compte bancaire,الحساب البنكي
+Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).,الحساب الذي حوّلت إليه شركة التوصيل المال (افتراضياً: الحساب المحدد في إعدادات COD).
+Écriture comptable,القيد المحاسبي
+"Faite à la validation : la banque, les frais du transporteur et le règlement de chaque facture.",يُنشأ عند الاعتماد: البنك ورسوم شركة التوصيل وتسديد كل فاتورة.
+Versement {0} de {1},تحويل {0} من {1}
+Renseignez dans les Paramètres COD : {0}.,يرجى ملء إعدادات COD: {0}.
+Le compte {0} n'appartient pas à la société {1}.,الحساب {0} لا ينتمي إلى الشركة {1}.

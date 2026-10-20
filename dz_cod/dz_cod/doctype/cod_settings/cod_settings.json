@@ -16,6 +16,13 @@
   "refused_warning_threshold",
   "column_break_orders",
   "settlement_tolerance",
+  "accounting_section",
+  "invoice_on_delivery",
+  "settlement_bank_account",
+  "courier_fee_account",
+  "column_break_accounting",
+  "settlement_difference_account",
+  "unmatched_settlement_account",
   "courier_section",
   "default_courier",
   "column_break_courier",
@@ -107,6 +114,50 @@
    "options": "DZD"
   },
   {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Comptabilité : factures et versements"
+  },
+  {
+   "default": "1",
+   "description": "Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.",
+   "fieldname": "invoice_on_delivery",
+   "fieldtype": "Check",
+   "label": "Facturer à la livraison"
+  },
+  {
+   "description": "Où arrivent les virements des transporteurs.",
+   "fieldname": "settlement_bank_account",
+   "fieldtype": "Link",
+   "label": "Compte des versements",
+   "options": "Account"
+  },
+  {
+   "description": "Ce que les transporteurs retiennent sur chaque colis.",
+   "fieldname": "courier_fee_account",
+   "fieldtype": "Link",
+   "label": "Compte des frais transporteurs",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_accounting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Écarts acceptés et montants versés en trop.",
+   "fieldname": "settlement_difference_account",
+   "fieldtype": "Link",
+   "label": "Compte des écarts sur versements",
+   "options": "Account"
+  },
+  {
+   "description": "Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.",
+   "fieldname": "unmatched_settlement_account",
+   "fieldtype": "Link",
+   "label": "Compte des versements à identifier",
+   "options": "Account"
+  },
+  {
    "fieldname": "courier_section",
    "fieldtype": "Section Break",
    "label": "Transporteur"
@@ -132,7 +183,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-20 20:00:00.000000",
+ "modified": "2026-10-20 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "COD Settings",
