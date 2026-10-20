@@ -11,6 +11,7 @@
   "shipping_income_account",
   "block_confirmation_without_stock",
   "orders_section",
+  "default_channel",
   "max_call_attempts",
   "refused_warning_threshold",
   "column_break_orders",
@@ -69,6 +70,14 @@
    "label": "Commandes et versements"
   },
   {
+   "default": "COD",
+   "description": "Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",
+   "fieldname": "default_channel",
+   "fieldtype": "Select",
+   "label": "Canal par défaut",
+   "options": "COD\nVente directe"
+  },
+  {
    "default": "3",
    "description": "Après ce nombre d'appels sans réponse, le bouton « Pas de réponse » disparaît : il faut confirmer ou annuler.",
    "fieldname": "max_call_attempts",
@@ -123,7 +132,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-16 10:00:00.000000",
+ "modified": "2026-10-20 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "COD Settings",

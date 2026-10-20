@@ -68,7 +68,7 @@ class TestWorkflowDefinition(UnitTestCase):
 
 	def test_every_transition_uses_known_states(self):
 		names = {state for state, *_ in STATES}
-		self.assertEqual(names, set(S.ALL_STATES))
+		self.assertEqual(names, set(S.ALL_STATES + S.DIRECT_STATES))
 		for from_state, _action, to_state, _role, _condition in TRANSITIONS:
 			self.assertIn(from_state, names)
 			self.assertIn(to_state, names)

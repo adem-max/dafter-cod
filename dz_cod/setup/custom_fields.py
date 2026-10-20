@@ -12,8 +12,14 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
+from dz_cod.cod.channel import COD, DIRECT
+
 DELIVERY_TYPES = "Domicile\nStop desk"
 ORDER_SOURCES = "\nInstagram\nFacebook\nSite web\nWhatsApp\nTikTok\nTéléphone\nAutre"
+# Empty first: a new order takes its customer's channel, else COD Settings' default (cod/channel.py)
+CHANNELS = f"\n{COD}\n{DIRECT}"
+# The COD sections of an order are hidden on a direct sale
+ONLY_COD = f"eval:doc.dz_channel != '{DIRECT}'"
 
 
 def after_submit_readonly(fieldname, label, fieldtype, insert_after, **extra):
@@ -32,12 +38,22 @@ def after_submit_readonly(fieldname, label, fieldtype, insert_after, **extra):
 
 
 SALES_ORDER_FIELDS = [
+	{
+		"fieldname": "dz_channel",
+		"label": "Canal",
+		"fieldtype": "Select",
+		"options": CHANNELS,
+		"insert_after": "order_type",
+		"in_standard_filter": 1,
+		"description": "Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",
+	},
 	# --- Section 1: who and where to deliver (filled when taking the order) ---
 	{
 		"fieldname": "dz_delivery_section",
 		"label": "Livraison COD",
 		"fieldtype": "Section Break",
 		"insert_after": "delivery_date",
+		"depends_on": ONLY_COD,
 	},
 	{
 		"fieldname": "dz_phone",
@@ -149,6 +165,7 @@ SALES_ORDER_FIELDS = [
 		"fieldtype": "Section Break",
 		"insert_after": "dz_cod_amount",
 		"collapsible": 1,
+		"depends_on": ONLY_COD,
 	},
 	after_submit_readonly("dz_call_attempts", "Appels sans réponse", "Int", "dz_tracking_section"),
 	{
@@ -221,6 +238,14 @@ CUSTOMER_FIELDS = [
 	{"fieldname": "dz_column", "fieldtype": "Column Break", "insert_after": "dz_wilaya"},
 	{"fieldname": "dz_commune", "label": "Commune", "fieldtype": "Data", "insert_after": "dz_column"},
 	{"fieldname": "dz_address", "label": "Adresse", "fieldtype": "Small Text", "insert_after": "dz_commune"},
+	{
+		"fieldname": "dz_channel",
+		"label": "Canal habituel",
+		"fieldtype": "Select",
+		"options": CHANNELS,
+		"insert_after": "dz_address",
+		"description": "Vide : le canal par défaut des Paramètres COD.",
+	},
 ]
 
 # Courier settings live on the Supplier (a courier is a supplier with

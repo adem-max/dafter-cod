@@ -35,6 +35,7 @@ Nouvelle ──Confirmer──> Confirmée ──Préparer──> Préparée ─
 - **Expédiée**: courier + tracking number (typed, or given by the courier connector); a Delivery Note takes the stock out.
 - **Retournée**: a return Delivery Note brings the parcel into the **Retours** warehouse; then **Inspecter le retour** puts good pieces back in stock and writes damaged ones off.
 - **Réglée**: set by a courier settlement (Versement).
+- **Direct sales** (wholesale, shop: *Canal* = Vente directe, from the customer or COD Settings) skip all of this: *Valider* → **Validée**, then ERPNext's usual delivery note and invoice. A producer who also sells online gets both on one site.
 
 **Shipping fees** — the list of the **69 wilayas** (2026 division, from
 dz_core) gets a home-delivery and a stop-desk rate plus the courier's cost; the fee is added

@@ -7,11 +7,17 @@ Think of the workflow as a routing in manufacturing:
 
 This file only DESCRIBES the workflow. What happens on each move (create the
 delivery note, return stock, ...) is coded in dz_cod/cod/order.py.
+
+A Frappe workflow covers every Sales Order of the site, so direct sales
+(cod/channel.py) have their own short path: Nouvelle ──Valider──> Validée,
+then ERPNext's usual delivery note and invoice. The COD buttons only show on
+COD orders and "Valider" only on direct sales (transition conditions).
 """
 
 import frappe
 
 from dz_cod.cod import states as S
+from dz_cod.cod.channel import DIRECT
 
 WORKFLOW_NAME = "Commande COD"
 
@@ -26,6 +32,9 @@ MANAGER = "Sales Manager"
 STATES = [
 	(S.NEW, 0, "Primary", SALES),
 	(S.UNREACHABLE, 0, "Warning", SALES),
+	# The first submitted state: an order submitted outside the workflow (by
+	# code, like a producer's import) lands here, not in a COD state
+	(S.VALIDATED, 1, "Info", SALES),
 	(S.CONFIRMED, 1, "Info", STOCK),
 	(S.PREPARED, 1, "Info", STOCK),
 	(S.SHIPPED, 1, "Primary", STOCK),
@@ -43,14 +52,21 @@ CALLS_LEFT = (
 	"int(frappe.db.get_value('COD Settings', 'COD Settings', 'max_call_attempts') or 3)"
 )
 
+# Which channel a button is for (cod/channel.py)
+COD_SALE = f'doc.dz_channel != "{DIRECT}"'
+DIRECT_SALE = f'doc.dz_channel == "{DIRECT}"'
+
 # (from state, action button, to state, role, condition)
 TRANSITIONS = [
-	(S.NEW, S.ACTION_CONFIRM, S.CONFIRMED, SALES, None),
-	(S.NEW, S.ACTION_NO_ANSWER, S.UNREACHABLE, SALES, CALLS_LEFT),
+	(S.NEW, S.ACTION_CONFIRM, S.CONFIRMED, SALES, COD_SALE),
+	(S.NEW, S.ACTION_NO_ANSWER, S.UNREACHABLE, SALES, f"{COD_SALE} and {CALLS_LEFT}"),
+	(S.NEW, S.ACTION_VALIDATE, S.VALIDATED, SALES, DIRECT_SALE),
 	(S.NEW, S.ACTION_CANCEL, S.CANCELLED, SALES, None),
-	(S.UNREACHABLE, S.ACTION_CONFIRM, S.CONFIRMED, SALES, None),
-	(S.UNREACHABLE, S.ACTION_NO_ANSWER, S.UNREACHABLE, SALES, CALLS_LEFT),
+	(S.UNREACHABLE, S.ACTION_CONFIRM, S.CONFIRMED, SALES, COD_SALE),
+	(S.UNREACHABLE, S.ACTION_NO_ANSWER, S.UNREACHABLE, SALES, f"{COD_SALE} and {CALLS_LEFT}"),
+	(S.UNREACHABLE, S.ACTION_VALIDATE, S.VALIDATED, SALES, DIRECT_SALE),
 	(S.UNREACHABLE, S.ACTION_CANCEL, S.CANCELLED, SALES, None),
+	(S.VALIDATED, S.ACTION_CANCEL, S.CANCELLED_AFTER_CONFIRMATION, SALES, None),
 	(S.CONFIRMED, S.ACTION_PREPARE, S.PREPARED, STOCK, None),
 	(S.CONFIRMED, S.ACTION_CANCEL, S.CANCELLED_AFTER_CONFIRMATION, SALES, None),
 	(S.PREPARED, S.ACTION_SHIP, S.SHIPPED, STOCK, None),

@@ -2,6 +2,10 @@
 // 1. Before "Expédier": ask for the courier and tracking number.
 // 2. On a returned order: a button to record the inspection of the parcel.
 // 3. Commune and stop desk pick lists (imported from the courier, e.g. Yalidine).
+// 4. The channel (COD or direct sale, dz_cod/cod/channel.py): the customer's
+//    usual one, else the default of COD Settings.
+
+const DIRECT_SALE = "Vente directe";
 
 // Offices of the order's wilaya (and of its parent wilaya for the 2026 wilayas)
 const stopdesk_query = (frm) => ({
@@ -21,6 +25,25 @@ frappe.ui.form.on("Sales Order", {
 		}));
 	},
 
+	onload(frm) {
+		if (frm.is_new() && !frm.doc.dz_channel) {
+			frappe.db
+				.get_single_value("COD Settings", "default_channel")
+				.then(
+					(channel) =>
+						channel && !frm.doc.dz_channel && frm.set_value("dz_channel", channel)
+				);
+		}
+	},
+
+	customer(frm) {
+		if (frm.doc.docstatus !== 0 || !frm.doc.customer) return;
+		frappe.db.get_value("Customer", frm.doc.customer, "dz_channel").then((r) => {
+			const channel = r.message && r.message.dz_channel;
+			if (channel) frm.set_value("dz_channel", channel);
+		});
+	},
+
 	refresh(frm) {
 		if (frm.doc.workflow_state === "Retournée" && !frm.doc.dz_return_inspected) {
 			frm.add_custom_button(__("Inspecter le retour"), () => inspect_return(frm));
@@ -34,7 +57,11 @@ frappe.ui.form.on("Sales Order", {
 		}
 		// Our own 100 x 150 mm label (print format "Bordereau COD"), for couriers
 		// whose API gives no label (Manuel, ZR Express...)
-		if (frm.doc.docstatus === 1 && has("labels_reports")) {
+		if (
+			frm.doc.docstatus === 1 &&
+			frm.doc.dz_channel !== DIRECT_SALE &&
+			has("labels_reports")
+		) {
 			frm.add_custom_button(__("Bordereau"), () => {
 				const params = new URLSearchParams({
 					doctype: frm.doc.doctype,

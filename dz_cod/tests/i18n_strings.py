@@ -110,7 +110,7 @@ def collect(lang="en"):
 			from_field(found, field, os.path.relpath(path, APP))
 
 	# Workflow: state names and button names
-	for state in states.ALL_STATES:
+	for state in states.ALL_STATES + states.DIRECT_STATES:
 		add(found, state, "cod/states.py")
 	for name in dir(states):
 		if name.startswith("ACTION_"):

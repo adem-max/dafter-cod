@@ -48,6 +48,16 @@ def apply_shipping_charge(order):
 	set_shipping_row(order, flt(order.dz_shipping_charge))
 
 
+def remove_shipping_row(order):
+	"""A direct sale has no COD delivery fee: drop the line this app added while
+	the draft was a COD order (a charge typed by hand has its own wording)."""
+	account = frappe.db.get_single_value("COD Settings", "shipping_income_account")
+	for tax in list(order.get("taxes")):
+		if tax.account_head == account and tax.description == SHIPPING_DESCRIPTION:
+			order.remove(tax)
+	order.dz_shipping_charge = 0
+
+
 def set_shipping_row(order, amount):
 	"""Create, update or remove our line in the "Taxes and Charges" table."""
 	account = get_settings().shipping_income_account

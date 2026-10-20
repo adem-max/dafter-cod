@@ -53,6 +53,7 @@ Newest decisions are added at the bottom of each section.
 - **Standard roles only**: Sales User confirms, Stock User prepares/ships/delivers/returns, Accounts User settles, Sales Manager may edit cancelled orders. "Allow self approval" is on because the shops are tiny teams.
 - **The "Expédier" button opens a small dialog** (courier + tracking number) before the workflow action, because the tracking number must be saved before the move.
 - **Event dates can be forced through `order.flags.dz_event_date`**: only the demo loader uses it, to replay 60 days of history with correct past dates.
+- **Two channels on one site: COD and direct sale** (20 October 2026): a Frappe Workflow covers every Sales Order of a site, so a producer who also sells online had every wholesale order go through the COD checks, delivery fee and states. Each order now has a channel (*Canal*: COD or Vente directe), taken from the customer's usual channel, else COD Settings' default (COD). A direct sale skips this app's hooks and has its own short path in the same workflow, Nouvelle → *Valider* → **Validée**, then ERPNext's own delivery note and invoice; the COD buttons only show on COD orders (transition conditions). Validée is the first submitted state, so an order submitted by code lands there, not in Confirmée. Orders made before got COD (patch). The COD counters, charts and *Commandes par jour* count COD orders only.
 
 ## Courier connectors
 

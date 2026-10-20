@@ -319,3 +319,12 @@ Bureau,Office
 N° de commande (pas encore de n° de suivi),Order number (no tracking number yet)
 Fonction non incluse dans votre offre,Feature not included in your plan
 Le connecteur {0} n'est pas inclus dans votre offre : choisissez Manuel.,The {0} connector is not included in your plan: choose Manual.
+Canal,Channel
+Vente directe,Direct sale
+"Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.","Direct sale: ERPNext's usual delivery note and invoice, without the COD checks."
+Canal habituel,Usual channel
+Vide : le canal par défaut des Paramètres COD.,Empty: the default channel of COD Settings.
+Canal par défaut,Default channel
+"Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.","For a customer without a usual channel. Direct sale: ERPNext's usual delivery note and invoice, without the COD checks."
+Validée,Validated
+Valider,Validate

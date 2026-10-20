@@ -37,6 +37,11 @@ ALL_STATES = [
 # States where the parcel has left our warehouse (used for the return rate)
 SHIPPED_OR_LATER = [SHIPPED, DELIVERED, SETTLED, RETURNED]
 
+# A direct sale (cod/channel.py) is validated, then follows ERPNext's usual
+# delivery note and invoice; its draft and cancel states are the ones above
+VALIDATED = "Validée"
+DIRECT_STATES = [VALIDATED]
+
 # Workflow action (button) names
 ACTION_CONFIRM = "Confirmer"
 ACTION_NO_ANSWER = "Pas de réponse"
@@ -46,3 +51,4 @@ ACTION_SHIP = "Expédier"
 ACTION_DELIVER = "Marquer livrée"
 ACTION_RETURN = "Marquer retournée"
 ACTION_SETTLE = "Marquer réglée"
+ACTION_VALIDATE = "Valider"

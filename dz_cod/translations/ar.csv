@@ -333,3 +333,12 @@ Bureau,المكتب
 N° de commande (pas encore de n° de suivi),رقم الطلب (لا يوجد رقم تتبع بعد)
 Fonction non incluse dans votre offre,ميزة غير مشمولة في عرضك
 Le connecteur {0} n'est pas inclus dans votre offre : choisissez Manuel.,الموصل {0} غير مشمول في عرضك: اختر «يدوي».
+Canal,قناة البيع
+Vente directe,بيع مباشر
+"Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",بيع مباشر: إشعار التسليم والفاتورة المعتادان في ERPNext، دون فحوصات COD.
+Canal habituel,القناة المعتادة
+Vide : le canal par défaut des Paramètres COD.,فارغ: القناة الافتراضية في إعدادات COD.
+Canal par défaut,القناة الافتراضية
+"Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",لعميل ليست له قناة معتادة. بيع مباشر: إشعار التسليم والفاتورة المعتادان في ERPNext، دون فحوصات COD.
+Validée,معتمدة
+Valider,اعتماد
