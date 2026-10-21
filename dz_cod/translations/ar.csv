@@ -371,3 +371,7 @@ Compte des écarts sur versements (gains),حساب فروق التحويلات (
 Montants encaissés au-delà de ce qui était dû (75882).,مبالغ محصّلة تتجاوز المستحق (75882).
 Encaissé par {0} à la livraison de la commande {1},حصّلتها {0} عند تسليم الطلب {1}
 La commande {0} n'a pas de mouvement d'expédition.,الطلب {0} ليس له حركة إرسال.
+{0} : encaissements à reverser égaux aux colis livrés non réglés,{0}: التحصيلات الواجب تحويلها تساوي الطرود المسلّمة غير المسوّاة
+Écart entre le compte {0} et les colis livrés non réglés : voyez les versements du transporteur.,فرق بين الحساب {0} والطرود المسلّمة غير المسوّاة: راجع تحويلات شركة التوصيل.
+{0} : frais retenus couverts par ses factures,{0}: الرسوم المقتطعة مغطاة بفواتيرها
+Saisissez la facture du transporteur pour ses frais retenus (6241 et la TVA).,أدخل فاتورة شركة التوصيل للرسوم التي اقتطعتها (6241 والرسم على القيمة المضافة).

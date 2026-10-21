@@ -184,3 +184,23 @@ class TestSettlementEntry(IntegrationTestCase):
 			self.assertEqual(frappe.db.get_single_value("COD Settings", "settlement_bank_account"), ccp)
 		finally:
 			cod_setting("settlement_bank_account", bank)
+
+	def test_month_close_checks_the_couriers_account(self):
+		from dz_core.closing import OK, TO_CHECK
+		from frappe.utils import get_last_day, today
+
+		from dz_cod.cod.closing import checks
+
+		order = delivered_order()
+		settlement = new_settlement([self.line(order)])
+		settlement.submit()
+		rows = [
+			row
+			for row in checks(settlement.company, today(), get_last_day(today()))
+			if row["check"].startswith(h.MOCK_COURIER)
+		]
+		owed, fees = rows
+		self.assertEqual(owed["status"], OK)  # its account matches the parcels it still owes for
+		# it kept fees, and its invoice is not entered yet
+		self.assertEqual(fees["status"], TO_CHECK)
+		self.assertGreaterEqual(fees["amount"], flt(settlement.total_fees))

@@ -102,6 +102,7 @@ def ensure_fee_item(company):
 	"""The delivery fee item (non-stock) and its group, crediting 7088 (an
 	account already set on the group for the company is kept)."""
 	from dz_core.setup.item_groups import fill
+	from dz_core.setup.tax import set_group_tax
 
 	if not frappe.db.exists("Item Group", FEE_GROUP):
 		frappe.get_doc(
@@ -112,6 +113,7 @@ def ensure_fee_item(company):
 			}
 		).insert(ignore_permissions=True)
 	fill(company, FEE_GROUP, {"income_account": SHIPPING_INCOME})
+	set_group_tax(company, FEE_GROUP)  # taxed like the goods: 19 % (CTCA art. 15)
 	if not frappe.db.exists("Item", FEE_ITEM):
 		frappe.get_doc(
 			{

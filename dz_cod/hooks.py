@@ -72,6 +72,9 @@ jinja = {"methods": ["dz_cod.cod.barcode.code128_svg"]}
 dz_restore_check_counted = ["Sales Order", "Courier Settlement"]
 dz_restore_check_last = ["Sales Order"]
 
+# dz_core's report "Clôture du mois" also checks the couriers' accounts (cod/closing.py)
+dz_closing_checks = ["dz_cod.cod.closing.checks"]
+
 # Courier webhook events are kept 30 days (Log Settings), enough to spot an
 # event delivered twice: Yalidine retries a delivery for 40 hours at most
 default_log_clearing_doctypes = {"Courier Webhook Event": 30}
