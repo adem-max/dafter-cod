@@ -133,3 +133,26 @@ class TestSettlementEntry(IntegrationTestCase):
 			self.assertEqual(frappe.db.get_value("Sales Order", order.name, "workflow_state"), S.DELIVERED)
 		finally:
 			cod_setting("courier_fee_account", account)
+
+	def test_settlement_bank_follows_the_company_bank(self):
+		from dz_core.setup.accounts import account_by_number
+
+		from dz_cod.patches import settlement_bank_follows_company
+
+		bank = frappe.db.get_single_value("COD Settings", "settlement_bank_account")
+		company = frappe.db.get_single_value("COD Settings", "company")
+		try:
+			# the bank the setup wizard had picked (5176 Société de bourse) is replaced
+			cod_setting("settlement_bank_account", account_by_number(company, "5176"))
+			settlement_bank_follows_company.execute()
+			self.assertEqual(
+				frappe.db.get_single_value("COD Settings", "settlement_bank_account"),
+				frappe.db.get_value("Company", company, "default_bank_account"),
+			)
+			# a bank someone chose is kept
+			ccp = account_by_number(company, "5171")
+			cod_setting("settlement_bank_account", ccp)
+			settlement_bank_follows_company.execute()
+			self.assertEqual(frappe.db.get_single_value("COD Settings", "settlement_bank_account"), ccp)
+		finally:
+			cod_setting("settlement_bank_account", bank)

@@ -7,3 +7,4 @@ dz_cod.patches.rename_place_fields
 # Patches added in this section will be executed after doctypes are migrated
 dz_cod.patches.set_channel_on_existing_orders
 dz_cod.patches.name_places_by_connector
+dz_cod.patches.settlement_bank_follows_company

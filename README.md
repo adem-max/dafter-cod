@@ -13,7 +13,7 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 | **Target version** | **ERPNext v16 (16.50 and 16.51) on Frappe v16 (16.51)**, branch `version-16`, latest stable major in October 2026. ERPNext 16.51 moved the default warehouse to the Company; the demo loader handles both. |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
 | **Version** | 0.2.0 (21 Oct 2026), released with dz_core 0.2.0: update both together (dafter-core docs/DEPLOY.md, section 11). |
-| **Automated tests** | 117 tests (24 unit + 93 integration on a real ERPNext site with dz_core installed), all passing on the test site and on GitHub's CI (every push). The phone and wilaya-list tests moved to dz_core with that code. |
+| **Automated tests** | 118 tests (24 unit + 94 integration on a real ERPNext site with dz_core installed), all passing on the test site and on GitHub's CI (every push). The phone and wilaya-list tests moved to dz_core with that code. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |

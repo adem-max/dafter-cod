@@ -28,6 +28,7 @@ What it does, in order:
 import random
 
 import frappe
+from dz_core.setup.accounts import set_default_accounts
 from dz_core.setup.tax import unset_default_templates
 from dz_core.setup.wilayas import WILAYAS, wilaya_docname
 from frappe.model.workflow import apply_workflow
@@ -104,6 +105,7 @@ def check_site_is_for_demo():
 
 def setup_company():
 	if frappe.db.exists("Company", D.COMPANY):
+		set_default_accounts(D.COMPANY)  # a company made before 21 Oct 2026 too
 		return
 
 	year = getdate(add_days(today(), -DAYS_OF_HISTORY - 10)).year
@@ -148,6 +150,8 @@ def setup_company():
 	defaults.update({"default_company": D.COMPANY, "default_currency": "DZD", "country": "Algeria"})
 	defaults.save()
 	ensure_fiscal_years()
+	# The SCF accounts in the Company's defaults, not the setup wizard's picks
+	set_default_accounts(D.COMPANY)
 
 
 def ensure_fiscal_years():
