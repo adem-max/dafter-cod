@@ -3,10 +3,10 @@
     bench --site demo.localhost execute dz_cod.demo.wipe.run
     bench --site demo.localhost execute dz_cod.demo.loader.load
 
-It cancels and deletes every transaction of the demo company (settlements,
-stock entries, delivery notes, orders), then the demo customers, couriers
-and items. The company, its warehouses and accounts and the COD Settings are
-kept (the loader reuses them).
+It cancels and deletes every transaction of the demo company (settlements
+and their Journal Entries, invoices, stock entries, delivery notes, orders),
+then the demo customers, couriers and items. The company, its warehouses and
+accounts and the COD Settings are kept (the loader reuses them).
 
 Even simpler, for a total reset, drop the demo site and create it again
 (see docs/DEMO.md).
@@ -24,8 +24,15 @@ def run():
 	check_site_is_for_demo()
 	company = {"company": D.COMPANY}
 
-	print("Versements...")
-	remove("Courier Settlement", company)
+	print("Versements et leurs écritures...")
+	entries = frappe.get_all(
+		"Courier Settlement", filters=dict(company, journal_entry=["is", "set"]), pluck="journal_entry"
+	)
+	remove("Courier Settlement", company)  # cancelling a Versement cancels its Journal Entry
+	remove("Journal Entry", {"name": ["in", entries]})
+
+	print("Factures des commandes livrées...")
+	remove("Sales Invoice", company)
 
 	print("Mouvements de stock des inspections...")
 	remove("Stock Entry", dict(company, dz_sales_order=["is", "set"]))
