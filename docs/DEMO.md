@@ -75,10 +75,14 @@ started by `bench start` process them. Without workers the queue fills up
 and Frappe refuses new jobs ("Too many queued background jobs"); fix it with
 `bench worker --queue default,short,long --burst`.
 
-It cancels and deletes settlements and their Journal Entries, invoices, stock
-entries, delivery notes and orders, then the demo customers, couriers and
-items. The company, warehouses, accounts and COD Settings stay (the loader
-reuses them).
+It cancels and deletes settlements and their Journal Entries, the couriers'
+collections, invoices, stock entries, delivery notes and orders, then the
+demo customers, couriers and items. The company, warehouses, accounts and
+COD Settings stay (the loader reuses them).
+
+A demo built before 0.3.0 (21 Oct 2026) moves to the SCF set-up (inventory
+accounts per item, chart changes) with `--kwargs "{'full': 1}"` on the wipe:
+it also deletes the ledger lines of what it removes.
 
 Option 2 — total reset (cleanest, 5 minutes):
 

@@ -4,24 +4,42 @@
     bench --site demo.localhost execute dz_cod.demo.loader.load
 
 It cancels and deletes every transaction of the demo company (settlements
-and their Journal Entries, invoices, stock entries, delivery notes, orders),
+and their Journal Entries, the couriers' collections, invoices, stock
+entries, delivery notes, orders),
 then the demo customers, couriers and items. The company, its warehouses and
 accounts and the COD Settings are kept (the loader reuses them).
 
 Even simpler, for a total reset, drop the demo site and create it again
 (see docs/DEMO.md).
 
+`full=1` also deletes the ledger lines of what it removes (dz_core's
+ledger_lines_deleted), then applies dz_core's SCF set-up again: a shop demo
+built before 0.3.0 moves to inventory accounts per item and the full chart
+changes without dropping the site.
+
 Refuses to run if the site contains orders of another company.
 """
 
 import frappe
+from dz_core.demo.loader import demo_accounting
+from dz_core.demo.wipe import ledger_lines_deleted
 
 from dz_cod.demo import data as D
 from dz_cod.demo.loader import check_site_is_for_demo
 
 
-def run():
+def run(full=0):
 	check_site_is_for_demo()
+	with ledger_lines_deleted(int(full)):
+		remove_everything()
+	if int(full):
+		for line in demo_accounting(D.COMPANY, None):
+			print(f"   {line}")
+		frappe.db.commit()
+	print("Démo effacée. Relancez : bench --site <site> execute dz_cod.demo.loader.load")
+
+
+def remove_everything():
 	company = {"company": D.COMPANY}
 
 	print("Versements et leurs écritures...")
@@ -30,6 +48,9 @@ def run():
 	)
 	remove("Courier Settlement", company)  # cancelling a Versement cancels its Journal Entry
 	remove("Journal Entry", {"name": ["in", entries]})
+
+	print("Encaissements des transporteurs...")
+	remove("Payment Entry", company)  # each paid a delivered order's invoice into 4671n
 
 	print("Factures des commandes livrées...")
 	remove("Sales Invoice", company)
@@ -72,7 +93,6 @@ def run():
 				frappe.delete_doc("Item", name, force=True)
 
 	frappe.db.commit()
-	print("Démo effacée. Relancez : bench --site <site> execute dz_cod.demo.loader.load")
 
 
 def remove(doctype, filters):
