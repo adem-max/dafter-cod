@@ -287,10 +287,13 @@ Données reçues,البيانات المستلمة
 Remarque,ملاحظة
 Nom de la commune,اسم البلدية
 Stop desk dans la commune,مكتب استلام في البلدية
-ID Yalidine,معرّف Yalidine
-Identifiant de la commune chez Yalidine.,معرّف البلدية لدى Yalidine.
-Wilaya chez Yalidine,الولاية لدى Yalidine
-Nom de la wilaya tel que Yalidine l'écrit.,اسم الولاية كما تكتبه Yalidine.
+Chez le transporteur,لدى شركة التوصيل
+Le transporteur dont la liste vient (connecteur du transporteur).,شركة التوصيل التي جاءت منها القائمة (وصلة شركة التوصيل).
+ID chez le transporteur,المعرّف لدى شركة التوصيل
+Identifiant de la commune chez le transporteur.,معرّف البلدية لدى شركة التوصيل.
+Wilaya chez le transporteur,الولاية لدى شركة التوصيل
+Nom de la wilaya tel que le transporteur l'écrit.,اسم الولاية كما تكتبه شركة التوصيل.
+Le bureau {0} n'est pas un bureau Yalidine. Choisissez-le dans la liste.,المكتب {0} ليس مكتبًا لـ Yalidine. اختره من القائمة.
 Nom du bureau,اسم المكتب
 ID du bureau,معرّف المكتب
 Identifiant du bureau chez le transporteur (envoyé avec le colis).,معرّف المكتب لدى شركة التوصيل (يُرسل مع الطرد).

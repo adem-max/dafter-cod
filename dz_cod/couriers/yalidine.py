@@ -27,6 +27,7 @@ from frappe.utils import cint, flt, get_datetime
 from dz_cod.couriers import places
 from dz_cod.couriers.base import DELIVERED, IN_TRANSIT, RETURNED, UNKNOWN, CourierAdapter
 
+CONNECTOR = "Yalidine"  # its communes and offices: DZ Commune / DZ Stop Desk named Yalidine-<id>
 BASE_URL = "https://api.yalidine.app/v1/"
 TIMEOUT = 20  # seconds
 MAX_PRICE = 150000  # Yalidine refuses an amount to collect above this
@@ -155,16 +156,18 @@ class YalidineAdapter(CourierAdapter):
 		if (
 			cint(doc.code) > 58
 			and doc.parent_wilaya
-			and not frappe.db.exists("DZ Commune", {"wilaya": wilaya})
+			and not frappe.db.exists("DZ Commune", {"wilaya": wilaya, "connector": CONNECTOR})
 		):
 			return self.yalidine_wilaya(doc.parent_wilaya)
-		name = frappe.db.get_value("DZ Commune", {"wilaya": wilaya}, "yalidine_wilaya_name")
+		name = frappe.db.get_value(
+			"DZ Commune", {"wilaya": wilaya, "connector": CONNECTOR}, "courier_wilaya_name"
+		)
 		return cint(doc.code), name or doc.wilaya_name
 
 	def commune_name(self, wilaya, name):
 		"""Yalidine's spelling of a commune. Refuses a commune Yalidine does not
 		know, once the communes are imported; before that, sends it as typed."""
-		communes = places.communes_of(wilaya)
+		communes = places.communes_of(wilaya, CONNECTOR)
 		if not communes:
 			return name
 		commune = places.match_commune(communes, name)
@@ -227,12 +230,20 @@ class YalidineAdapter(CourierAdapter):
 			if not order.dz_stopdesk_id:
 				frappe.throw(_("Choisissez le bureau stop desk de la commande avant d'expédier."))
 			desk = frappe.db.get_value(
-				"DZ Stop Desk", order.dz_stopdesk_id, ["center_name", "commune_name", "wilaya"], as_dict=True
+				"DZ Stop Desk",
+				order.dz_stopdesk_id,
+				["connector", "center_id", "center_name", "commune_name", "wilaya"],
+				as_dict=True,
 			)
-			if desk:
-				# The desk's commune is the destination; the address is optional for us, not for Yalidine
-				wilaya, commune = desk.wilaya or wilaya, desk.commune_name or commune
-				address = address or desk.center_name
+			if not desk or desk.connector != CONNECTOR:
+				frappe.throw(
+					_("Le bureau {0} n'est pas un bureau Yalidine. Choisissez-le dans la liste.").format(
+						order.dz_stopdesk_id
+					)
+				)
+			# The desk's commune is the destination; the address is optional for us, not for Yalidine
+			wilaya, commune = desk.wilaya or wilaya, desk.commune_name or commune
+			address = address or desk.center_name
 		else:
 			commune = self.commune_name(wilaya, commune)
 		_to_id, to_wilaya_name = self.yalidine_wilaya(wilaya)
@@ -269,7 +280,7 @@ class YalidineAdapter(CourierAdapter):
 			"has_exchange": False,
 		}
 		if stop_desk:
-			parcel["stopdesk_id"] = order.dz_stopdesk_id
+			parcel["stopdesk_id"] = desk.center_id  # Yalidine's own id, not our record name
 		return parcel
 
 	# ------------------------------------------------------------ status

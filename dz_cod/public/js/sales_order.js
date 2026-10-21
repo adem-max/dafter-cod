@@ -1,27 +1,29 @@
 // Extra behaviour on the Sales Order form for COD orders.
 // 1. Before "Expédier": ask for the courier and tracking number.
 // 2. On a returned order: a button to record the inspection of the parcel.
-// 3. Commune and stop desk pick lists (imported from the courier, e.g. Yalidine).
+// 3. Commune and stop desk pick lists: the list imported from the order's
+//    courier (e.g. Yalidine), dz_cod/couriers/places.py.
 // 4. The channel (COD or direct sale, dz_cod/cod/channel.py): the customer's
 //    usual one, else the default of COD Settings.
 
 const DIRECT_SALE = "Vente directe";
 
-// Offices of the order's wilaya (and of its parent wilaya for the 2026 wilayas)
-const stopdesk_query = (frm) => ({
+// The courier's offices in the order's wilaya (and in its parent wilaya for
+// the 2026 wilayas)
+const stopdesk_query = (frm, courier) => ({
 	query: "dz_cod.couriers.places.stopdesk_query",
-	filters: { wilaya: frm.doc.dz_wilaya },
+	filters: { wilaya: frm.doc.dz_wilaya, courier: courier || frm.doc.dz_courier },
 });
 
 frappe.ui.form.on("Sales Order", {
 	setup(frm) {
 		frm.set_query("dz_courier", () => ({ filters: { is_transporter: 1 } }));
 		frm.set_query("dz_stopdesk_id", () => stopdesk_query(frm));
-		// All the wilaya's communes: a name outside the list is refused. Nothing
-		// imported = empty list = free text.
+		// All the wilaya's communes in the courier's list: a name outside the list
+		// is refused. No list (no courier, Manuel, nothing imported) = free text.
 		frm.set_query("dz_commune", () => ({
 			query: "dz_cod.couriers.places.commune_names",
-			params: { wilaya: frm.doc.dz_wilaya },
+			params: { wilaya: frm.doc.dz_wilaya, courier: frm.doc.dz_courier },
 		}));
 	},
 
@@ -114,7 +116,7 @@ frappe.ui.form.on("Sales Order", {
 						options: "DZ Stop Desk",
 						default: frm.doc.dz_stopdesk_id,
 						hidden: frm.doc.dz_delivery_type !== "Stop desk",
-						get_query: () => stopdesk_query(frm),
+						get_query: () => stopdesk_query(frm, dialog.get_value("courier")),
 					},
 				],
 				primary_action_label: __("Expédier"),

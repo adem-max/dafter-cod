@@ -276,10 +276,13 @@ Données reçues,Received data
 Remarque,Remark
 Nom de la commune,Commune name
 Stop desk dans la commune,Stop desk in the commune
-ID Yalidine,Yalidine ID
-Identifiant de la commune chez Yalidine.,The commune's identifier at Yalidine.
-Wilaya chez Yalidine,Wilaya at Yalidine
-Nom de la wilaya tel que Yalidine l'écrit.,The wilaya name as Yalidine spells it.
+Chez le transporteur,At the courier
+Le transporteur dont la liste vient (connecteur du transporteur).,The courier the list comes from (the courier's connector).
+ID chez le transporteur,ID at the courier
+Identifiant de la commune chez le transporteur.,The commune's identifier at the courier.
+Wilaya chez le transporteur,Wilaya at the courier
+Nom de la wilaya tel que le transporteur l'écrit.,The wilaya name as the courier spells it.
+Le bureau {0} n'est pas un bureau Yalidine. Choisissez-le dans la liste.,Office {0} is not a Yalidine office. Pick it from the list.
 Nom du bureau,Office name
 ID du bureau,Office ID
 Identifiant du bureau chez le transporteur (envoyé avec le colis).,The office's identifier at the courier (sent with the parcel).
