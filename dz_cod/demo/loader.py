@@ -28,7 +28,8 @@ What it does, in order:
 import random
 
 import frappe
-from dz_core.setup.accounts import set_default_accounts
+from dz_core.demo.loader import demo_accounting
+from dz_core.setup.item_groups import FINISHED, MERCHANDISE, RAW, set_group_accounts
 from dz_core.setup.tax import unset_default_templates
 from dz_core.setup.wilayas import WILAYAS, wilaya_docname
 from frappe.model.workflow import apply_workflow
@@ -42,6 +43,9 @@ from dz_cod.features import ALL, configured, set_features
 from dz_cod.setup.new_client import make_cod_the_home_page, settlement_accounts
 
 DAYS_OF_HISTORY = 60
+# The shop prints its own designs on blanks: printed garments are its products,
+# the blanks its raw material; accessories are bought and resold as they are
+GROUP_KINDS = {D.TSHIRTS: FINISHED, D.SWEATS: FINISHED, D.ACCESSORIES: MERCHANDISE, D.RAW: RAW}
 NB_CUSTOMERS = 80
 NB_ORDERS = 200
 SEED = 2026  # same seed = same demo every time
@@ -105,7 +109,7 @@ def check_site_is_for_demo():
 
 def setup_company():
 	if frappe.db.exists("Company", D.COMPANY):
-		set_default_accounts(D.COMPANY)  # a company made before 21 Oct 2026 too
+		demo_accounting(D.COMPANY, None)  # a company made before 21 Oct 2026 too
 		return
 
 	year = getdate(add_days(today(), -DAYS_OF_HISTORY - 10)).year
@@ -150,8 +154,8 @@ def setup_company():
 	defaults.update({"default_company": D.COMPANY, "default_currency": "DZD", "country": "Algeria"})
 	defaults.save()
 	ensure_fiscal_years()
-	# The SCF accounts in the Company's defaults, not the setup wizard's picks
-	set_default_accounts(D.COMPANY)
+	# The SCF set-up (dz_core setup/scf.py), without the immutable ledger: a demo is wiped
+	demo_accounting(D.COMPANY, None)
 
 
 def ensure_fiscal_years():
@@ -247,8 +251,10 @@ def setup_items():
 		ensure("Brand", brand, {"brand": brand})
 
 	root_group = get_root_of("Item Group")
-	for group in (D.TSHIRTS, D.SWEATS, D.ACCESSORIES, D.RAW):
+	for group, kind in GROUP_KINDS.items():
 		ensure("Item Group", group, {"item_group_name": group, "parent_item_group": root_group})
+		# the group's stock, cost of sales and income accounts (inventory accounts per item)
+		set_group_accounts(D.COMPANY, group, kind)
 
 	ensure_attribute("Taille", D.SIZES)
 	ensure_attribute("Couleur", D.COLOURS)

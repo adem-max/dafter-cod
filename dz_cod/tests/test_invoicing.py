@@ -143,7 +143,10 @@ class TestSettlementEntry(IntegrationTestCase):
 		company = frappe.db.get_single_value("COD Settings", "company")
 		try:
 			# the bank the setup wizard had picked (5176 Société de bourse) is replaced
-			cod_setting("settlement_bank_account", account_by_number(company, "5176"))
+			wizard_bank = frappe.db.get_value("Account", {"company": company, "account_number": "5176"})
+			cod_setting(
+				"settlement_bank_account", wizard_bank
+			)  # disabled since 0.3.0, so not by account_by_number
 			settlement_bank_follows_company.execute()
 			self.assertEqual(
 				frappe.db.get_single_value("COD Settings", "settlement_bank_account"),

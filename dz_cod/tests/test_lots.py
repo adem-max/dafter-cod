@@ -6,6 +6,7 @@ Run: bench --site <site> run-tests --module dz_cod.tests.test_lots
 """
 
 import frappe
+from dz_core.setup.item_groups import MERCHANDISE_GROUP
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from frappe.tests import IntegrationTestCase
 from frappe.utils import random_string
@@ -51,7 +52,7 @@ class TestLots(IntegrationTestCase):
 				"doctype": "Item",
 				"item_code": cls.item,
 				"item_name": "Miel de test",
-				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}),
+				"item_group": MERCHANDISE_GROUP,
 				"stock_uom": "Pièce",
 				"is_stock_item": 1,
 				"has_batch_no": 1,

@@ -8,6 +8,7 @@ Everything a test class creates is rolled back at the end of the class
 """
 
 import frappe
+from dz_core.setup.item_groups import MERCHANDISE_GROUP
 from frappe.model.workflow import apply_workflow
 from frappe.utils import today
 
@@ -53,7 +54,8 @@ def setup_fixtures():
 			{
 				"item_code": ITEM,
 				"item_name": "T-shirt de test",
-				"item_group": frappe.utils.nestedset.get_root_of("Item Group"),
+				# a group with accounts: inventory accounts are per item (group)
+				"item_group": MERCHANDISE_GROUP,
 				"stock_uom": "Pièce",
 				"is_stock_item": 1,
 				"valuation_rate": 800,
