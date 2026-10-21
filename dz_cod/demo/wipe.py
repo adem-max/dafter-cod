@@ -22,7 +22,7 @@ Refuses to run if the site contains orders of another company.
 
 import frappe
 from dz_core.demo.loader import demo_accounting
-from dz_core.demo.wipe import ledger_lines_deleted
+from dz_core.demo.wipe import BATCH, commit_when_workers_keep_up, ledger_lines_deleted
 
 from dz_cod.demo import data as D
 from dz_cod.demo.loader import check_site_is_for_demo
@@ -104,6 +104,8 @@ def remove(doctype, filters):
 		if doc.docstatus == 1:
 			doc.flags.ignore_links = True
 			doc.cancel()
-	for name in names:
+	for count, name in enumerate(names, 1):
 		frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
-	frappe.db.commit()
+		if count % BATCH == 0:
+			commit_when_workers_keep_up()  # Frappe's clean-up jobs, 1,000 at most
+	commit_when_workers_keep_up()
