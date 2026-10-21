@@ -11,9 +11,11 @@ installs dz_core, the base it runs on):
 dz_core does the base first: setup wizard (French, Algeria, DZD), sector
 template, the Matières premières / Travaux en cours / Produits finis
 warehouses, and the tax regime (IFU = no TVA by default, which replaces the
-old "remove the default 19 % VAT" step). Then this adds the COD part: the
-Retours warehouse, the delivery-fee account, COD Settings (orders leave from
-dz_core's Produits finis), one courier, and the client's optional features
+old "remove the default 19 % VAT" step) and the SCF set-up (chart, default
+accounts, accounts per item group). Then this adds the COD part: the Retours
+and "Chez transporteur" warehouses, the delivery fee item, the couriers'
+supplier group and accounts (cod/accounts.py), COD Settings (orders leave
+from dz_core's Produits finis), one courier, and the client's optional features
 (none given = base only; see dz_cod/features.py and docs/FEATURES.md).
 Products, stock, users and the wilaya rate card stay manual: they differ per
 client (products and stock can come from dz_core's import workbook).
@@ -23,14 +25,9 @@ Safe to run twice: whatever already exists is skipped.
 import frappe
 from frappe.utils.nestedset import get_root_of
 
+from dz_cod.cod.accounts import COURIER_GROUP, settlement_accounts, setup_cod_accounts
+
 RETURNS_WAREHOUSE = "Retours"
-SHIPPING_ACCOUNT = "Frais de livraison facturés"
-COURIER_GROUP = "Transporteurs"
-# Where the Versements are booked (cod/invoicing.py). Names and places in the
-# chart are to be checked with the accountant: each can be changed in COD Settings
-COURIER_FEES_ACCOUNT = "Frais transporteurs"
-SETTLEMENT_DIFFERENCE_ACCOUNT = "Écarts sur versements"
-UNMATCHED_ACCOUNT = "Versements à identifier"
 
 
 def prepare(company, abbr, courier=None, features=None, sector="Confection", tax_regime="IFU"):
@@ -45,7 +42,7 @@ def prepare(company, abbr, courier=None, features=None, sector="Confection", tax
 	# Orders leave from dz_core's finished goods warehouse
 	main = frappe.db.get_single_value("DZ Core Settings", "finished_goods_warehouse")
 	returns = create_returns_warehouse(company, abbr)
-	account = create_shipping_account(company, abbr)
+	in_transit = setup_cod_accounts(company)
 	if courier:
 		create_courier(courier)
 
@@ -55,12 +52,12 @@ def prepare(company, abbr, courier=None, features=None, sector="Confection", tax
 			"company": company,
 			"main_warehouse": main,
 			"returns_warehouse": returns,
-			"shipping_income_account": account,
+			"in_transit_warehouse": in_transit,
 			"max_call_attempts": settings.max_call_attempts or 3,
 			"default_courier": courier or settings.default_courier,
 		}
 	)
-	# The Versements' accounts: keep the ones chosen for this company
+	# The fee's and the Versements' accounts: keep the ones chosen for this company
 	for field, account in settlement_accounts(company).items():
 		chosen = settings.get(field)
 		if not chosen or frappe.db.get_value("Account", chosen, "company") != company:
@@ -99,49 +96,6 @@ def create_returns_warehouse(company, abbr):
 			}
 		).insert()
 	return full_name
-
-
-def create_account(company, abbr, account_name, root_type, account_type=None):
-	"""A ledger account under the company's root of that type, if missing."""
-	name = f"{account_name} - {abbr}"
-	if not frappe.db.exists("Account", name):
-		root = frappe.db.get_value(
-			"Account",
-			{"company": company, "root_type": root_type, "is_group": 1, "parent_account": ["is", "not set"]},
-		)
-		frappe.get_doc(
-			{
-				"doctype": "Account",
-				"account_name": account_name,
-				"company": company,
-				"parent_account": root,
-				"account_type": account_type,
-			}
-		).insert(ignore_permissions=True)
-	return name
-
-
-def create_shipping_account(company, abbr):
-	return create_account(company, abbr, SHIPPING_ACCOUNT, "Income", "Income Account")
-
-
-def settlement_accounts(company):
-	"""{COD Settings field: account} to book the Versements, the accounts made
-	if missing. The bank is the company's default one, else its first."""
-	abbr = frappe.get_cached_value("Company", company, "abbr")
-	bank = frappe.get_cached_value("Company", company, "default_bank_account") or frappe.db.get_value(
-		"Account", {"company": company, "account_type": "Bank", "is_group": 0}
-	)
-	return {
-		"settlement_bank_account": bank,
-		"courier_fee_account": create_account(
-			company, abbr, COURIER_FEES_ACCOUNT, "Expense", "Expense Account"
-		),
-		"settlement_difference_account": create_account(
-			company, abbr, SETTLEMENT_DIFFERENCE_ACCOUNT, "Expense", "Expense Account"
-		),
-		"unmatched_settlement_account": create_account(company, abbr, UNMATCHED_ACCOUNT, "Liability"),
-	}
 
 
 def create_courier(courier):

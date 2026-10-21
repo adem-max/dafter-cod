@@ -27,9 +27,7 @@ la commune et l'adresse (livraison à domicile),البلدية والعنوان 
 Choisissez le transporteur avant d'expédier.,اختر شركة التوصيل قبل الإرسال.
 Saisissez le n° de suivi du colis avant d'expédier.,أدخل رقم تتبع الطرد قبل الإرسال.
 La commande doit être à l'état {0}.,يجب أن تكون الطلبية في الحالة {0}.
-Choisissez le compte des frais de livraison dans les Paramètres COD.,اختر حساب رسوم التوصيل في إعدادات COD.
 "{0} : besoin {1}, disponible {2}",{0}: المطلوب {1}، المتوفر {2}
-Pas de bon de livraison pour la commande {0}.,لا يوجد إشعار تسليم للطلبية {0}.
 La commande {0} n'est pas retournée.,الطلبية {0} ليست مُرتجعة.
 Le retour de la commande {0} est déjà inspecté.,تم فحص مرتجع الطلبية {0} من قبل.
 Les quantités inspectées doivent correspondre exactement aux quantités retournées.,يجب أن تطابق الكميات المفحوصة الكميات المُرتجعة تمامًا.
@@ -351,10 +349,6 @@ Facturer à la livraison,الفوترة عند التسليم
 "Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.",عندما تصبح الطلبية مُسلَّمة، تُنشأ فاتورتها (Facture DZ) من إشعار التسليم وتُعتمد. ويُسجَّل كل تحويل من شركة التوصيل في قيد محاسبي.
 Compte des versements,حساب التحويلات
 Où arrivent les virements des transporteurs.,الحساب الذي تصل إليه تحويلات شركات التوصيل.
-Compte des frais transporteurs,حساب رسوم شركات التوصيل
-Ce que les transporteurs retiennent sur chaque colis.,ما تقتطعه شركات التوصيل عن كل طرد.
-Compte des écarts sur versements,حساب فروقات التحويلات
-Écarts acceptés et montants versés en trop.,الفروقات المقبولة والمبالغ المدفوعة زيادةً.
 Compte des versements à identifier,حساب التحويلات غير المحددة
 "Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.",مبالغ دُفعت عن طرود مجهولة أو غير صالحة أو مسدَّدة سابقاً: يجب مراجعتها مع شركة التوصيل.
 Compte bancaire,الحساب البنكي
@@ -364,3 +358,16 @@ Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).
 Versement {0} de {1},تحويل {0} من {1}
 Renseignez dans les Paramètres COD : {0}.,يرجى ملء إعدادات COD: {0}.
 Le compte {0} n'appartient pas à la société {1}.,الحساب {0} لا ينتمي إلى الشركة {1}.
+Mouvement d'expédition,حركة الإرسال
+Encaissement transporteur,تحصيل شركة التوصيل
+Mouvement de retour,حركة الإرجاع
+Compte des encaissements,حساب التحصيلات
+"Ce que le transporteur a encaissé pour nous et doit reverser (4671n, créé à la première livraison).",ما حصّلته شركة التوصيل لحسابنا وعليها تحويله (4671n، يُنشأ عند أول تسليم).
+Entrepôt chez le transporteur,المخزن لدى شركة التوصيل
+"Les colis expédiés y restent jusqu'à la livraison ou au retour : encore notre stock, pas encore vendu.",تبقى الطرود المرسلة هنا حتى التسليم أو الإرجاع: ما زالت من مخزوننا ولم تُبع بعد.
+Compte des écarts sur versements (pertes),حساب فروق التحويلات (خسائر)
+Écarts acceptés : ce que le transporteur ne versera pas (65882).,الفروق المقبولة: ما لن تحوّله شركة التوصيل (65882).
+Compte des écarts sur versements (gains),حساب فروق التحويلات (أرباح)
+Montants encaissés au-delà de ce qui était dû (75882).,مبالغ محصّلة تتجاوز المستحق (75882).
+Encaissé par {0} à la livraison de la commande {1},حصّلتها {0} عند تسليم الطلب {1}
+La commande {0} n'a pas de mouvement d'expédition.,الطلب {0} ليس له حركة إرسال.

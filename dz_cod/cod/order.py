@@ -14,7 +14,10 @@ How ERPNext sees it:
 - Nouvelle / Injoignable / Annulée: the Sales Order is a DRAFT (docstatus 0).
 - Confirmer = SUBMIT the Sales Order. ERPNext reserves the stock.
 - Other moves on a submitted order = "update after submit". We look at which
-  state the order just entered and act (create delivery note, return, ...).
+  state the order just entered and act: Expédiée moves the parcel to "Chez
+  transporteur", Livrée makes the delivery note, the invoice and its payment
+  into the courier's account, Retournée moves the parcel to the returns
+  warehouse (cod/stock.py, cod/invoicing.py).
 - Annulée après confirmation = CANCEL the Sales Order. ERPNext un-reserves.
 
 A direct sale (channel "Vente directe", cod/channel.py) skips all of this:
@@ -147,13 +150,14 @@ def on_update_after_submit(order, method=None):
 
 	state = order.workflow_state
 	if state == S.SHIPPED:
-		delivery_note = stock.create_delivery_note(order, event_date(order))
-		order.db_set("dz_delivery_note", delivery_note)
+		# the parcel goes to "Chez transporteur": still ours, not sold yet
+		order.db_set("dz_shipment_entry", stock.ship_order(order, event_date(order)))
 	elif state == S.DELIVERED:
+		if not order.dz_delivery_note:  # an order shipped before 0.3.0 has it already
+			order.db_set("dz_delivery_note", stock.deliver_order(order, event_date(order)))
 		invoicing.invoice_delivered_order(order, event_date(order))
 	elif state == S.RETURNED:
-		return_note = stock.create_return(order, event_date(order))
-		order.db_set("dz_return_note", return_note)
+		order.db_set("dz_return_entry", stock.return_order(order, event_date(order)))
 		stock.close_order(order.name)
 
 

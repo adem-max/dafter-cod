@@ -85,15 +85,39 @@ class TestLots(IntegrationTestCase):
 
 	def test_a_line_takes_several_lots_and_comes_back_with_them(self):
 		order = self.order(PER_LOT + 2)  # more than one lot holds
-		shipped = lots_of("Delivery Note", order.dz_delivery_note)
+		shipped = lots_of("Stock Entry", order.dz_shipment_entry)
 		self.assertEqual(sum(shipped.values()), PER_LOT + 2)
 		self.assertEqual(set(shipped), set(self.lots))
 
 		order = h.act(order, S.ACTION_RETURN)
-		self.assertEqual(lots_of("Delivery Note", order.dz_return_note), shipped)
+		self.assertEqual(lots_of("Stock Entry", order.dz_return_entry), shipped)
 		for lot, qty in shipped.items():
 			self.assertEqual(get_batch_qty(lot, h.returns_warehouse()), qty)
 
 		inspect_return(order.name, [{"item_code": self.item, "good_qty": PER_LOT + 1, "damaged_qty": 1}])
 		self.assertEqual(sum(get_batch_qty(lot, h.returns_warehouse()) for lot in self.lots), 0)
 		self.assertEqual(sum(get_batch_qty(lot, h.main_warehouse()) for lot in self.lots), 2 * PER_LOT - 1)
+
+	def test_the_lots_delivered_are_the_lots_shipped(self):
+		order = self.order(PER_LOT + 1)
+		shipped = lots_of("Stock Entry", order.dz_shipment_entry)
+		order = h.act(order, S.ACTION_DELIVER)
+		delivered = {}
+		for row in frappe.get_doc("Delivery Note", order.dz_delivery_note).items:
+			if row.item_code == self.item:
+				delivered.update(lots_of_row(row))
+		self.assertEqual(delivered, shipped)
+
+
+def lots_of_row(row):
+	"""{lot: qty} of one delivery note row (a lot set on the row, or its bundle)."""
+	if row.serial_and_batch_bundle:
+		return {
+			entry.batch_no: abs(entry.qty)
+			for entry in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": row.serial_and_batch_bundle},
+				fields=["batch_no", "qty"],
+			)
+		}
+	return {row.batch_no: row.stock_qty}

@@ -27,9 +27,7 @@ la commune et l'adresse (livraison à domicile),the commune and address (home de
 Choisissez le transporteur avant d'expédier.,Choose the courier before shipping.
 Saisissez le n° de suivi du colis avant d'expédier.,Enter the parcel tracking number before shipping.
 La commande doit être à l'état {0}.,The order must be in state {0}.
-Choisissez le compte des frais de livraison dans les Paramètres COD.,Choose the delivery fee account in COD Settings.
 "{0} : besoin {1}, disponible {2}","{0}: need {1}, available {2}"
-Pas de bon de livraison pour la commande {0}.,No delivery note for order {0}.
 La commande {0} n'est pas retournée.,Order {0} is not returned.
 Le retour de la commande {0} est déjà inspecté.,The return of order {0} has already been inspected.
 Les quantités inspectées doivent correspondre exactement aux quantités retournées.,Inspected quantities must exactly match the returned quantities.
@@ -337,10 +335,6 @@ Facturer à la livraison,Invoice on delivery
 "Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.","When an order becomes Delivered, its invoice (Facture DZ) is made from the delivery note and submitted. Each courier payment is booked as a journal entry."
 Compte des versements,Courier payments account
 Où arrivent les virements des transporteurs.,Where the couriers' transfers arrive.
-Compte des frais transporteurs,Courier fees account
-Ce que les transporteurs retiennent sur chaque colis.,What couriers keep on each parcel.
-Compte des écarts sur versements,Payment differences account
-Écarts acceptés et montants versés en trop.,Accepted differences and amounts paid in excess.
 Compte des versements à identifier,Unmatched payments account
 "Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.","Amounts paid for unknown, invalid or already settled parcels: to check with the courier."
 Compte bancaire,Bank account
@@ -350,3 +344,16 @@ Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).
 Versement {0} de {1},Courier payment {0} from {1}
 Renseignez dans les Paramètres COD : {0}.,Fill in COD Settings: {0}.
 Le compte {0} n'appartient pas à la société {1}.,Account {0} does not belong to company {1}.
+Mouvement d'expédition,Shipment movement
+Encaissement transporteur,Courier collection
+Mouvement de retour,Return movement
+Compte des encaissements,Collections account
+"Ce que le transporteur a encaissé pour nous et doit reverser (4671n, créé à la première livraison).","What the courier collected for us and must pay over (4671n, made at the first delivery)."
+Entrepôt chez le transporteur,Warehouse at the courier
+"Les colis expédiés y restent jusqu'à la livraison ou au retour : encore notre stock, pas encore vendu.","Shipped parcels stay here until delivery or return: still our stock, not sold yet."
+Compte des écarts sur versements (pertes),Settlement differences account (losses)
+Écarts acceptés : ce que le transporteur ne versera pas (65882).,Accepted differences: what the courier will not pay (65882).
+Compte des écarts sur versements (gains),Settlement differences account (gains)
+Montants encaissés au-delà de ce qui était dû (75882).,Amounts collected beyond what was due (75882).
+Encaissé par {0} à la livraison de la commande {1},Collected by {0} on delivery of order {1}
+La commande {0} n'a pas de mouvement d'expédition.,Order {0} has no shipment movement.

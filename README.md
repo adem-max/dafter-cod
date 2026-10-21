@@ -33,9 +33,9 @@ Nouvelle ──Confirmer──> Confirmée ──Préparer──> Préparée ─
 
 - **Confirmée**: phone, wilaya and address checked; stock reserved (ERPNext reserved qty); optional block if stock is short.
 - **Injoignable**: each "Pas de réponse" adds 1 to the call counter; the button disappears at the maximum (default 3).
-- **Expédiée**: courier + tracking number (typed, or given by the courier connector); a Delivery Note takes the stock out.
-- **Livrée**: the order's invoice (Facture DZ, payment mode Contre-remboursement) is made from its Delivery Note; dz_core's sales reports count it.
-- **Retournée**: a return Delivery Note brings the parcel into the **Retours** warehouse; then **Inspecter le retour** puts good pieces back in stock and writes damaged ones off.
+- **Expédiée**: courier + tracking number (typed, or given by the courier connector); the parcel moves to the **Chez transporteur** warehouse (still our stock, not sold).
+- **Livrée**: a Delivery Note takes the parcel out of Chez transporteur with its lots; the order's invoice (Facture DZ, payment mode Contre-remboursement) is made from it and paid into the courier's account (4671n): the courier now owes the money. dz_core's sales reports count it.
+- **Retournée**: the parcel moves from Chez transporteur to the **Retours** warehouse (nothing was sold); then **Inspecter le retour** puts good pieces back in stock and writes damaged ones off.
 - **Réglée**: set by a courier settlement (Versement).
 - **Direct sales** (wholesale, shop: *Canal* = Vente directe, from the customer or COD Settings) skip all of this: *Valider* → **Validée**, then ERPNext's usual delivery note and invoice. A producer who also sells online gets both on one site.
 
@@ -118,7 +118,8 @@ dz_cod/
   cod/                      business rules
     states.py                 state and button names
     order.py                  what happens at each step of the order
-    stock.py                  delivery note, return, inspection
+    stock.py                  shipment to Chez transporteur, delivery note, return, inspection
+    accounts.py               couriers' accounts (4671n), delivery fee item, Versement accounts
     shipping.py               shipping fee from the wilaya rate table
     settlement.py             settlement matching rules (pure functions)
     phone_checks.py           refused-parcels and duplicate-customer warnings

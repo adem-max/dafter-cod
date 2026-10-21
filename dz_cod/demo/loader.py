@@ -37,10 +37,11 @@ from frappe.utils import add_days, getdate, today
 from frappe.utils.nestedset import get_root_of
 
 from dz_cod.cod import states as S
+from dz_cod.cod.accounts import settlement_accounts, setup_cod_accounts
 from dz_cod.cod.stock import get_returned_items, inspect_return
 from dz_cod.demo import data as D
 from dz_cod.features import ALL, configured, set_features
-from dz_cod.setup.new_client import make_cod_the_home_page, settlement_accounts
+from dz_cod.setup.new_client import make_cod_the_home_page
 
 DAYS_OF_HISTORY = 60
 # The shop prints its own designs on blanks: printed garments are its products,
@@ -184,23 +185,8 @@ def setup_settings():
 			wh.update({"warehouse_name": name, "company": D.COMPANY, "parent_warehouse": root_warehouse})
 			wh.insert()
 
-	# Income account for the delivery fees we charge customers
-	shipping_account = f"{D.SHIPPING_ACCOUNT} - {D.ABBR}"
-	if not frappe.db.exists("Account", shipping_account):
-		income_root = frappe.db.get_value(
-			"Account",
-			{"company": D.COMPANY, "root_type": "Income", "is_group": 1, "parent_account": ["is", "not set"]},
-		)
-		account = frappe.new_doc("Account")
-		account.update(
-			{
-				"account_name": D.SHIPPING_ACCOUNT,
-				"company": D.COMPANY,
-				"parent_account": income_root,
-				"account_type": "Income Account",
-			}
-		)
-		account.insert()
+	# Couriers' group accounts, the delivery fee item, "Chez transporteur" (cod/accounts.py)
+	in_transit = setup_cod_accounts(D.COMPANY)
 
 	settings = frappe.get_doc("COD Settings")
 	settings.update(
@@ -208,13 +194,15 @@ def setup_settings():
 			"company": D.COMPANY,
 			"main_warehouse": warehouse_name(D.MAIN_WAREHOUSE),
 			"returns_warehouse": warehouse_name(D.RETURNS_WAREHOUSE),
-			"shipping_income_account": shipping_account,
+			"in_transit_warehouse": in_transit,
 			"max_call_attempts": settings.max_call_attempts or 3,
 		}
 	)
-	# Where the Versements are booked (cod/invoicing.py)
+	# The fee's account and where the Versements are booked (cod/invoicing.py);
+	# an account of another company (a site prepared before) is replaced
 	for field, account in settlement_accounts(D.COMPANY).items():
-		if not settings.get(field):
+		chosen = settings.get(field)
+		if not chosen or frappe.db.get_value("Account", chosen, "company") != D.COMPANY:
 			settings.set(field, account)
 	settings.save()
 

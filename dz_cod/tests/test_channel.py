@@ -17,8 +17,8 @@ from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
 from dz_cod.cod import states as S
+from dz_cod.cod.accounts import FEE_ITEM
 from dz_cod.cod.channel import COD, DIRECT
-from dz_cod.cod.shipping import SHIPPING_DESCRIPTION
 from dz_cod.dz_cod.report.cod_daily_orders import cod_daily_orders
 from dz_cod.patches import set_channel_on_existing_orders
 from dz_cod.tests import helpers as h
@@ -44,7 +44,7 @@ def direct_order():
 
 
 def fee_lines(order):
-	return [tax for tax in order.get("taxes") if tax.description == SHIPPING_DESCRIPTION]
+	return [row for row in order.get("items") if row.item_code == FEE_ITEM]
 
 
 def actions(order):

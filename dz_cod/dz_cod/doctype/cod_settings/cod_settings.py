@@ -11,18 +11,18 @@ from frappe.model.document import Document
 ACCOUNT_FIELDS = (
 	"shipping_income_account",
 	"settlement_bank_account",
-	"courier_fee_account",
 	"settlement_difference_account",
+	"settlement_gain_account",
 	"unmatched_settlement_account",
 )
 
 
 class CODSettings(Document):
 	def validate(self):
-		# Both warehouses must belong to the selected company
-		for fieldname in ("main_warehouse", "returns_warehouse"):
+		# The warehouses must belong to the selected company
+		for fieldname in ("main_warehouse", "returns_warehouse", "in_transit_warehouse"):
 			warehouse = self.get(fieldname)
-			if frappe.db.get_value("Warehouse", warehouse, "company") != self.company:
+			if warehouse and frappe.db.get_value("Warehouse", warehouse, "company") != self.company:
 				frappe.throw(
 					_("L'entrepôt {0} n'appartient pas à la société {1}.").format(warehouse, self.company)
 				)

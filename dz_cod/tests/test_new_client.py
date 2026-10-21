@@ -74,11 +74,28 @@ class TestNewClient(IntegrationTestCase):
 			self.assertEqual(cod.main_warehouse, core.finished_goods_warehouse)
 			self.assertEqual(cod.returns_warehouse, f"{new_client.RETURNS_WAREHOUSE} - {abbr}")
 			self.assertEqual(frappe.db.get_value("Warehouse", cod.returns_warehouse, "company"), company)
-			self.assertEqual(cod.shipping_income_account, f"{new_client.SHIPPING_ACCOUNT} - {abbr}")
+			# the fee's and the Versements' accounts, by SCF number (cod/accounts.py)
+			numbers = {
+				field: frappe.db.get_value("Account", cod.get(field), "account_number")
+				for field in (
+					"shipping_income_account",
+					"settlement_difference_account",
+					"settlement_gain_account",
+					"unmatched_settlement_account",
+					"settlement_bank_account",
+				)
+			}
 			self.assertEqual(
-				frappe.db.get_value("Account", cod.shipping_income_account, ["company", "account_type"]),
-				(company, "Income Account"),
+				numbers,
+				{
+					"shipping_income_account": "7088",
+					"settlement_difference_account": "65882",
+					"settlement_gain_account": "75882",
+					"unmatched_settlement_account": "4781",
+					"settlement_bank_account": "5121",
+				},
 			)
+			self.assertEqual(cod.in_transit_warehouse, f"Chez transporteur - {abbr}")
 			self.assertEqual((cod.default_courier, cod.max_call_attempts), (courier, 3))
 			self.assertEqual(
 				frappe.db.get_value(

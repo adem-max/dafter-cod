@@ -11,8 +11,8 @@ frappe.ui.form.on("COD Settings", {
 			accounts({ account_type: ["in", ["Bank", "Cash"]] })
 		);
 		for (const field of [
-			"courier_fee_account",
 			"settlement_difference_account",
+			"settlement_gain_account",
 			"unmatched_settlement_account",
 		]) {
 			frm.set_query(field, accounts({}));

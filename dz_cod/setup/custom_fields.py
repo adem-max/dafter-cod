@@ -197,13 +197,24 @@ SALES_ORDER_FIELDS = [
 		options="currency",
 		description="Montant que le transporteur devrait retenir (d'après la grille de la wilaya).",
 	),
+	# Expédiée: the parcel's goods moved to "Chez transporteur" (cod/stock.py)
 	after_submit_readonly(
-		"dz_delivery_note", "Bon de livraison", "Link", "dz_courier_fee", options="Delivery Note"
+		"dz_shipment_entry", "Mouvement d'expédition", "Link", "dz_courier_fee", options="Stock Entry"
 	),
-	# Made when the order becomes Livrée (cod/invoicing.py)
+	# Livrée: delivery note, invoice, and its payment into the courier's account
+	after_submit_readonly(
+		"dz_delivery_note", "Bon de livraison", "Link", "dz_shipment_entry", options="Delivery Note"
+	),
 	after_submit_readonly("dz_sales_invoice", "Facture", "Link", "dz_delivery_note", options="Sales Invoice"),
 	after_submit_readonly(
-		"dz_return_note", "Bon de retour", "Link", "dz_sales_invoice", options="Delivery Note"
+		"dz_payment_entry", "Encaissement transporteur", "Link", "dz_sales_invoice", options="Payment Entry"
+	),
+	# Retournée: the parcel moved to the returns warehouse (before 0.3.0: a return note)
+	after_submit_readonly(
+		"dz_return_entry", "Mouvement de retour", "Link", "dz_payment_entry", options="Stock Entry"
+	),
+	after_submit_readonly(
+		"dz_return_note", "Bon de retour", "Link", "dz_return_entry", options="Delivery Note"
 	),
 	after_submit_readonly("dz_return_inspected", "Retour inspecté", "Check", "dz_return_note"),
 	after_submit_readonly(
@@ -289,6 +300,15 @@ SUPPLIER_FIELDS = [
 		"description": "Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).",
 		"fieldtype": "Password",
 		"insert_after": "dz_from_wilaya",
+	},
+	{
+		"fieldname": "dz_cod_account",
+		"label": "Compte des encaissements",
+		"description": "Ce que le transporteur a encaissé pour nous et doit reverser (4671n, créé à la première livraison).",
+		"fieldtype": "Link",
+		"options": "Account",
+		"read_only": 1,
+		"insert_after": "dz_webhook_secret",
 	},
 ]
 

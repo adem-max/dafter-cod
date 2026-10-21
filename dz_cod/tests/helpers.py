@@ -114,6 +114,10 @@ def main_warehouse():
 	return frappe.db.get_single_value("COD Settings", "main_warehouse")
 
 
+def transit_warehouse():
+	return frappe.db.get_single_value("COD Settings", "in_transit_warehouse")
+
+
 def returns_warehouse():
 	return frappe.db.get_single_value("COD Settings", "returns_warehouse")
 

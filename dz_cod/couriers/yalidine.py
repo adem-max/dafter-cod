@@ -349,8 +349,14 @@ def split_name(full_name):
 
 
 def product_list(order):
-	"""'2 x T-shirt Casbah Noir M, 1 x Mug Alger'"""
-	return ", ".join(f"{flt(row.qty):g} x {row.item_name or row.item_code}" for row in order.items)
+	"""'2 x T-shirt Casbah Noir M, 1 x Mug Alger' (the delivery fee line left out)"""
+	from dz_cod.cod.accounts import FEE_ITEM
+
+	return ", ".join(
+		f"{flt(row.qty):g} x {row.item_name or row.item_code}"
+		for row in order.items
+		if row.item_code != FEE_ITEM
+	)
 
 
 def update_order(tracking, status=None, status_on=None, payment_status=None, payment_id=None):

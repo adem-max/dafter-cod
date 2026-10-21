@@ -331,8 +331,9 @@ Read `dz_cod/cod/stock.py`.
 | COD step | ERPNext document | Planning analogy |
 |----------|------------------|------------------|
 | Confirmer | Sales Order submitted → `reserved_qty` goes up in the Bin | **material allocation** (soft reservation) against a work order: the stock is still on the shelf, but promised |
-| Expédier | **Delivery Note** submitted → `actual_qty` goes down, reservation released | **material issue** to the order |
-| Marquer retournée | **return Delivery Note** into **Retours** warehouse | **receipt into a quarantine / MRB sub-inventory**: nobody may use it before inspection |
+| Expédier | **Stock Entry** Material Transfer main → **Chez transporteur**; reservation kept | **move to a holding / consignment location**: still our stock, not issued |
+| Marquer livrée | **Delivery Note** out of Chez transporteur (same lots) → reservation released; invoice + payment into the courier's account | **material issue** to the order, and the sale |
+| Marquer retournée | **Stock Entry** Material Transfer Chez transporteur → **Retours** | **receipt into a quarantine / MRB sub-inventory**: nobody may use it before inspection |
 | Inspecter le retour | **Stock Entry** Material Transfer (good) and Material Issue (damaged) | **MRB disposition**: return to stock or scrap |
 
 The **Bin** is ERPNext's on-hand table per item and warehouse
@@ -406,10 +407,11 @@ dafter-core); this app adds the rate fields to it (`DZ_WILAYA_FIELDS` in
 The **wilaya list is the rate table** (one row per wilaya, two prices: home
 and stop desk, plus what the courier keeps). When an order is saved as a
 draft, we look up its wilaya and delivery type and add the fee to the order
-as a **freight charge line** in "Taxes and Charges", type *Actual* — exactly
-like a freight modifier in Advanced Pricing, and exactly how ERPNext's own
-Shipping Rule works. Because it is a normal charge line, the total, the
-delivery note and the accounts all include it automatically.
+as an **item line** (`FRAIS-LIVRAISON`, a non-stock service item). Being an
+item, it is taxed by the order's tax template like the goods (the TVA law
+keeps a re-billed courier fee in the taxable base), and the total, the
+delivery note, the invoice and the accounts (7088) all include it. Until
+0.3.0 it was a freight charge line in "Taxes and Charges", after the TVA.
 
 ### The lines that matter
 

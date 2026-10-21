@@ -32,7 +32,7 @@ def setup_all():
 	setup_selling_settings()
 	setup_home_block()
 	setup_new_settings_defaults()
-	setup_settlement_accounts()
+	setup_cod_accounting()
 	# Last: migrate re-imports our reports and print formats (enabled); switch
 	# off again what this site doesn't have (dz_cod/features.py)
 	apply_features()
@@ -52,18 +52,20 @@ def setup_new_settings_defaults():
 			frappe.db.set_single_value("COD Settings", fieldname, value)
 
 
-def setup_settlement_accounts():
-	"""The accounts the Versements are booked to (cod/invoicing.py), made and
-	set once on a site prepared before they existed. A choice made in COD
-	Settings is kept."""
-	from dz_cod.setup.new_client import settlement_accounts
+def setup_cod_accounting():
+	"""What COD needs on top of dz_core's SCF set-up (cod/accounts.py): the
+	couriers' group accounts, the delivery fee item, the "Chez transporteur"
+	warehouse, and the fee's and Versements' accounts in COD Settings. Set
+	where empty, on a site prepared before they existed; a choice is kept."""
+	from dz_cod.cod.accounts import settlement_accounts, setup_cod_accounts
 
 	company = frappe.db.get_single_value("COD Settings", "company")
-	if not company:
-		return
-	for field, account in settlement_accounts(company).items():
-		if account and not frappe.db.get_single_value("COD Settings", field):
-			frappe.db.set_single_value("COD Settings", field, account)
+	if not company or not frappe.db.exists("Account", {"company": company, "account_number": "4671"}):
+		return  # no company yet, or dz_core's SCF set-up has not run on it
+	values = {"in_transit_warehouse": setup_cod_accounts(company), **settlement_accounts(company)}
+	for field, value in values.items():
+		if value and not frappe.db.get_single_value("COD Settings", field):
+			frappe.db.set_single_value("COD Settings", field, value)
 
 
 def setup_selling_settings():

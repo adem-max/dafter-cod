@@ -10,8 +10,8 @@ from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, getdate
 
 from dz_cod.cod import states as S
+from dz_cod.cod.accounts import FEE_ITEM, courier_account
 from dz_cod.cod.invoicing import PAYMENT_MODE, invoice_delivered_order
-from dz_cod.cod.shipping import SHIPPING_DESCRIPTION
 from dz_cod.tests import helpers as h
 from dz_cod.tests.test_settlement import delivered_order, new_settlement
 
@@ -27,12 +27,20 @@ def outstanding(order):
 
 
 def entry_amounts(name):
-	"""{account: debit - credit} of a Journal Entry, customers' lines left out."""
+	"""{account: debit - credit} of a Journal Entry, the supplier's line under "supplier"."""
 	amounts = {}
 	for row in frappe.get_doc("Journal Entry", name).accounts:
-		if not row.party:
-			amounts[row.account] = amounts.get(row.account, 0) + row.debit - row.credit
+		key = "supplier" if row.party_type == "Supplier" else row.account
+		amounts[key] = amounts.get(key, 0) + row.debit - row.credit
 	return amounts
+
+
+def balance(account):
+	return flt(
+		frappe.db.sql(
+			"SELECT SUM(debit - credit) FROM `tabGL Entry` WHERE account = %s AND is_cancelled = 0", account
+		)[0][0]
+	)
 
 
 class TestInvoiceAtDelivery(IntegrationTestCase):
@@ -51,10 +59,21 @@ class TestInvoiceAtDelivery(IntegrationTestCase):
 		self.assertEqual(invoice.dz_payment_mode, PAYMENT_MODE)
 		self.assertEqual(getdate(invoice.posting_date), getdate(order.dz_delivered_on))
 		self.assertEqual(getdate(invoice.due_date), getdate(invoice.posting_date))
-		fee = [tax for tax in invoice.taxes if tax.description == SHIPPING_DESCRIPTION]
-		self.assertEqual(flt(fee[0].tax_amount), 400)  # the delivery fee, Alger home delivery
+		fee = [row for row in invoice.items if row.item_code == FEE_ITEM]
+		self.assertEqual(flt(fee[0].amount), 400)  # the delivery fee, Alger home delivery
+		self.assertEqual(frappe.db.get_value("Account", fee[0].income_account, "account_number"), "7088")
 		self.assertEqual(frappe.db.get_value("Sales Order", order.name, "per_billed"), 100)
 		self.assertIsNone(invoice_delivered_order(order))  # once per order
+
+		# The buyer paid the courier: the invoice is paid, into the courier's account
+		self.assertEqual(outstanding(order), 0)
+		payment = frappe.get_doc("Payment Entry", order.dz_payment_entry)
+		self.assertEqual(payment.docstatus, 1)
+		self.assertEqual(payment.paid_to, courier_account(order.dz_courier, order.company))
+		self.assertEqual(getdate(payment.posting_date), getdate(invoice.posting_date))
+		account = frappe.get_doc("Account", payment.paid_to)
+		self.assertTrue(account.account_number.startswith("4671"))
+		self.assertEqual(frappe.db.get_value("Account", account.parent_account, "account_number"), "4671")
 
 	def test_no_invoice_before_delivery_or_when_switched_off(self):
 		returned = h.act(h.make_order(), S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP, S.ACTION_RETURN)
@@ -98,41 +117,47 @@ class TestSettlementEntry(IntegrationTestCase):
 		self.assertTrue(settlement.journal_entry)
 		entry = frappe.get_doc("Journal Entry", settlement.journal_entry)
 		self.assertEqual(entry.docstatus, 1)
-		self.assertEqual([outstanding(o) for o in (ok, short_ok, short_open, over)], [0, 0, 300, 0])
 
 		settings = frappe.get_cached_doc("COD Settings")
+		courier = courier_account(h.MOCK_COURIER, settlement.company)
 		amounts = entry_amounts(entry.name)
 		self.assertAlmostEqual(amounts[settlement.bank_account], settlement.amount_received, 2)
-		self.assertAlmostEqual(amounts[settings.courier_fee_account], settlement.total_fees, 2)
-		# 500 written off, 200 received too much
-		self.assertAlmostEqual(amounts[settings.settlement_difference_account], 500 - 200, 2)
+		# the fees the courier kept, against its own invoice
+		self.assertAlmostEqual(amounts["supplier"], settlement.total_fees, 2)
+		# the courier's debt cleared: each parcel's amount, except 300 still owed on short_open
+		cleared = sum(flt(o.dz_cod_amount) for o in (ok, short_ok, short_open, over)) - 300
+		self.assertAlmostEqual(amounts[courier], -cleared, 2)
+		self.assertAlmostEqual(amounts[settings.settlement_difference_account], 500, 2)  # written off
+		self.assertAlmostEqual(amounts[settings.settlement_gain_account], -200, 2)  # received too much
 		# the unknown parcel and the 50 DA: to check with the courier
 		self.assertAlmostEqual(amounts[settings.unmatched_settlement_account], -1050, 2)
+		self.assertAlmostEqual(sum(amounts.values()), 0, 2)
 		states = [
 			frappe.db.get_value("Sales Order", o.name, "workflow_state")
 			for o in (ok, short_ok, short_open, over)
 		]
 		self.assertEqual(states, [S.SETTLED, S.SETTLED, S.DELIVERED, S.SETTLED])
 
+		courier_before_cancel = balance(courier)
 		settlement.cancel()
 		self.assertEqual(frappe.db.get_value("Journal Entry", entry.name, "docstatus"), 2)
-		self.assertEqual(outstanding(ok), flt(ok.dz_cod_amount))
+		self.assertAlmostEqual(balance(courier), courier_before_cancel + cleared, 2)  # owed again
 		self.assertEqual(frappe.db.get_value("Sales Order", ok.name, "workflow_state"), S.DELIVERED)
 
 	def test_missing_accounts_are_named(self):
-		account = frappe.db.get_single_value("COD Settings", "courier_fee_account")
-		cod_setting("courier_fee_account", None)
+		account = frappe.db.get_single_value("COD Settings", "settlement_gain_account")
+		cod_setting("settlement_gain_account", None)
 		try:
 			order = delivered_order()
 			settlement = new_settlement([self.line(order)])
 			with self.assertRaises(frappe.ValidationError) as error:
 				settlement.submit()
 			# Compared in the active language: another test may have switched it
-			self.assertIn(_("Compte des frais transporteurs"), str(error.exception))
+			self.assertIn(_("Compte des écarts sur versements (gains)"), str(error.exception))
 			# refused before anything moved
 			self.assertEqual(frappe.db.get_value("Sales Order", order.name, "workflow_state"), S.DELIVERED)
 		finally:
-			cod_setting("courier_fee_account", account)
+			cod_setting("settlement_gain_account", account)
 
 	def test_settlement_bank_follows_the_company_bank(self):
 		from dz_core.setup.accounts import account_by_number

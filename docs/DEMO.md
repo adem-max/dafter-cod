@@ -97,7 +97,7 @@ bench --site demo.localhost execute dz_cod.demo.loader.load
 3. **Actions → Pas de réponse** twice: the call counter goes up. Then
    **Actions → Confirmer**: stock is reserved.
 4. **Préparer**, then **Expédier**: the dialog asks for the courier; the Mock
-   courier gives a tracking number and a delivery note is created.
+   courier gives a tracking number and the parcel moves to the "Chez transporteur" warehouse.
 5. **Rapports → Encours transporteurs**: how much cash each courier owes.
 6. **Versements → new**: courier "Rapide Express (démo)", button *Charger les
    commandes livrées*, change one amount (−500), save: OK / Écart lines and

@@ -7,6 +7,7 @@
   "company",
   "main_warehouse",
   "returns_warehouse",
+  "in_transit_warehouse",
   "column_break_stock",
   "shipping_income_account",
   "block_confirmation_without_stock",
@@ -19,10 +20,10 @@
   "accounting_section",
   "invoice_on_delivery",
   "settlement_bank_account",
-  "courier_fee_account",
+  "unmatched_settlement_account",
   "column_break_accounting",
   "settlement_difference_account",
-  "unmatched_settlement_account",
+  "settlement_gain_account",
   "courier_section",
   "default_courier",
   "column_break_courier",
@@ -51,6 +52,13 @@
    "label": "Entrepôt des retours",
    "options": "Warehouse",
    "reqd": 1
+  },
+  {
+   "description": "Les colis expédiés y restent jusqu'à la livraison ou au retour : encore notre stock, pas encore vendu.",
+   "fieldname": "in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "Entrepôt chez le transporteur",
+   "options": "Warehouse"
   },
   {
    "fieldname": "column_break_stock",
@@ -133,21 +141,21 @@
    "options": "Account"
   },
   {
-   "description": "Ce que les transporteurs retiennent sur chaque colis.",
-   "fieldname": "courier_fee_account",
-   "fieldtype": "Link",
-   "label": "Compte des frais transporteurs",
-   "options": "Account"
-  },
-  {
    "fieldname": "column_break_accounting",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Écarts acceptés et montants versés en trop.",
+   "description": "Écarts acceptés : ce que le transporteur ne versera pas (65882).",
    "fieldname": "settlement_difference_account",
    "fieldtype": "Link",
-   "label": "Compte des écarts sur versements",
+   "label": "Compte des écarts sur versements (pertes)",
+   "options": "Account"
+  },
+  {
+   "description": "Montants encaissés au-delà de ce qui était dû (75882).",
+   "fieldname": "settlement_gain_account",
+   "fieldtype": "Link",
+   "label": "Compte des écarts sur versements (gains)",
    "options": "Account"
   },
   {
@@ -183,7 +191,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-20 21:00:00.000000",
+ "modified": "2026-10-21 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "COD Settings",
