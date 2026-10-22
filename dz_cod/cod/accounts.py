@@ -58,6 +58,14 @@ def courier_account(courier, company):
 	)
 	if not group:
 		frappe.throw(f"Compte {COURIER_ACCOUNTS_GROUP} introuvable : lancez la mise en place SCF (dz_core).")
+	name = COURIER_ACCOUNT_NAME.format(frappe.db.get_value("Supplier", courier, "supplier_name"))
+	# a courier made again under the same name (the demo reload) gets its account back
+	account = frappe.db.get_value(
+		"Account", {"company": company, "parent_account": group, "account_name": name, "is_group": 0}
+	)
+	if account:
+		frappe.db.set_value("Supplier", courier, "dz_cod_account", account)
+		return account
 	numbers = frappe.get_all("Account", filters={"parent_account": group}, pluck="account_number")
 	number = next(
 		f"{COURIER_ACCOUNTS_GROUP}{n}" for n in range(1, 100) if f"{COURIER_ACCOUNTS_GROUP}{n}" not in numbers
@@ -67,9 +75,7 @@ def courier_account(courier, company):
 			{
 				"doctype": "Account",
 				"company": company,
-				"account_name": COURIER_ACCOUNT_NAME.format(
-					frappe.db.get_value("Supplier", courier, "supplier_name")
-				),
+				"account_name": name,
 				"account_number": number,
 				"parent_account": group,
 				"account_type": "Cash",  # so a Payment Entry may pay into it
