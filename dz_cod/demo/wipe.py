@@ -22,7 +22,7 @@ Refuses to run if the site contains orders of another company.
 
 import frappe
 from dz_core.demo.loader import demo_accounting
-from dz_core.demo.wipe import BATCH, commit_when_workers_keep_up, ledger_lines_deleted
+from dz_core.demo.wipe import BATCH, commit_when_workers_keep_up, forget_books, ledger_lines_deleted
 
 from dz_cod.demo import data as D
 from dz_cod.demo.loader import check_site_is_for_demo
@@ -32,6 +32,7 @@ def run(full=0):
 	check_site_is_for_demo()
 	with ledger_lines_deleted(int(full)):
 		remove_everything()
+	forget_books(D.COMPANY)  # the wiped story's audit trail and archives
 	if int(full):
 		for line in demo_accounting(D.COMPANY, None):
 			print(f"   {line}")
