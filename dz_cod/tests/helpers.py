@@ -8,6 +8,7 @@ Everything a test class creates is rolled back at the end of the class
 """
 
 import frappe
+from dz_core.setup.item_groups import MERCHANDISE_GROUP
 from frappe.model.workflow import apply_workflow
 from frappe.utils import today
 
@@ -53,7 +54,8 @@ def setup_fixtures():
 			{
 				"item_code": ITEM,
 				"item_name": "T-shirt de test",
-				"item_group": frappe.utils.nestedset.get_root_of("Item Group"),
+				# a group with accounts: inventory accounts are per item (group)
+				"item_group": MERCHANDISE_GROUP,
 				"stock_uom": "Pièce",
 				"is_stock_item": 1,
 				"valuation_rate": 800,
@@ -95,8 +97,25 @@ def setup_fixtures():
 	set_stock(STOCK_QTY)
 
 
+def before_tests():
+	"""hooks.py before_tests: the fixtures are kept on the test site (company,
+	COD Settings, couriers, stock), so a fresh site (CI) is like test.localhost.
+	dz_core's suite runs on the same site, and every sales order there goes
+	through dz_cod, which needs COD Settings. The test site has every feature
+	("all"): a site without a list would have the base only."""
+	from dz_cod.features import ALL, set_features
+
+	setup_fixtures()
+	set_features(ALL)
+	frappe.db.commit()
+
+
 def main_warehouse():
 	return frappe.db.get_single_value("COD Settings", "main_warehouse")
+
+
+def transit_warehouse():
+	return frappe.db.get_single_value("COD Settings", "in_transit_warehouse")
 
 
 def returns_warehouse():
@@ -127,8 +146,8 @@ def set_stock(qty):
 	entry.submit()
 
 
-def make_order(qty=1, courier=MOCK_COURIER, **values):
-	"""A new draft COD order (state Nouvelle)."""
+def make_order(qty=1, courier=MOCK_COURIER, item=ITEM, **values):
+	"""A new draft COD order (state Nouvelle) of one line."""
 	order = frappe.new_doc("Sales Order")
 	order.update(
 		{
@@ -145,7 +164,7 @@ def make_order(qty=1, courier=MOCK_COURIER, **values):
 		}
 	)
 	order.update(values)
-	order.append("items", {"item_code": ITEM, "qty": qty, "rate": ITEM_PRICE, "delivery_date": today()})
+	order.append("items", {"item_code": item, "qty": qty, "rate": ITEM_PRICE, "delivery_date": today()})
 	order.insert()
 	return order
 

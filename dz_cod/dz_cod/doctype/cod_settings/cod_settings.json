@@ -7,14 +7,23 @@
   "company",
   "main_warehouse",
   "returns_warehouse",
+  "in_transit_warehouse",
   "column_break_stock",
   "shipping_income_account",
   "block_confirmation_without_stock",
   "orders_section",
+  "default_channel",
   "max_call_attempts",
   "refused_warning_threshold",
   "column_break_orders",
   "settlement_tolerance",
+  "accounting_section",
+  "invoice_on_delivery",
+  "settlement_bank_account",
+  "unmatched_settlement_account",
+  "column_break_accounting",
+  "settlement_difference_account",
+  "settlement_gain_account",
   "courier_section",
   "default_courier",
   "column_break_courier",
@@ -45,6 +54,13 @@
    "reqd": 1
   },
   {
+   "description": "Les colis expédiés y restent jusqu'à la livraison ou au retour : encore notre stock, pas encore vendu.",
+   "fieldname": "in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "Entrepôt chez le transporteur",
+   "options": "Warehouse"
+  },
+  {
    "fieldname": "column_break_stock",
    "fieldtype": "Column Break"
   },
@@ -67,6 +83,14 @@
    "fieldname": "orders_section",
    "fieldtype": "Section Break",
    "label": "Commandes et versements"
+  },
+  {
+   "default": "COD",
+   "description": "Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",
+   "fieldname": "default_channel",
+   "fieldtype": "Select",
+   "label": "Canal par défaut",
+   "options": "COD\nVente directe"
   },
   {
    "default": "3",
@@ -98,6 +122,50 @@
    "options": "DZD"
   },
   {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Comptabilité : factures et versements"
+  },
+  {
+   "default": "1",
+   "description": "Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.",
+   "fieldname": "invoice_on_delivery",
+   "fieldtype": "Check",
+   "label": "Facturer à la livraison"
+  },
+  {
+   "description": "Où arrivent les virements des transporteurs.",
+   "fieldname": "settlement_bank_account",
+   "fieldtype": "Link",
+   "label": "Compte des versements",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_accounting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Écarts acceptés : ce que le transporteur ne versera pas (65882).",
+   "fieldname": "settlement_difference_account",
+   "fieldtype": "Link",
+   "label": "Compte des écarts sur versements (pertes)",
+   "options": "Account"
+  },
+  {
+   "description": "Montants encaissés au-delà de ce qui était dû (75882).",
+   "fieldname": "settlement_gain_account",
+   "fieldtype": "Link",
+   "label": "Compte des écarts sur versements (gains)",
+   "options": "Account"
+  },
+  {
+   "description": "Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.",
+   "fieldname": "unmatched_settlement_account",
+   "fieldtype": "Link",
+   "label": "Compte des versements à identifier",
+   "options": "Account"
+  },
+  {
    "fieldname": "courier_section",
    "fieldtype": "Section Break",
    "label": "Transporteur"
@@ -123,7 +191,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-16 10:00:00.000000",
+ "modified": "2026-10-21 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "COD Settings",

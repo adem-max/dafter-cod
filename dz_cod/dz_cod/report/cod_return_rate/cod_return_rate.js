@@ -35,7 +35,9 @@ frappe.query_reports["COD Return Rate"] = {
 			label: __("Minimum de colis"),
 			fieldtype: "Int",
 			default: 5,
-			description: __("En dessous de ce nombre de commandes livrées ou retournées, pas de taux (échantillon trop petit)."),
+			description: __(
+				"En dessous de ce nombre de commandes livrées ou retournées, pas de taux (échantillon trop petit)."
+			),
 		},
 	],
 };

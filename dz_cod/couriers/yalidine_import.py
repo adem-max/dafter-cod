@@ -21,7 +21,7 @@ from frappe import _
 from frappe.utils import cint
 
 from dz_cod.couriers import get_adapter, places
-from dz_cod.couriers.yalidine import YalidineAdapter
+from dz_cod.couriers.yalidine import CONNECTOR, YalidineAdapter
 from dz_cod.features import requires_feature
 
 PAUSE = 1.5  # seconds between two price calls: 40 calls per minute at most
@@ -179,12 +179,13 @@ def update_places(adapter):
 		if wilaya and row.get("id"):
 			upsert(
 				"DZ Commune",
-				str(row["id"]),
+				places.record_name(CONNECTOR, row["id"]),
 				{
-					"yalidine_id": str(row["id"]),
+					"connector": CONNECTOR,
+					"courier_id": str(row["id"]),
 					"commune_name": row.get("name"),
 					"wilaya": wilaya,
-					"yalidine_wilaya_name": row.get("wilaya_name"),
+					"courier_wilaya_name": row.get("wilaya_name"),
 					"has_stop_desk": cint(row.get("has_stop_desk")),
 					"is_deliverable": cint(row.get("is_deliverable")),
 				},
@@ -196,8 +197,9 @@ def update_places(adapter):
 		if row.get("center_id"):
 			upsert(
 				"DZ Stop Desk",
-				str(row["center_id"]),
+				places.record_name(CONNECTOR, row["center_id"]),
 				{
+					"connector": CONNECTOR,
 					"center_id": str(row["center_id"]),
 					"center_name": row.get("name"),
 					"address": row.get("address"),

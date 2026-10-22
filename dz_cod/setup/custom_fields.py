@@ -12,8 +12,14 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
+from dz_cod.cod.channel import COD, DIRECT
+
 DELIVERY_TYPES = "Domicile\nStop desk"
 ORDER_SOURCES = "\nInstagram\nFacebook\nSite web\nWhatsApp\nTikTok\nTéléphone\nAutre"
+# Empty first: a new order takes its customer's channel, else COD Settings' default (cod/channel.py)
+CHANNELS = f"\n{COD}\n{DIRECT}"
+# The COD sections of an order are hidden on a direct sale
+ONLY_COD = f"eval:doc.dz_channel != '{DIRECT}'"
 
 
 def after_submit_readonly(fieldname, label, fieldtype, insert_after, **extra):
@@ -32,12 +38,22 @@ def after_submit_readonly(fieldname, label, fieldtype, insert_after, **extra):
 
 
 SALES_ORDER_FIELDS = [
+	{
+		"fieldname": "dz_channel",
+		"label": "Canal",
+		"fieldtype": "Select",
+		"options": CHANNELS,
+		"insert_after": "order_type",
+		"in_standard_filter": 1,
+		"description": "Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",
+	},
 	# --- Section 1: who and where to deliver (filled when taking the order) ---
 	{
 		"fieldname": "dz_delivery_section",
 		"label": "Livraison COD",
 		"fieldtype": "Section Break",
 		"insert_after": "delivery_date",
+		"depends_on": ONLY_COD,
 	},
 	{
 		"fieldname": "dz_phone",
@@ -149,6 +165,7 @@ SALES_ORDER_FIELDS = [
 		"fieldtype": "Section Break",
 		"insert_after": "dz_cod_amount",
 		"collapsible": 1,
+		"depends_on": ONLY_COD,
 	},
 	after_submit_readonly("dz_call_attempts", "Appels sans réponse", "Int", "dz_tracking_section"),
 	{
@@ -180,11 +197,24 @@ SALES_ORDER_FIELDS = [
 		options="currency",
 		description="Montant que le transporteur devrait retenir (d'après la grille de la wilaya).",
 	),
+	# Expédiée: the parcel's goods moved to "Chez transporteur" (cod/stock.py)
 	after_submit_readonly(
-		"dz_delivery_note", "Bon de livraison", "Link", "dz_courier_fee", options="Delivery Note"
+		"dz_shipment_entry", "Mouvement d'expédition", "Link", "dz_courier_fee", options="Stock Entry"
+	),
+	# Livrée: delivery note, invoice, and its payment into the courier's account
+	after_submit_readonly(
+		"dz_delivery_note", "Bon de livraison", "Link", "dz_shipment_entry", options="Delivery Note"
+	),
+	after_submit_readonly("dz_sales_invoice", "Facture", "Link", "dz_delivery_note", options="Sales Invoice"),
+	after_submit_readonly(
+		"dz_payment_entry", "Encaissement transporteur", "Link", "dz_sales_invoice", options="Payment Entry"
+	),
+	# Retournée: the parcel moved to the returns warehouse (before 0.3.0: a return note)
+	after_submit_readonly(
+		"dz_return_entry", "Mouvement de retour", "Link", "dz_payment_entry", options="Stock Entry"
 	),
 	after_submit_readonly(
-		"dz_return_note", "Bon de retour", "Link", "dz_delivery_note", options="Delivery Note"
+		"dz_return_note", "Bon de retour", "Link", "dz_return_entry", options="Delivery Note"
 	),
 	after_submit_readonly("dz_return_inspected", "Retour inspecté", "Check", "dz_return_note"),
 	after_submit_readonly(
@@ -221,6 +251,14 @@ CUSTOMER_FIELDS = [
 	{"fieldname": "dz_column", "fieldtype": "Column Break", "insert_after": "dz_wilaya"},
 	{"fieldname": "dz_commune", "label": "Commune", "fieldtype": "Data", "insert_after": "dz_column"},
 	{"fieldname": "dz_address", "label": "Adresse", "fieldtype": "Small Text", "insert_after": "dz_commune"},
+	{
+		"fieldname": "dz_channel",
+		"label": "Canal habituel",
+		"fieldtype": "Select",
+		"options": CHANNELS,
+		"insert_after": "dz_address",
+		"description": "Vide : le canal par défaut des Paramètres COD.",
+	},
 ]
 
 # Courier settings live on the Supplier (a courier is a supplier with
@@ -262,6 +300,15 @@ SUPPLIER_FIELDS = [
 		"description": "Copiée du tableau de bord Webhooks du transporteur (voir docs/COURIER_INTEGRATION.md).",
 		"fieldtype": "Password",
 		"insert_after": "dz_from_wilaya",
+	},
+	{
+		"fieldname": "dz_cod_account",
+		"label": "Compte des encaissements",
+		"description": "Ce que le transporteur a encaissé pour nous et doit reverser (4671n, créé à la première livraison).",
+		"fieldtype": "Link",
+		"options": "Account",
+		"read_only": 1,
+		"insert_after": "dz_webhook_secret",
 	},
 ]
 

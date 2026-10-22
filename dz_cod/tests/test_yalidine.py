@@ -237,6 +237,7 @@ class TestYalidineShipping(IntegrationTestCase):
 		frappe.get_doc(
 			{
 				"doctype": "DZ Stop Desk",
+				"connector": "Yalidine",
 				"center_id": "163001",
 				"center_name": "Centre de Bordj El Kiffan",
 				"commune_name": "Bordj El Kiffan",
@@ -251,11 +252,25 @@ class TestYalidineShipping(IntegrationTestCase):
 			str(error.exception), _("Choisissez le bureau stop desk de la commande avant d'expédier.")
 		)
 
-		order.dz_stopdesk_id = "163001"
+		order.dz_stopdesk_id = "Yalidine-163001"
 		sent = adapter().build_parcel(order)
 		self.assertTrue(sent["is_stopdesk"])
-		self.assertEqual(sent["stopdesk_id"], "163001")
+		self.assertEqual(sent["stopdesk_id"], "163001")  # Yalidine's id, not our record name
 		self.assertEqual(sent["to_commune_name"], "Bordj El Kiffan")
+
+		# Another courier's office is refused
+		frappe.get_doc(
+			{
+				"doctype": "DZ Stop Desk",
+				"connector": "ZR Express",
+				"center_id": "163001",
+				"center_name": "Agence ZR Bordj El Kiffan",
+				"wilaya": h.ALGER,
+			}
+		).insert()
+		order.dz_stopdesk_id = "ZR Express-163001"
+		with self.assertRaisesRegex(frappe.ValidationError, "ZR Express-163001"):
+			adapter().build_parcel(order)
 
 	def test_new_wilaya_is_sent_as_its_parent(self):
 		# Yalidine's docs list 58 wilayas: Aflou (59) goes as Laghouat (03)
@@ -502,12 +517,35 @@ class TestYalidineImports(IntegrationTestCase):
 		with fake_api(routes):
 			self.assertEqual(yalidine_import.update_places(adapter()), (5, 1))
 
-		self.assertEqual(frappe.db.get_value("DZ Commune", "1630", "wilaya"), h.ALGER)
-		self.assertIn("Kouba", places.commune_names(h.ALGER))
+		commune = frappe.db.get_value(
+			"DZ Commune", "Yalidine-1630", ["connector", "courier_id", "wilaya"], as_dict=True
+		)
+		self.assertEqual(
+			(commune.connector, commune.courier_id, commune.wilaya), ("Yalidine", "1630", h.ALGER)
+		)
+		self.assertIn("Kouba", places.commune_names(h.ALGER, YALIDINE))
 		# Aflou (59) has no commune of its own at Yalidine: its parent's list is offered
-		self.assertEqual(places.commune_names(NEW_WILAYA), ["Aflou"])
-		desks = places.stopdesk_query("DZ Stop Desk", "", "name", 0, 20, {"wilaya": h.ALGER})
-		self.assertEqual(desks[0][0], "163001")
+		self.assertEqual(places.commune_names(NEW_WILAYA, YALIDINE), ["Aflou"])
+		desks = places.stopdesk_query(
+			"DZ Stop Desk", "", "name", 0, 20, {"wilaya": h.ALGER, "courier": YALIDINE}
+		)
+		self.assertEqual(desks[0][0], "Yalidine-163001")
+		# A courier without a list (Manuel) or no courier yet: free text, no office list
+		for courier in (h.MANUAL_COURIER, None):
+			self.assertEqual(places.commune_names(h.ALGER, courier), [])
+			self.assertEqual(
+				places.stopdesk_query(
+					"DZ Stop Desk", "", "name", 0, 20, {"wilaya": h.ALGER, "courier": courier}
+				),
+				[],
+			)
+		# A second import updates the records instead of adding new ones
+		pages = iter(
+			[{"has_more": False, "data": [{"id": 1630, "name": "Bordj El Kiffan", "wilaya_id": 16}]}]
+		)
+		with fake_api(routes):
+			yalidine_import.update_places(adapter())
+		self.assertEqual(frappe.db.count("DZ Commune", {"courier_id": "1630"}), 1)
 
 		# Confirming an order: Yalidine's spelling is stored, an unknown commune is refused
 		order = h.act(h.make_order(courier=YALIDINE, dz_commune="kouba"), S.ACTION_CONFIRM)

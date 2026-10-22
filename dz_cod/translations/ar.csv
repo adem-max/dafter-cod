@@ -27,9 +27,7 @@ la commune et l'adresse (livraison à domicile),البلدية والعنوان 
 Choisissez le transporteur avant d'expédier.,اختر شركة التوصيل قبل الإرسال.
 Saisissez le n° de suivi du colis avant d'expédier.,أدخل رقم تتبع الطرد قبل الإرسال.
 La commande doit être à l'état {0}.,يجب أن تكون الطلبية في الحالة {0}.
-Choisissez le compte des frais de livraison dans les Paramètres COD.,اختر حساب رسوم التوصيل في إعدادات COD.
 "{0} : besoin {1}, disponible {2}",{0}: المطلوب {1}، المتوفر {2}
-Pas de bon de livraison pour la commande {0}.,لا يوجد إشعار تسليم للطلبية {0}.
 La commande {0} n'est pas retournée.,الطلبية {0} ليست مُرتجعة.
 Le retour de la commande {0} est déjà inspecté.,تم فحص مرتجع الطلبية {0} من قبل.
 Les quantités inspectées doivent correspondre exactement aux quantités retournées.,يجب أن تطابق الكميات المفحوصة الكميات المُرتجعة تمامًا.
@@ -287,10 +285,13 @@ Données reçues,البيانات المستلمة
 Remarque,ملاحظة
 Nom de la commune,اسم البلدية
 Stop desk dans la commune,مكتب استلام في البلدية
-ID Yalidine,معرّف Yalidine
-Identifiant de la commune chez Yalidine.,معرّف البلدية لدى Yalidine.
-Wilaya chez Yalidine,الولاية لدى Yalidine
-Nom de la wilaya tel que Yalidine l'écrit.,اسم الولاية كما تكتبه Yalidine.
+Chez le transporteur,لدى شركة التوصيل
+Le transporteur dont la liste vient (connecteur du transporteur).,شركة التوصيل التي جاءت منها القائمة (وصلة شركة التوصيل).
+ID chez le transporteur,المعرّف لدى شركة التوصيل
+Identifiant de la commune chez le transporteur.,معرّف البلدية لدى شركة التوصيل.
+Wilaya chez le transporteur,الولاية لدى شركة التوصيل
+Nom de la wilaya tel que le transporteur l'écrit.,اسم الولاية كما تكتبه شركة التوصيل.
+Le bureau {0} n'est pas un bureau Yalidine. Choisissez-le dans la liste.,المكتب {0} ليس مكتبًا لـ Yalidine. اختره من القائمة.
 Nom du bureau,اسم المكتب
 ID du bureau,معرّف المكتب
 Identifiant du bureau chez le transporteur (envoyé avec le colis).,معرّف المكتب لدى شركة التوصيل (يُرسل مع الطرد).
@@ -333,3 +334,44 @@ Bureau,المكتب
 N° de commande (pas encore de n° de suivi),رقم الطلب (لا يوجد رقم تتبع بعد)
 Fonction non incluse dans votre offre,ميزة غير مشمولة في عرضك
 Le connecteur {0} n'est pas inclus dans votre offre : choisissez Manuel.,الموصل {0} غير مشمول في عرضك: اختر «يدوي».
+Canal,قناة البيع
+Vente directe,بيع مباشر
+"Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",بيع مباشر: إشعار التسليم والفاتورة المعتادان في ERPNext، دون فحوصات COD.
+Canal habituel,القناة المعتادة
+Vide : le canal par défaut des Paramètres COD.,فارغ: القناة الافتراضية في إعدادات COD.
+Canal par défaut,القناة الافتراضية
+"Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.",لعميل ليست له قناة معتادة. بيع مباشر: إشعار التسليم والفاتورة المعتادان في ERPNext، دون فحوصات COD.
+Validée,معتمدة
+Valider,اعتماد
+Facture,الفاتورة
+Comptabilité : factures et versements,المحاسبة: الفواتير والتحويلات
+Facturer à la livraison,الفوترة عند التسليم
+"Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.",عندما تصبح الطلبية مُسلَّمة، تُنشأ فاتورتها (Facture DZ) من إشعار التسليم وتُعتمد. ويُسجَّل كل تحويل من شركة التوصيل في قيد محاسبي.
+Compte des versements,حساب التحويلات
+Où arrivent les virements des transporteurs.,الحساب الذي تصل إليه تحويلات شركات التوصيل.
+Compte des versements à identifier,حساب التحويلات غير المحددة
+"Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.",مبالغ دُفعت عن طرود مجهولة أو غير صالحة أو مسدَّدة سابقاً: يجب مراجعتها مع شركة التوصيل.
+Compte bancaire,الحساب البنكي
+Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).,الحساب الذي حوّلت إليه شركة التوصيل المال (افتراضياً: الحساب المحدد في إعدادات COD).
+Écriture comptable,القيد المحاسبي
+"Faite à la validation : la banque, les frais du transporteur et le règlement de chaque facture.",يُنشأ عند الاعتماد: البنك ورسوم شركة التوصيل وتسديد كل فاتورة.
+Versement {0} de {1},تحويل {0} من {1}
+Renseignez dans les Paramètres COD : {0}.,يرجى ملء إعدادات COD: {0}.
+Le compte {0} n'appartient pas à la société {1}.,الحساب {0} لا ينتمي إلى الشركة {1}.
+Mouvement d'expédition,حركة الإرسال
+Encaissement transporteur,تحصيل شركة التوصيل
+Mouvement de retour,حركة الإرجاع
+Compte des encaissements,حساب التحصيلات
+"Ce que le transporteur a encaissé pour nous et doit reverser (4671n, créé à la première livraison).",ما حصّلته شركة التوصيل لحسابنا وعليها تحويله (4671n، يُنشأ عند أول تسليم).
+Entrepôt chez le transporteur,المخزن لدى شركة التوصيل
+"Les colis expédiés y restent jusqu'à la livraison ou au retour : encore notre stock, pas encore vendu.",تبقى الطرود المرسلة هنا حتى التسليم أو الإرجاع: ما زالت من مخزوننا ولم تُبع بعد.
+Compte des écarts sur versements (pertes),حساب فروق التحويلات (خسائر)
+Écarts acceptés : ce que le transporteur ne versera pas (65882).,الفروق المقبولة: ما لن تحوّله شركة التوصيل (65882).
+Compte des écarts sur versements (gains),حساب فروق التحويلات (أرباح)
+Montants encaissés au-delà de ce qui était dû (75882).,مبالغ محصّلة تتجاوز المستحق (75882).
+Encaissé par {0} à la livraison de la commande {1},حصّلتها {0} عند تسليم الطلب {1}
+La commande {0} n'a pas de mouvement d'expédition.,الطلب {0} ليس له حركة إرسال.
+{0} : encaissements à reverser égaux aux colis livrés non réglés,{0}: التحصيلات الواجب تحويلها تساوي الطرود المسلّمة غير المسوّاة
+Écart entre le compte {0} et les colis livrés non réglés : voyez les versements du transporteur.,فرق بين الحساب {0} والطرود المسلّمة غير المسوّاة: راجع تحويلات شركة التوصيل.
+{0} : frais retenus couverts par ses factures,{0}: الرسوم المقتطعة مغطاة بفواتيرها
+Saisissez la facture du transporteur pour ses frais retenus (6241 et la TVA).,أدخل فاتورة شركة التوصيل للرسوم التي اقتطعتها (6241 والرسم على القيمة المضافة).

@@ -27,9 +27,7 @@ la commune et l'adresse (livraison à domicile),the commune and address (home de
 Choisissez le transporteur avant d'expédier.,Choose the courier before shipping.
 Saisissez le n° de suivi du colis avant d'expédier.,Enter the parcel tracking number before shipping.
 La commande doit être à l'état {0}.,The order must be in state {0}.
-Choisissez le compte des frais de livraison dans les Paramètres COD.,Choose the delivery fee account in COD Settings.
 "{0} : besoin {1}, disponible {2}","{0}: need {1}, available {2}"
-Pas de bon de livraison pour la commande {0}.,No delivery note for order {0}.
 La commande {0} n'est pas retournée.,Order {0} is not returned.
 Le retour de la commande {0} est déjà inspecté.,The return of order {0} has already been inspected.
 Les quantités inspectées doivent correspondre exactement aux quantités retournées.,Inspected quantities must exactly match the returned quantities.
@@ -276,10 +274,13 @@ Données reçues,Received data
 Remarque,Remark
 Nom de la commune,Commune name
 Stop desk dans la commune,Stop desk in the commune
-ID Yalidine,Yalidine ID
-Identifiant de la commune chez Yalidine.,The commune's identifier at Yalidine.
-Wilaya chez Yalidine,Wilaya at Yalidine
-Nom de la wilaya tel que Yalidine l'écrit.,The wilaya name as Yalidine spells it.
+Chez le transporteur,At the courier
+Le transporteur dont la liste vient (connecteur du transporteur).,The courier the list comes from (the courier's connector).
+ID chez le transporteur,ID at the courier
+Identifiant de la commune chez le transporteur.,The commune's identifier at the courier.
+Wilaya chez le transporteur,Wilaya at the courier
+Nom de la wilaya tel que le transporteur l'écrit.,The wilaya name as the courier spells it.
+Le bureau {0} n'est pas un bureau Yalidine. Choisissez-le dans la liste.,Office {0} is not a Yalidine office. Pick it from the list.
 Nom du bureau,Office name
 ID du bureau,Office ID
 Identifiant du bureau chez le transporteur (envoyé avec le colis).,The office's identifier at the courier (sent with the parcel).
@@ -319,3 +320,44 @@ Bureau,Office
 N° de commande (pas encore de n° de suivi),Order number (no tracking number yet)
 Fonction non incluse dans votre offre,Feature not included in your plan
 Le connecteur {0} n'est pas inclus dans votre offre : choisissez Manuel.,The {0} connector is not included in your plan: choose Manual.
+Canal,Channel
+Vente directe,Direct sale
+"Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.","Direct sale: ERPNext's usual delivery note and invoice, without the COD checks."
+Canal habituel,Usual channel
+Vide : le canal par défaut des Paramètres COD.,Empty: the default channel of COD Settings.
+Canal par défaut,Default channel
+"Pour un client sans canal habituel. Vente directe : livraison et facture habituelles d'ERPNext, sans les contrôles COD.","For a customer without a usual channel. Direct sale: ERPNext's usual delivery note and invoice, without the COD checks."
+Validée,Validated
+Valider,Validate
+Facture,Invoice
+Comptabilité : factures et versements,Accounting: invoices and courier payments
+Facturer à la livraison,Invoice on delivery
+"Quand une commande passe Livrée, sa facture (Facture DZ) est faite à partir du bon de livraison et validée. Chaque versement est passé en écriture comptable.","When an order becomes Delivered, its invoice (Facture DZ) is made from the delivery note and submitted. Each courier payment is booked as a journal entry."
+Compte des versements,Courier payments account
+Où arrivent les virements des transporteurs.,Where the couriers' transfers arrive.
+Compte des versements à identifier,Unmatched payments account
+"Montants versés pour des colis inconnus, invalides ou déjà réglés : à voir avec le transporteur.","Amounts paid for unknown, invalid or already settled parcels: to check with the courier."
+Compte bancaire,Bank account
+Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).,Where the courier paid the money (by default: the one in COD Settings).
+Écriture comptable,Journal entry
+"Faite à la validation : la banque, les frais du transporteur et le règlement de chaque facture.","Made on submit: the bank, the courier's fees and the payment of each invoice."
+Versement {0} de {1},Courier payment {0} from {1}
+Renseignez dans les Paramètres COD : {0}.,Fill in COD Settings: {0}.
+Le compte {0} n'appartient pas à la société {1}.,Account {0} does not belong to company {1}.
+Mouvement d'expédition,Shipment movement
+Encaissement transporteur,Courier collection
+Mouvement de retour,Return movement
+Compte des encaissements,Collections account
+"Ce que le transporteur a encaissé pour nous et doit reverser (4671n, créé à la première livraison).","What the courier collected for us and must pay over (4671n, made at the first delivery)."
+Entrepôt chez le transporteur,Warehouse at the courier
+"Les colis expédiés y restent jusqu'à la livraison ou au retour : encore notre stock, pas encore vendu.","Shipped parcels stay here until delivery or return: still our stock, not sold yet."
+Compte des écarts sur versements (pertes),Settlement differences account (losses)
+Écarts acceptés : ce que le transporteur ne versera pas (65882).,Accepted differences: what the courier will not pay (65882).
+Compte des écarts sur versements (gains),Settlement differences account (gains)
+Montants encaissés au-delà de ce qui était dû (75882).,Amounts collected beyond what was due (75882).
+Encaissé par {0} à la livraison de la commande {1},Collected by {0} on delivery of order {1}
+La commande {0} n'a pas de mouvement d'expédition.,Order {0} has no shipment movement.
+{0} : encaissements à reverser égaux aux colis livrés non réglés,"{0}: collections to pay over equal the delivered, unsettled parcels"
+Écart entre le compte {0} et les colis livrés non réglés : voyez les versements du transporteur.,"Difference between account {0} and the delivered, unsettled parcels: check the courier's settlements."
+{0} : frais retenus couverts par ses factures,{0}: fees withheld covered by its invoices
+Saisissez la facture du transporteur pour ses frais retenus (6241 et la TVA).,Enter the courier's invoice for the fees it withheld (6241 and the VAT).

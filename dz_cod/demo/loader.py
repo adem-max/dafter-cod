@@ -28,6 +28,9 @@ What it does, in order:
 import random
 
 import frappe
+from dz_core.demo.loader import demo_accounting
+from dz_core.setup.accounts import opening_account
+from dz_core.setup.item_groups import FINISHED, MERCHANDISE, RAW, set_group_accounts
 from dz_core.setup.tax import unset_default_templates
 from dz_core.setup.wilayas import WILAYAS, wilaya_docname
 from frappe.model.workflow import apply_workflow
@@ -35,11 +38,16 @@ from frappe.utils import add_days, getdate, today
 from frappe.utils.nestedset import get_root_of
 
 from dz_cod.cod import states as S
+from dz_cod.cod.accounts import settlement_accounts, setup_cod_accounts
 from dz_cod.cod.stock import get_returned_items, inspect_return
 from dz_cod.demo import data as D
+from dz_cod.features import ALL, configured, set_features
 from dz_cod.setup.new_client import make_cod_the_home_page
 
 DAYS_OF_HISTORY = 60
+# The shop prints its own designs on blanks: printed garments are its products,
+# the blanks its raw material; accessories are bought and resold as they are
+GROUP_KINDS = {D.TSHIRTS: FINISHED, D.SWEATS: FINISHED, D.ACCESSORIES: MERCHANDISE, D.RAW: RAW}
 NB_CUSTOMERS = 80
 NB_ORDERS = 200
 SEED = 2026  # same seed = same demo every time
@@ -67,6 +75,9 @@ def load(return_rate=0.2, seed=SEED):
 	print("1/6 Société et paramètres...")
 	setup_company()
 	setup_settings()
+	# A demo shows every option; a site without a list would have the base only
+	if configured() is None:
+		set_features(ALL)
 	print("2/6 Articles...")
 	setup_items()
 	print("3/6 Clients et transporteurs...")
@@ -100,6 +111,7 @@ def check_site_is_for_demo():
 
 def setup_company():
 	if frappe.db.exists("Company", D.COMPANY):
+		demo_accounting(D.COMPANY, None)  # a company made before 21 Oct 2026 too
 		return
 
 	year = getdate(add_days(today(), -DAYS_OF_HISTORY - 10)).year
@@ -144,6 +156,8 @@ def setup_company():
 	defaults.update({"default_company": D.COMPANY, "default_currency": "DZD", "country": "Algeria"})
 	defaults.save()
 	ensure_fiscal_years()
+	# The SCF set-up (dz_core setup/scf.py), without the immutable ledger: a demo is wiped
+	demo_accounting(D.COMPANY, None)
 
 
 def ensure_fiscal_years():
@@ -172,23 +186,8 @@ def setup_settings():
 			wh.update({"warehouse_name": name, "company": D.COMPANY, "parent_warehouse": root_warehouse})
 			wh.insert()
 
-	# Income account for the delivery fees we charge customers
-	shipping_account = f"{D.SHIPPING_ACCOUNT} - {D.ABBR}"
-	if not frappe.db.exists("Account", shipping_account):
-		income_root = frappe.db.get_value(
-			"Account",
-			{"company": D.COMPANY, "root_type": "Income", "is_group": 1, "parent_account": ["is", "not set"]},
-		)
-		account = frappe.new_doc("Account")
-		account.update(
-			{
-				"account_name": D.SHIPPING_ACCOUNT,
-				"company": D.COMPANY,
-				"parent_account": income_root,
-				"account_type": "Income Account",
-			}
-		)
-		account.insert()
+	# Couriers' group accounts, the delivery fee item, "Chez transporteur" (cod/accounts.py)
+	in_transit = setup_cod_accounts(D.COMPANY)
 
 	settings = frappe.get_doc("COD Settings")
 	settings.update(
@@ -196,10 +195,16 @@ def setup_settings():
 			"company": D.COMPANY,
 			"main_warehouse": warehouse_name(D.MAIN_WAREHOUSE),
 			"returns_warehouse": warehouse_name(D.RETURNS_WAREHOUSE),
-			"shipping_income_account": shipping_account,
+			"in_transit_warehouse": in_transit,
 			"max_call_attempts": settings.max_call_attempts or 3,
 		}
 	)
+	# The fee's account and where the Versements are booked (cod/invoicing.py);
+	# an account of another company (a site prepared before) is replaced
+	for field, account in settlement_accounts(D.COMPANY).items():
+		chosen = settings.get(field)
+		if not chosen or frappe.db.get_value("Account", chosen, "company") != D.COMPANY:
+			settings.set(field, account)
 	settings.save()
 
 	# Default warehouse for stock movements. ERPNext 16.51+ keeps it on the
@@ -235,8 +240,10 @@ def setup_items():
 		ensure("Brand", brand, {"brand": brand})
 
 	root_group = get_root_of("Item Group")
-	for group in (D.TSHIRTS, D.SWEATS, D.ACCESSORIES, D.RAW):
+	for group, kind in GROUP_KINDS.items():
 		ensure("Item Group", group, {"item_group_name": group, "parent_item_group": root_group})
+		# the group's stock, cost of sales and income accounts (inventory accounts per item)
+		set_group_accounts(D.COMPANY, group, kind)
 
 	ensure_attribute("Taille", D.SIZES)
 	ensure_attribute("Couleur", D.COLOURS)
@@ -456,6 +463,8 @@ def setup_opening_stock():
 		fields=["name", "valuation_rate"],
 	)
 	blanks = frappe.get_all("Item", filters={"variant_of": "BLANK-TS"}, fields=["name", "valuation_rate"])
+	# against the opening account 479, like an opening count (not the groups' 7245 / 6571...)
+	opening = opening_account(D.COMPANY)
 	for item in items + blanks:
 		warehouse = D.WORKSHOP_WAREHOUSE if item.name.startswith("BLANK") else D.MAIN_WAREHOUSE
 		entry.append(
@@ -465,6 +474,7 @@ def setup_opening_stock():
 				"qty": opening_qty(item.name),
 				"basic_rate": item.valuation_rate,
 				"t_warehouse": warehouse_name(warehouse),
+				"expense_account": opening,
 			},
 		)
 	entry.insert()

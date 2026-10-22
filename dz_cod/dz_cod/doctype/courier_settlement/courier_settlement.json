@@ -11,6 +11,8 @@
   "posting_date",
   "reference",
   "amount_received",
+  "bank_account",
+  "journal_entry",
   "lines_section",
   "items",
   "summary_section",
@@ -74,6 +76,22 @@
    "in_list_view": 1,
    "label": "Montant reçu",
    "options": "DZD"
+  },
+  {
+   "description": "Où le transporteur a versé l'argent (par défaut : celui des Paramètres COD).",
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Compte bancaire",
+   "options": "Account"
+  },
+  {
+   "description": "Faite à la validation : la banque, les frais du transporteur et le règlement de chaque facture.",
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Écriture comptable",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "description": "Une ligne par colis du relevé du transporteur. Bouton « Charger les commandes livrées » pour pré-remplir, ou « Téléverser » pour importer un fichier CSV.",
@@ -204,7 +222,7 @@
  "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-09 10:00:00.000000",
+ "modified": "2026-10-20 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "Courier Settlement",

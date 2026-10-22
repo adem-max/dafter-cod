@@ -1,6 +1,8 @@
 // Runs inside the block. The choice is a per-user preference saved on the
 // server, so it follows the user on every computer and phone.
 // Values: "open" (default), "collapsed", "hidden".
+// Frappe hands a Custom HTML Block's script the block's own root as root_element
+/* global root_element */
 const KEY = "dz_cod_home_guide";
 const box = root_element.querySelector(".cod-home");
 const toggle = root_element.querySelector(".toggle");

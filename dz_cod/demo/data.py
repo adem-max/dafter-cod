@@ -12,7 +12,6 @@ MAIN_WAREHOUSE = "Stock principal"
 WORKSHOP_WAREHOUSE = "Atelier"
 RETURNS_WAREHOUSE = "Retours"
 
-SHIPPING_ACCOUNT = "Frais de livraison facturés"
 
 CUSTOMER_GROUP = "Particuliers (démo)"
 SUPPLIER_GROUP = "Transporteurs"

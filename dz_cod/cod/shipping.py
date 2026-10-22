@@ -4,19 +4,21 @@ The rate table is the list of wilayas (doctype "DZ Wilaya", from dz_core): this
 app gives each wilaya a home-delivery rate and a stop-desk rate, plus what the
 courier keeps (custom fields, setup/custom_fields.py).
 
-The fee is added to the order as a line in the standard "Taxes and Charges"
-table (type "Actual"), exactly like ERPNext's own Shipping Rule does. This way
-the order total, the delivery note and the stock/accounting entries all
-include it without extra code.
+The fee is an item line on the order (FEE_ITEM, a non-stock service item,
+cod/accounts.py), taxed by the order's tax template like the goods: a fee
+re-billed for a third-party courier stays in the TVA base (CTCA art. 15, SCF
+advice of 21 October 2026), so 19 % on the régime réel and nothing on IFU.
+Its group credits 7088. Until 0.3.0 it was a charge row after the TVA in
+"Taxes and Charges": a draft saved again loses that row and gets the line.
 """
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, today
 
-from dz_cod.dz_cod.doctype.cod_settings.cod_settings import get_settings
+from dz_cod.cod.accounts import FEE_ITEM, FEE_ITEM_NAME, ensure_fee_item
 
-SHIPPING_DESCRIPTION = "Frais de livraison"
+SHIPPING_DESCRIPTION = "Frais de livraison"  # the charge row of orders made before 0.3.0
 STOP_DESK = "Stop desk"
 
 
@@ -40,34 +42,55 @@ def get_rates(wilaya, delivery_type):
 
 
 def apply_shipping_charge(order):
-	"""Set the delivery fee on a draft order and put it in the taxes table."""
+	"""Set the delivery fee on a draft order and put it on its fee line."""
 	if not order.dz_manual_shipping:
 		customer_rate, _courier_cost = get_rates(order.dz_wilaya, order.dz_delivery_type)
 		order.dz_shipping_charge = customer_rate
+	remove_legacy_row(order)
+	set_fee_line(order, flt(order.dz_shipping_charge))
 
-	set_shipping_row(order, flt(order.dz_shipping_charge))
+
+def remove_shipping_row(order):
+	"""A direct sale has no COD delivery fee: drop the line this app added while
+	the draft was a COD order."""
+	remove_legacy_row(order)
+	set_fee_line(order, 0)
+	order.dz_shipping_charge = 0
 
 
-def set_shipping_row(order, amount):
-	"""Create, update or remove our line in the "Taxes and Charges" table."""
-	account = get_settings().shipping_income_account
-	if not account:
-		frappe.throw(_("Choisissez le compte des frais de livraison dans les Paramètres COD."))
+def remove_legacy_row(order):
+	"""The charge row of a draft made before 0.3.0 (a fee typed by hand has its own wording)."""
+	for tax in list(order.get("taxes")):
+		if tax.charge_type == "Actual" and tax.description == SHIPPING_DESCRIPTION:
+			order.remove(tax)
 
-	row = None
-	for tax in order.get("taxes"):
-		if tax.account_head == account:
-			row = tax
 
+def fee_lines(order):
+	return [row for row in order.get("items") if row.item_code == FEE_ITEM]
+
+
+def set_fee_line(order, amount):
+	"""Create, update or remove the fee line (one per order)."""
+	lines = fee_lines(order)
 	if amount <= 0:
 		# No fee (free delivery): remove our line if it exists
-		if row:
+		for row in lines:
 			order.remove(row)
 		return
-
-	if not row:
-		row = order.append(
-			"taxes",
-			{"charge_type": "Actual", "account_head": account, "description": SHIPPING_DESCRIPTION},
-		)
-	row.tax_amount = amount
+	if not lines:
+		ensure_fee_item(order.company)
+		lines = [order.append("items", {"item_code": FEE_ITEM})]
+	for extra in lines[1:]:
+		order.remove(extra)
+	lines[0].update(
+		{
+			"item_name": FEE_ITEM_NAME,
+			"qty": 1,
+			"uom": "Nos",
+			"stock_uom": "Nos",
+			"conversion_factor": 1,
+			"price_list_rate": amount,
+			"rate": amount,
+			"delivery_date": order.delivery_date or today(),
+		}
+	)

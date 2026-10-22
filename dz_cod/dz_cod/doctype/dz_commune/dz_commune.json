@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 0,
- "autoname": "field:yalidine_id",
+ "autoname": "format:{connector}-{courier_id}",
  "creation": "2026-10-15 22:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -11,9 +11,10 @@
   "column_break_main",
   "is_deliverable",
   "has_stop_desk",
-  "yalidine_section",
-  "yalidine_id",
-  "yalidine_wilaya_name"
+  "courier_section",
+  "connector",
+  "courier_id",
+  "courier_wilaya_name"
  ],
  "fields": [
   {
@@ -51,32 +52,41 @@
    "label": "Stop desk dans la commune"
   },
   {
-   "fieldname": "yalidine_section",
+   "fieldname": "courier_section",
    "fieldtype": "Section Break",
-   "label": "Yalidine"
+   "label": "Chez le transporteur"
   },
   {
-   "description": "Identifiant de la commune chez Yalidine.",
-   "fieldname": "yalidine_id",
-   "fieldtype": "Data",
-   "label": "ID Yalidine",
-   "reqd": 1,
-   "unique": 1
+   "description": "Le transporteur dont la liste vient (connecteur du transporteur).",
+   "fieldname": "connector",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Connecteur",
+   "options": "Yalidine\nZR Express",
+   "reqd": 1
   },
   {
-   "description": "Nom de la wilaya tel que Yalidine l'écrit.",
-   "fieldname": "yalidine_wilaya_name",
+   "description": "Identifiant de la commune chez le transporteur.",
+   "fieldname": "courier_id",
    "fieldtype": "Data",
-   "label": "Wilaya chez Yalidine"
+   "label": "ID chez le transporteur",
+   "reqd": 1
+  },
+  {
+   "description": "Nom de la wilaya tel que le transporteur l'écrit.",
+   "fieldname": "courier_wilaya_name",
+   "fieldtype": "Data",
+   "label": "Wilaya chez le transporteur"
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-10-15 22:00:00.000000",
+ "modified": "2026-10-20 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "DZ COD",
  "name": "DZ Commune",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

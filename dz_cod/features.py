@@ -16,6 +16,7 @@ import frappe
 
 # The mechanism, imported here so COD modules keep one place to import from
 from dz_core.features import (
+	ALL,
 	CONFIG_KEY,
 	MESSAGE,
 	FeatureNotEnabled,

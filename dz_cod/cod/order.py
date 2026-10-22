@@ -14,8 +14,14 @@ How ERPNext sees it:
 - Nouvelle / Injoignable / Annulée: the Sales Order is a DRAFT (docstatus 0).
 - Confirmer = SUBMIT the Sales Order. ERPNext reserves the stock.
 - Other moves on a submitted order = "update after submit". We look at which
-  state the order just entered and act (create delivery note, return, ...).
+  state the order just entered and act: Expédiée moves the parcel to "Chez
+  transporteur", Livrée makes the delivery note, the invoice and its payment
+  into the courier's account, Retournée moves the parcel to the returns
+  warehouse (cod/stock.py, cod/invoicing.py).
 - Annulée après confirmation = CANCEL the Sales Order. ERPNext un-reserves.
+
+A direct sale (channel "Vente directe", cod/channel.py) skips all of this:
+Nouvelle ──Valider──> Validée, then ERPNext's own delivery note and invoice.
 """
 
 import frappe
@@ -23,10 +29,11 @@ from dz_core.phone import is_valid_phone, normalize_phone
 from frappe import _
 from frappe.utils import flt, today
 
+from dz_cod.cod import invoicing, stock
 from dz_cod.cod import states as S
-from dz_cod.cod import stock
+from dz_cod.cod.channel import default_channel, is_cod
 from dz_cod.cod.phone_checks import warn_refused_parcels
-from dz_cod.cod.shipping import apply_shipping_charge, get_rates
+from dz_cod.cod.shipping import apply_shipping_charge, get_rates, remove_shipping_row
 from dz_cod.couriers import get_adapter
 from dz_cod.dz_cod.doctype.cod_settings.cod_settings import get_settings
 
@@ -43,6 +50,11 @@ def event_date(order):
 def before_validate(order, method=None):
 	"""Runs on every save of a draft order, before ERPNext computes totals."""
 	if order.docstatus != 0:
+		return
+	if not order.dz_channel:
+		order.dz_channel = default_channel(order.customer)
+	if not is_cod(order):
+		remove_shipping_row(order)  # a draft switched from COD to a direct sale
 		return
 
 	settings = get_settings()
@@ -64,7 +76,9 @@ def before_validate(order, method=None):
 def validate(order, method=None):
 	"""Runs after ERPNext computed the totals: store the amount to collect,
 	and warn if this phone already had parcels sent back."""
-	if order.docstatus == 0:
+	if order.docstatus == 0 and not is_cod(order):
+		order.dz_cod_amount = 0  # nothing for a courier to collect
+	elif order.docstatus == 0:
 		order.dz_cod_amount = flt(order.rounded_total or order.grand_total)
 		if not order.flags.get("dz_event_date"):  # the demo loader replays history quietly
 			warn_refused_parcels(order)
@@ -75,6 +89,8 @@ def validate(order, method=None):
 
 def before_submit(order, method=None):
 	"""Confirmer: check the order is complete before reserving stock."""
+	if not is_cod(order):
+		return
 	check_delivery_details(order)
 	if not order.flags.get("dz_event_date"):
 		warn_refused_parcels(order)
@@ -112,7 +128,7 @@ def check_delivery_details(order):
 
 def before_update_after_submit(order, method=None):
 	"""Checks and dates, BEFORE a submitted order is saved in its new state."""
-	if not order.has_value_changed("workflow_state"):
+	if not is_cod(order) or not order.has_value_changed("workflow_state"):
 		return
 
 	state = order.workflow_state
@@ -128,17 +144,20 @@ def before_update_after_submit(order, method=None):
 
 
 def on_update_after_submit(order, method=None):
-	"""Stock movements, AFTER the order is saved in its new state."""
-	if not order.has_value_changed("workflow_state"):
+	"""Stock movements and the invoice, AFTER the order is saved in its new state."""
+	if not is_cod(order) or not order.has_value_changed("workflow_state"):
 		return
 
 	state = order.workflow_state
 	if state == S.SHIPPED:
-		delivery_note = stock.create_delivery_note(order, event_date(order))
-		order.db_set("dz_delivery_note", delivery_note)
+		# the parcel goes to "Chez transporteur": still ours, not sold yet
+		order.db_set("dz_shipment_entry", stock.ship_order(order, event_date(order)))
+	elif state == S.DELIVERED:
+		if not order.dz_delivery_note:  # an order shipped before 0.3.0 has it already
+			order.db_set("dz_delivery_note", stock.deliver_order(order, event_date(order)))
+		invoicing.invoice_delivered_order(order, event_date(order))
 	elif state == S.RETURNED:
-		return_note = stock.create_return(order, event_date(order))
-		order.db_set("dz_return_note", return_note)
+		order.db_set("dz_return_entry", stock.return_order(order, event_date(order)))
 		stock.close_order(order.name)
 
 

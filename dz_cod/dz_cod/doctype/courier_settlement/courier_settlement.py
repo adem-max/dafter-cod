@@ -13,7 +13,8 @@ How it is used:
    accepted), the line shows it in "Déjà versé" and only the rest is expected.
 4. Submit: every OK line (and every Écart line you ticked "Accepter") moves
    its order to "Réglée". The others stay "Livrée" and keep showing in the
-   "Encours transporteurs" report.
+   "Encours transporteurs" report. One Journal Entry books the money: the
+   bank, the courier's fees, and each order's invoice (cod/invoicing.py).
 """
 
 import frappe
@@ -24,6 +25,7 @@ from frappe.utils import flt
 
 from dz_cod.cod import settlement as rules
 from dz_cod.cod import states as S
+from dz_cod.cod.invoicing import cancel_settlement_entry, check_settlement_accounts, settlement_entry
 
 ORDER_FIELDS = [
 	"name",
@@ -37,8 +39,13 @@ ORDER_FIELDS = [
 
 class CourierSettlement(Document):
 	def validate(self):
+		if not self.bank_account:
+			self.bank_account = frappe.db.get_single_value("COD Settings", "settlement_bank_account")
 		self.match_lines()
 		self.compute_summary()
+
+	def before_submit(self):
+		check_settlement_accounts(self)
 
 	def on_submit(self):
 		paid_lines = [line for line in self.items if rules.is_paid(line.status, line.accept_difference)]
@@ -47,6 +54,7 @@ class CourierSettlement(Document):
 			order.flags.dz_event_date = self.posting_date
 			apply_workflow(order, S.ACTION_SETTLE)
 			frappe.db.set_value("Sales Order", order.name, "dz_settlement", self.name)
+		self.db_set("journal_entry", settlement_entry(self))
 
 	def before_cancel(self):
 		"""Refuse when a later Versement settled an order on the rest of the
@@ -73,6 +81,7 @@ class CourierSettlement(Document):
 
 		A Workflow cannot go backwards, so we write the fields directly.
 		"""
+		cancel_settlement_entry(self)  # the invoices are due again
 		for name in frappe.get_all("Sales Order", filters={"dz_settlement": self.name}, pluck="name"):
 			frappe.db.set_value(
 				"Sales Order",

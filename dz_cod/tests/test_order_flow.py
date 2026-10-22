@@ -8,8 +8,13 @@ from frappe.model.workflow import WorkflowTransitionError, get_transitions
 from frappe.tests import IntegrationTestCase
 
 from dz_cod.cod import states as S
-from dz_cod.cod.stock import inspect_return
+from dz_cod.cod.accounts import FEE_ITEM
+from dz_cod.cod.stock import check_available_stock, inspect_return
 from dz_cod.tests import helpers as h
+
+
+def fee_lines(order):
+	return [row for row in order.items if row.item_code == FEE_ITEM]
 
 
 class TestShippingRate(IntegrationTestCase):
@@ -22,9 +27,11 @@ class TestShippingRate(IntegrationTestCase):
 		order = h.make_order(qty=2)
 		self.assertEqual(order.dz_shipping_charge, 400)
 		self.assertEqual(order.dz_cod_amount, 2 * h.ITEM_PRICE + 400)
-		shipping_rows = [t for t in order.taxes if t.charge_type == "Actual"]
-		self.assertEqual(len(shipping_rows), 1)
-		self.assertEqual(shipping_rows[0].tax_amount, 400)
+		# the fee is an item line, taxed like the goods (cod/shipping.py)
+		lines = fee_lines(order)
+		self.assertEqual(len(lines), 1)
+		self.assertEqual(lines[0].amount, 400)
+		self.assertFalse([t for t in order.taxes if t.charge_type == "Actual"])
 
 	def test_stop_desk_rate(self):
 		order = h.make_order(dz_delivery_type="Stop desk")
@@ -36,13 +43,13 @@ class TestShippingRate(IntegrationTestCase):
 		order.save()
 		oran_rate = frappe.db.get_value("DZ Wilaya", "31 - Oran", "home_rate")
 		self.assertEqual(order.dz_shipping_charge, oran_rate)
-		self.assertEqual(len([t for t in order.taxes if t.charge_type == "Actual"]), 1)
+		self.assertEqual(len(fee_lines(order)), 1)
 
 	def test_manual_rate_is_kept_and_zero_removes_the_line(self):
 		order = h.make_order(dz_manual_shipping=1, dz_shipping_charge=0)
 		self.assertEqual(order.dz_shipping_charge, 0)
 		self.assertEqual(order.dz_cod_amount, h.ITEM_PRICE)
-		self.assertFalse([t for t in order.taxes if t.charge_type == "Actual"])
+		self.assertFalse(fee_lines(order))
 
 	def test_wilaya_not_delivered(self):
 		frappe.db.set_value("DZ Wilaya", "11 - Tamanrasset", "enabled", 0)
@@ -127,19 +134,38 @@ class TestShipmentAndReturn(IntegrationTestCase):
 		order = h.make_order(qty=qty, courier=courier)
 		return h.act(order, S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP)
 
-	def test_ship_creates_delivery_note_and_takes_stock_out(self):
+	def test_ship_moves_the_parcel_to_the_courier_then_delivery_takes_it_out(self):
 		stock_before = h.bin_qty(h.main_warehouse())
 		reserved_before = h.bin_qty(h.main_warehouse(), "reserved_qty")
+		transit_before = h.bin_qty(h.transit_warehouse())
 		order = self.ship(qty=2)
 
 		self.assertEqual(order.workflow_state, S.SHIPPED)
 		self.assertEqual(order.dz_tracking_number, f"MOCK-{order.name}")  # given by the mock courier
+		# still our stock, at the courier, still reserved: not sold yet
+		self.assertEqual(frappe.db.get_value("Stock Entry", order.dz_shipment_entry, "docstatus"), 1)
+		self.assertFalse(order.dz_delivery_note)
+		self.assertEqual(h.bin_qty(h.main_warehouse()), stock_before - 2)
+		self.assertEqual(h.bin_qty(h.transit_warehouse()), transit_before + 2)
+		self.assertEqual(h.bin_qty(h.main_warehouse(), "reserved_qty"), reserved_before + 2)
+
+		order = h.act(order, S.ACTION_DELIVER)
 		dn = frappe.get_doc("Delivery Note", order.dz_delivery_note)
 		self.assertEqual(dn.docstatus, 1)
 		self.assertEqual(dn.transporter, h.MOCK_COURIER)
 		self.assertEqual(dn.lr_no, order.dz_tracking_number)
-		self.assertEqual(h.bin_qty(h.main_warehouse()), stock_before - 2)
+		self.assertEqual(
+			{row.warehouse for row in dn.items if row.item_code == h.ITEM}, {h.transit_warehouse()}
+		)
+		self.assertEqual(h.bin_qty(h.transit_warehouse()), transit_before)
 		self.assertEqual(h.bin_qty(h.main_warehouse(), "reserved_qty"), reserved_before)
+
+	def test_parcels_at_the_courier_still_count_as_available(self):
+		h.set_stock(h.STOCK_QTY)
+		stock = h.bin_qty(h.main_warehouse()) - h.bin_qty(h.main_warehouse(), "reserved_qty")
+		self.ship(qty=2)  # off the shelf, still reserved until delivered
+		order = h.make_order(qty=stock - 2)
+		self.assertEqual(check_available_stock(order), [])
 
 	def test_manual_courier_needs_a_tracking_number(self):
 		order = h.make_order(courier=h.MANUAL_COURIER)
@@ -165,6 +191,8 @@ class TestShipmentAndReturn(IntegrationTestCase):
 		self.assertEqual(order.status, "Closed")  # never reserves stock again
 		self.assertEqual(h.bin_qty(h.returns_warehouse()), returns_before + 3)
 		self.assertEqual(h.bin_qty(h.main_warehouse()), main_before - 3)
+		self.assertEqual(frappe.db.get_value("Stock Entry", order.dz_return_entry, "docstatus"), 1)
+		self.assertFalse(order.dz_delivery_note)  # never sold: nothing to reverse
 
 		# Wrong total (2 instead of 3 pieces) is refused
 		with self.assertRaises(frappe.ValidationError):

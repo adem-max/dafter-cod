@@ -2,6 +2,7 @@
 
 One row per order date, one column per workflow state. Read a row as:
 "of the orders taken that day, how many are now in each state".
+COD orders only: direct sales (cod/channel.py) are left out.
 """
 
 import frappe
@@ -9,6 +10,7 @@ from frappe import _
 from frappe.utils import flt, getdate
 
 from dz_cod.cod import states as S
+from dz_cod.cod.channel import DIRECT
 
 
 def execute(filters=None):
@@ -46,6 +48,7 @@ def get_rows(filters):
 		WHERE company = %(company)s
 			AND transaction_date BETWEEN %(from_date)s AND %(to_date)s
 			AND workflow_state IN %(states)s
+			AND IFNULL(dz_channel, '') != %(direct)s
 			AND (%(courier)s = '' OR dz_courier = %(courier)s)
 		GROUP BY transaction_date, workflow_state
 		ORDER BY transaction_date DESC
@@ -56,6 +59,7 @@ def get_rows(filters):
 			"to_date": filters.to_date,
 			"courier": filters.courier or "",
 			"states": S.ALL_STATES,
+			"direct": DIRECT,
 		},
 		as_dict=True,
 	)

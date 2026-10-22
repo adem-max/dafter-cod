@@ -3,39 +3,77 @@
     bench --site demo.localhost execute dz_cod.demo.wipe.run
     bench --site demo.localhost execute dz_cod.demo.loader.load
 
-It cancels and deletes every transaction of the demo company (settlements,
-stock entries, delivery notes, orders), then the demo customers, couriers
-and items. The company, its warehouses and accounts and the COD Settings are
-kept (the loader reuses them).
+It cancels and deletes every transaction of the demo company (settlements
+and their Journal Entries, the couriers' collections, invoices, stock
+entries, delivery notes, orders),
+then the demo customers, couriers and items. The company, its warehouses and
+accounts and the COD Settings are kept (the loader reuses them).
 
 Even simpler, for a total reset, drop the demo site and create it again
 (see docs/DEMO.md).
+
+`full=1` also deletes the ledger lines of what it removes (dz_core's
+ledger_lines_deleted), then applies dz_core's SCF set-up again: a shop demo
+built before 0.3.0 moves to inventory accounts per item and the full chart
+changes without dropping the site.
 
 Refuses to run if the site contains orders of another company.
 """
 
 import frappe
+from dz_core.demo.loader import demo_accounting
+from dz_core.demo.wipe import BATCH, commit_when_workers_keep_up, forget_books, ledger_lines_deleted
 
 from dz_cod.demo import data as D
 from dz_cod.demo.loader import check_site_is_for_demo
 
 
-def run():
+def run(full=0):
 	check_site_is_for_demo()
+	with ledger_lines_deleted(int(full)):
+		remove_everything()
+	forget_books(D.COMPANY)  # the wiped story's audit trail and archives
+	if int(full):
+		for line in demo_accounting(D.COMPANY, None):
+			print(f"   {line}")
+		frappe.db.commit()
+	print("Démo effacée. Relancez : bench --site <site> execute dz_cod.demo.loader.load")
+
+
+def remove_everything():
 	company = {"company": D.COMPANY}
 
-	print("Versements...")
-	remove("Courier Settlement", company)
+	print("Versements et leurs écritures...")
+	entries = frappe.get_all(
+		"Courier Settlement", filters=dict(company, journal_entry=["is", "set"]), pluck="journal_entry"
+	)
+	remove("Courier Settlement", company)  # cancelling a Versement cancels its Journal Entry
+	remove("Journal Entry", {"name": ["in", entries]})
 
-	print("Mouvements de stock des inspections...")
-	remove("Stock Entry", dict(company, dz_sales_order=["is", "set"]))
+	print("Encaissements des transporteurs...")
+	remove("Payment Entry", company)  # each paid a delivered order's invoice into 4671n
 
-	print("Bons de retour puis bons de livraison...")
+	print("Factures des commandes livrées...")
+	remove("Sales Invoice", company)
+
+	print("Expéditions, livraisons, retours et inspections...")
 	# Returned orders are "Closed": ERPNext refuses to touch their delivery notes until reopened
 	for name in frappe.get_all("Sales Order", filters=dict(company, status="Closed"), pluck="name"):
 		frappe.get_doc("Sales Order", name).update_status("Draft")
-	remove("Delivery Note", dict(company, is_return=1))
-	remove("Delivery Note", dict(company, is_return=0))
+	# A parcel's stock moves through two doctypes (shipment, delivery note,
+	# return, inspection): undone latest first, so no cancel leaves a later
+	# move short of stock "Chez transporteur"
+	moves = [
+		(move.posting_date, move.posting_time, move.creation, doctype, move.name)
+		for doctype, filters in (
+			("Stock Entry", dict(company, dz_sales_order=["is", "set"])),
+			("Delivery Note", company),
+		)
+		for move in frappe.get_all(
+			doctype, filters=filters, fields=["name", "posting_date", "posting_time", "creation"]
+		)
+	]
+	remove_documents([(doctype, name) for *_when, doctype, name in sorted(moves, reverse=True)])
 
 	print("Commandes...")
 	remove("Sales Order", company)
@@ -65,18 +103,24 @@ def run():
 				frappe.delete_doc("Item", name, force=True)
 
 	frappe.db.commit()
-	print("Démo effacée. Relancez : bench --site <site> execute dz_cod.demo.loader.load")
 
 
 def remove(doctype, filters):
 	"""Cancel (if submitted) then delete every document matching the filters,
 	newest first so stock is always given back in the reverse order it moved."""
 	names = frappe.get_all(doctype, filters=filters, pluck="name", order_by="creation desc")
-	for name in names:
+	remove_documents([(doctype, name) for name in names])
+
+
+def remove_documents(documents):
+	"""Cancel (if submitted) then delete the (doctype, name) documents, in this order."""
+	for doctype, name in documents:
 		doc = frappe.get_doc(doctype, name)
 		if doc.docstatus == 1:
 			doc.flags.ignore_links = True
 			doc.cancel()
-	for name in names:
+	for count, (doctype, name) in enumerate(documents, 1):
 		frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
-	frappe.db.commit()
+		if count % BATCH == 0:
+			commit_when_workers_keep_up()  # Frappe's clean-up jobs, 1,000 at most
+	commit_when_workers_keep_up()

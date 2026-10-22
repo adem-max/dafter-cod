@@ -12,7 +12,8 @@ courier hand-over, returns, and courier cash settlement ("Versement").
 |---|---|
 | **Target version** | **ERPNext v16 (16.50 and 16.51) on Frappe v16 (16.51)**, branch `version-16`, latest stable major in October 2026. ERPNext 16.51 moved the default warehouse to the Company; the demo loader handles both. |
 | **Tested on a real site?** | **Yes.** Installed and run in an Ubuntu 24.04 container: Python 3.14, Node 24, MariaDB 10.11, Redis. |
-| **Automated tests** | 98 tests (21 unit + 77 integration on a real ERPNext site with dz_core installed), all passing on the test site. The phone and wilaya-list tests moved to dz_core with that code. |
+| **Version** | 0.3.0 (21 Oct 2026), released with dz_core 0.3.0: update both together (dafter-core docs/DEPLOY.md, section 11). |
+| **Automated tests** | 121 tests (24 unit + 97 integration on a real ERPNext site with dz_core installed), all passing on the test site and on GitHub's CI (every push). The phone and wilaya-list tests moved to dz_core with that code. |
 | **Checked in a real browser** | order list and form, "Expédier" dialog, return inspection dialog, reports, COD sidebar (headless Chromium). |
 | **Demo** | loaded on a fresh site in 2 min 20 s; second run changes nothing; wipe + reload checked. |
 | **Backup / restore** | backup of the demo site restored into a new site, data and encrypted secrets verified. |
@@ -32,9 +33,11 @@ Nouvelle ──Confirmer──> Confirmée ──Préparer──> Préparée ─
 
 - **Confirmée**: phone, wilaya and address checked; stock reserved (ERPNext reserved qty); optional block if stock is short.
 - **Injoignable**: each "Pas de réponse" adds 1 to the call counter; the button disappears at the maximum (default 3).
-- **Expédiée**: courier + tracking number (typed, or given by the courier connector); a Delivery Note takes the stock out.
-- **Retournée**: a return Delivery Note brings the parcel into the **Retours** warehouse; then **Inspecter le retour** puts good pieces back in stock and writes damaged ones off.
+- **Expédiée**: courier + tracking number (typed, or given by the courier connector); the parcel moves to the **Chez transporteur** warehouse (still our stock, not sold).
+- **Livrée**: a Delivery Note takes the parcel out of Chez transporteur with its lots; the order's invoice (Facture DZ, payment mode Contre-remboursement) is made from it and paid into the courier's account (4671n): the courier now owes the money. dz_core's sales reports count it.
+- **Retournée**: the parcel moves from Chez transporteur to the **Retours** warehouse (nothing was sold); then **Inspecter le retour** puts good pieces back in stock and writes damaged ones off.
 - **Réglée**: set by a courier settlement (Versement).
+- **Direct sales** (wholesale, shop: *Canal* = Vente directe, from the customer or COD Settings) skip all of this: *Valider* → **Validée**, then ERPNext's usual delivery note and invoice. A producer who also sells online gets both on one site.
 
 **Shipping fees** — the list of the **69 wilayas** (2026 division, from
 dz_core) gets a home-delivery and a stop-desk rate plus the courier's cost; the fee is added
@@ -42,7 +45,8 @@ to each order automatically (editable "manual rate" for free delivery).
 
 **Versement (courier settlement)** — record a courier's statement, match each
 parcel to its order (by tracking number), see what is **paid**, **disputed**
-and **missing**; submitting marks paid orders "Réglée".
+and **missing**; submitting marks paid orders "Réglée" and books the money in one
+Journal Entry (bank, courier fees, each invoice paid; accounts in COD Settings).
 
 **Courier connectors** — one interface (create shipment, get status, get
 tracking); **Manuel** (default), **Mock** (offline, for tests and demos),
@@ -88,6 +92,10 @@ bench --site test.localhost run-tests --app dz_cod
 bench --site test.localhost run-tests --app dz_core       # the base it runs on
 ```
 
+Every push runs pre-commit, then both suites on a fresh site with dz_core
+(`.github/workflows/ci.yml`; dafter-core is taken at the branch of the same
+name when there is one, else main).
+
 ## Documentation
 
 | File | For |
@@ -110,7 +118,8 @@ dz_cod/
   cod/                      business rules
     states.py                 state and button names
     order.py                  what happens at each step of the order
-    stock.py                  delivery note, return, inspection
+    stock.py                  shipment to Chez transporteur, delivery note, return, inspection
+    accounts.py               couriers' accounts (4671n), delivery fee item, Versement accounts
     shipping.py               shipping fee from the wilaya rate table
     settlement.py             settlement matching rules (pure functions)
     phone_checks.py           refused-parcels and duplicate-customer warnings
@@ -137,6 +146,6 @@ dz_cod/
 2. Standard doctypes first (Sales Order, Delivery Note, Stock Entry, Customer, Supplier, Item); new doctypes only where nothing fits (justified in DECISIONS.md).
 3. Per-client differences live in settings and data, never in code branches.
 4. Short, plainly commented code, English in code, French for users (English and Arabic available per user: User → Language).
-5. Currency DZD, no VAT logic.
+5. Currency DZD. TVA comes from dz_core's tax regime (régime réel); this app adds none of its own.
 
 License: MIT.

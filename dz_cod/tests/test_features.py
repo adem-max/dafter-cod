@@ -1,8 +1,9 @@
 """Optional features per client site (dz_cod/features.py).
 
-The test site has no "dz_features" key (the mechanism is dz_core's), so every other test runs with
-everything on. Here the key is patched in frappe.local.conf for one test at
-a time, and apply_features() puts the records back afterwards.
+The test site has "dz_features": "all" (dz_cod's before_tests; the mechanism
+is dz_core's), so every other test runs with everything on. Here the key is
+patched in frappe.local.conf for one test at a time, and apply_features()
+puts the records back afterwards.
 
 Run: bench --site <site> run-tests --module dz_cod.tests.test_features
 """
@@ -27,9 +28,13 @@ def only(*names):
 
 
 class TestFeatureList(IntegrationTestCase):
-	def test_missing_key_means_everything(self):
+	def test_missing_key_means_the_base_only(self):
 		with patch.dict(frappe.local.conf, {}):
 			frappe.local.conf.pop(F.CONFIG_KEY, None)
+			self.assertEqual(F.enabled(), set())
+
+	def test_all_means_every_feature(self):
+		with patch.dict(frappe.local.conf, {F.CONFIG_KEY: F.ALL}):
 			self.assertEqual(F.enabled(), set(F.FEATURES))
 
 	def test_explicit_list_is_followed_and_unknown_names_ignored(self):
@@ -63,7 +68,7 @@ class TestFeatureGuards(IntegrationTestCase):
 		setup_webhooks()
 
 	def tearDown(self):
-		F.apply_features()  # back to "everything" (no key on the test site)
+		F.apply_features()  # back to "all", the test site's setting
 
 	def test_reports_and_label_follow_labels_reports(self):
 		with only():
