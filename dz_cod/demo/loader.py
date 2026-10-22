@@ -29,6 +29,7 @@ import random
 
 import frappe
 from dz_core.demo.loader import demo_accounting
+from dz_core.setup.accounts import opening_account
 from dz_core.setup.item_groups import FINISHED, MERCHANDISE, RAW, set_group_accounts
 from dz_core.setup.tax import unset_default_templates
 from dz_core.setup.wilayas import WILAYAS, wilaya_docname
@@ -462,6 +463,8 @@ def setup_opening_stock():
 		fields=["name", "valuation_rate"],
 	)
 	blanks = frappe.get_all("Item", filters={"variant_of": "BLANK-TS"}, fields=["name", "valuation_rate"])
+	# against the opening account 479, like an opening count (not the groups' 7245 / 6571...)
+	opening = opening_account(D.COMPANY)
 	for item in items + blanks:
 		warehouse = D.WORKSHOP_WAREHOUSE if item.name.startswith("BLANK") else D.MAIN_WAREHOUSE
 		entry.append(
@@ -471,6 +474,7 @@ def setup_opening_stock():
 				"qty": opening_qty(item.name),
 				"basic_rate": item.valuation_rate,
 				"t_warehouse": warehouse_name(warehouse),
+				"expense_account": opening,
 			},
 		)
 	entry.insert()

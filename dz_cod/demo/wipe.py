@@ -55,15 +55,24 @@ def remove_everything():
 	print("Factures des commandes livrées...")
 	remove("Sales Invoice", company)
 
-	print("Mouvements de stock des inspections...")
-	remove("Stock Entry", dict(company, dz_sales_order=["is", "set"]))
-
-	print("Bons de retour puis bons de livraison...")
+	print("Expéditions, livraisons, retours et inspections...")
 	# Returned orders are "Closed": ERPNext refuses to touch their delivery notes until reopened
 	for name in frappe.get_all("Sales Order", filters=dict(company, status="Closed"), pluck="name"):
 		frappe.get_doc("Sales Order", name).update_status("Draft")
-	remove("Delivery Note", dict(company, is_return=1))
-	remove("Delivery Note", dict(company, is_return=0))
+	# A parcel's stock moves through two doctypes (shipment, delivery note,
+	# return, inspection): undone latest first, so no cancel leaves a later
+	# move short of stock "Chez transporteur"
+	moves = [
+		(move.posting_date, move.posting_time, move.creation, doctype, move.name)
+		for doctype, filters in (
+			("Stock Entry", dict(company, dz_sales_order=["is", "set"])),
+			("Delivery Note", company),
+		)
+		for move in frappe.get_all(
+			doctype, filters=filters, fields=["name", "posting_date", "posting_time", "creation"]
+		)
+	]
+	remove_documents([(doctype, name) for *_when, doctype, name in sorted(moves, reverse=True)])
 
 	print("Commandes...")
 	remove("Sales Order", company)
@@ -99,12 +108,17 @@ def remove(doctype, filters):
 	"""Cancel (if submitted) then delete every document matching the filters,
 	newest first so stock is always given back in the reverse order it moved."""
 	names = frappe.get_all(doctype, filters=filters, pluck="name", order_by="creation desc")
-	for name in names:
+	remove_documents([(doctype, name) for name in names])
+
+
+def remove_documents(documents):
+	"""Cancel (if submitted) then delete the (doctype, name) documents, in this order."""
+	for doctype, name in documents:
 		doc = frappe.get_doc(doctype, name)
 		if doc.docstatus == 1:
 			doc.flags.ignore_links = True
 			doc.cancel()
-	for count, name in enumerate(names, 1):
+	for count, (doctype, name) in enumerate(documents, 1):
 		frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
 		if count % BATCH == 0:
 			commit_when_workers_keep_up()  # Frappe's clean-up jobs, 1,000 at most

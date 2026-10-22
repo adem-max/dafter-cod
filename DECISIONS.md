@@ -128,7 +128,8 @@ Source: the advice doc "Daftar: SCF default accounts and compliance advice" (daf
 - **The loader refuses to run on a site holding another company's orders**: protection against loading fake data into a client site.
 - **Prices are set by the loader**: ERPNext only applies the price list in the browser form, not on server-side inserts.
 - **Disputed parcels stay disputed in the demo** (the next weekly statement does not re-pay them), so the outstanding report has something to show.
-- **Wipe = cancel and delete in reverse order, keep the company**; a total reset is simply dropping and re-creating the demo site.
+- **Wipe = cancel and delete in reverse order, keep the company**; a total reset is simply dropping and re-creating the demo site. Since 0.3.0 a parcel's stock moves span two doctypes (shipment and return transfers, inspections, delivery notes): they are undone together, latest posting first, or cancelling a shipment would leave its delivery note short of stock "Chez transporteur" (22 October 2026).
+- **The opening stock enters against the opening account 479** (dz_core's `opening_account`), like a client's opening count: not against the item groups' accounts (7245, 6571...), which would put it in the results and hide a production gap from the monthly close (22 October 2026).
 
 - **Phone checks warn, never block** (16 October 2026, Adem's choice): a refused-parcels warning on the order (threshold in COD Settings, default 1, 0 = off) and a duplicate-phone warning on the customer, both with links. Blocking was rejected: the operator knows the customer. Customer phones are now normalized like order phones, so the comparison works.
 - **Return-rate report needs a minimum sample** (16 October 2026): filter *Minimum de colis* (default 5 finished orders); below it the rate is empty and the row sorts last. Products are still counted in pieces; the new column counts orders.
