@@ -111,6 +111,36 @@ class TestSettlement(IntegrationTestCase):
 		self.assertEqual(values.workflow_state, S.DELIVERED)
 		self.assertIsNone(values.dz_settlement)
 
+	def test_a_versement_is_audited_and_cannot_be_deleted(self):
+		"""dz_core's audit trail and delete lock follow the Versement (hooks.py dz_no_delete)."""
+		from dz_core.setup.permissions import lock_deletions, no_delete
+
+		self.assertIn("Courier Settlement", no_delete())
+		lock_deletions()
+		user = frappe.db.exists("User", "versement@test.dz") or (
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": "versement@test.dz",
+					"first_name": "Versement",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Accounts User"}, {"role": "Accounts Manager"}],
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
+		self.assertFalse(frappe.has_permission("Courier Settlement", "delete", user=user))
+
+		settlement = new_settlement([short_line(delivered_order(), short=0)])
+		settlement.submit()
+		operations = frappe.get_all(
+			"DZ Audit Log",
+			filters={"reference_doctype": "Courier Settlement", "reference_name": settlement.name},
+			pluck="operation",
+		)
+		self.assertEqual(operations, ["Validation"])
+
 	def test_order_paid_twice_is_flagged(self):
 		order = delivered_order()
 		line = {

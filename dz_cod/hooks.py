@@ -54,7 +54,15 @@ doc_events = {
 	# Optional features (dz_cod/features.py): API connectors and COD webhooks
 	"Supplier": {"validate": "dz_cod.features.check_courier_connector"},
 	"Webhook": {"validate": "dz_cod.features.check_webhook"},
+	# A Versement books the courier's money: dz_core's audit trail follows it
+	# (dz_core books/audit.py) and nobody may delete one (dz_no_delete below)
+	"Courier Settlement": {
+		event: "dz_core.books.audit.log"
+		for event in ("on_submit", "on_cancel", "on_update_after_submit", "on_trash")
+	},
 }
+# Documents nobody may delete, not even a draft (dz_core setup/permissions.py)
+dz_no_delete = ["Courier Settlement"]
 
 # Our optional features. dz_core switches them per site (dz-features command,
 # frappe.boot.dz_features in the browser, the hub's offers)
