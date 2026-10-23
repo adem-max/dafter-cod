@@ -10,7 +10,9 @@
 .cod-home .step p { margin: 8px 0 0; color: var(--text-muted, #6b7280); font-size: 12px; }
 .cod-home .arrow { align-self: center; color: var(--text-muted, #9ca3af); font-size: 14px; }
 .cod-home .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.cod-home .blue { background: var(--bg-blue, #e8f1fd); color: var(--text-on-blue, #1d4ed8); }
+/* Frappe's --text-on-blue is 4.2:1 on --bg-blue in light; one ink step darker reads at 6.0:1 (8.5:1 dark).
+   The block is in a shadow root, so a theme selector can't reach it: the variable carries both themes. */
+.cod-home .blue { background: var(--bg-blue, #e8f1fd); color: var(--ink-blue-9, #005cad); }
 .cod-home .orange { background: var(--bg-orange, #fdeee2); color: var(--text-on-orange, #c2410c); }
 .cod-home .purple { background: var(--bg-purple, #f1eafd); color: var(--text-on-purple, #6d28d9); }
 .cod-home .green { background: var(--bg-green, #e5f5ea); color: var(--text-on-green, #15803d); }
