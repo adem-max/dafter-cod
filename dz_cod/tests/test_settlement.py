@@ -4,6 +4,7 @@ Run: bench --site <site> run-tests --module dz_cod.tests.test_settlement
 """
 
 import frappe
+from dz_core.tests.helpers import user_with_roles
 from frappe.tests import IntegrationTestCase
 from frappe.utils import today
 
@@ -117,19 +118,7 @@ class TestSettlement(IntegrationTestCase):
 
 		self.assertIn("Courier Settlement", no_delete())
 		lock_deletions()
-		user = frappe.db.exists("User", "versement@test.dz") or (
-			frappe.get_doc(
-				{
-					"doctype": "User",
-					"email": "versement@test.dz",
-					"first_name": "Versement",
-					"send_welcome_email": 0,
-					"roles": [{"role": "Accounts User"}, {"role": "Accounts Manager"}],
-				}
-			)
-			.insert(ignore_permissions=True)
-			.name
-		)
+		user = user_with_roles("Accounts Manager", "Accounts User")
 		self.assertFalse(frappe.has_permission("Courier Settlement", "delete", user=user))
 
 		settlement = new_settlement([short_line(delivered_order(), short=0)])

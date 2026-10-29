@@ -43,7 +43,8 @@ On a laptop, `bench start` shows only the site chosen with `bench use`
 The loader makes no demo login. dafter-core's `scripts/demo_tunnels.sh`
 (which shows the three demo sites on public links, dafter-core docs/DEMO.md)
 adds `gerant@demo.localhost` with the manager and user roles of sales, stock
-and accounts, password `Demo-2026!`, the same as the producer demos.
+and accounts (never System Manager), and at each start sets a new password,
+printed with the links, on every demo login.
 
 ## Change the return rate
 
