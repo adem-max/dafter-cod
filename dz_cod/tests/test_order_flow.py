@@ -206,3 +206,25 @@ class TestShipmentAndReturn(IntegrationTestCase):
 		# A second inspection of the same parcel is refused
 		with self.assertRaises(frappe.ValidationError):
 			inspect_return(order.name, [{"item_code": h.ITEM, "good_qty": 3, "damaged_qty": 0}])
+
+	def test_inspection_adds_up_rows_and_refuses_bad_quantities(self):
+		"""Review of 27 October 2026, 2.1: rows of one item overwrote each other
+		(two rows of 3 passed for a parcel of 3, then moved 6), and a negative
+		or unreadable quantity got through."""
+		order = h.act(self.ship(qty=3), S.ACTION_RETURN)
+		returns_before = h.bin_qty(h.returns_warehouse())
+		for items in (
+			[{"item_code": h.ITEM, "good_qty": 3}, {"item_code": h.ITEM, "good_qty": 3}],
+			[{"item_code": h.ITEM, "good_qty": 5, "damaged_qty": -2}],
+			[{"item_code": h.ITEM, "good_qty": "abc", "damaged_qty": 3}],
+		):
+			with self.subTest(items=items), self.assertRaises(frappe.ValidationError):
+				inspect_return(order.name, items)
+		self.assertEqual(h.bin_qty(h.returns_warehouse()), returns_before)
+
+		# two rows of the same item, adding up to the parcel, are fine
+		inspect_return(
+			order.name,
+			[{"item_code": h.ITEM, "good_qty": 1}, {"item_code": h.ITEM, "good_qty": 1, "damaged_qty": 1}],
+		)
+		self.assertEqual(h.bin_qty(h.returns_warehouse()), returns_before - 3)

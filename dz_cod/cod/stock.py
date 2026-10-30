@@ -217,34 +217,38 @@ def inspect_return(sales_order, items, posting_date=None):
 	"""
 	frappe.has_permission("Stock Entry", "create", throw=True)
 	items = frappe.parse_json(items)
-	order = frappe.get_doc("Sales Order", sales_order)
+	# for_update: a second click waits here, then finds dz_return_inspected set
+	order = frappe.get_doc("Sales Order", sales_order, for_update=True)
 
 	if order.workflow_state != S.RETURNED:
 		frappe.throw(_("La commande {0} n'est pas retournée.").format(order.name))
 	if order.dz_return_inspected:
 		frappe.throw(_("Le retour de la commande {0} est déjà inspecté.").format(order.name))
 
-	# Check that every returned piece is either good or damaged, no more, no less
+	# Every returned piece is either good or damaged, no more, no less. Rows of
+	# the same item add up (they used to overwrite each other, and the stock
+	# moves then took every row); a negative or non-numeric quantity is refused.
 	returned = {}
 	for row in get_returned_items(order.name):
 		returned[row["item_code"]] = returned.get(row["item_code"], 0) + row["qty"]
-	declared = {}
+	good, damaged = {}, {}
 	for row in items:
-		declared[row["item_code"]] = flt(row.get("good_qty")) + flt(row.get("damaged_qty"))
-	if returned != declared:
+		for field, totals in (("good_qty", good), ("damaged_qty", damaged)):
+			qty = quantity(row.get(field))
+			if qty:
+				totals[row["item_code"]] = totals.get(row["item_code"], 0) + qty
+	declared = {code: good.get(code, 0) + damaged.get(code, 0) for code in {*good, *damaged}}
+	if {code: flt(qty) for code, qty in returned.items() if qty} != declared:
 		frappe.throw(_("Les quantités inspectées doivent correspondre exactement aux quantités retournées."))
 
 	settings = get_settings()
-	good = [row for row in items if flt(row.get("good_qty")) > 0]
-	damaged = [row for row in items if flt(row.get("damaged_qty")) > 0]
-
 	if good:
 		make_stock_entry(
 			order,
 			"Material Transfer",
 			[
-				(row["item_code"], row["good_qty"], settings.returns_warehouse, settings.main_warehouse, None)
-				for row in good
+				(code, qty, settings.returns_warehouse, settings.main_warehouse, None)
+				for code, qty in good.items()
 			],
 			posting_date=posting_date,
 		)
@@ -252,10 +256,7 @@ def inspect_return(sales_order, items, posting_date=None):
 		make_stock_entry(
 			order,
 			"Material Issue",
-			[
-				(row["item_code"], row["damaged_qty"], settings.returns_warehouse, None, None)
-				for row in damaged
-			],
+			[(code, qty, settings.returns_warehouse, None, None) for code, qty in damaged.items()],
 			posting_date=posting_date,
 		)
 
@@ -263,9 +264,23 @@ def inspect_return(sales_order, items, posting_date=None):
 	order.add_comment(
 		"Comment",
 		_("Retour inspecté : {0} remis en stock, {1} mis au rebut.").format(
-			sum(flt(r.get("good_qty")) for r in items), sum(flt(r.get("damaged_qty")) for r in items)
+			sum(good.values()), sum(damaged.values())
 		),
 	)
+
+
+def quantity(value):
+	"""A quantity typed in the inspection dialog: empty is 0; negative or not
+	a number is refused (flt() would have read "abc" as 0 silently)."""
+	if value in (None, ""):
+		return 0
+	try:
+		qty = float(value)
+	except (TypeError, ValueError):
+		frappe.throw(_("Quantité invalide : {0}").format(value))
+	if qty < 0:
+		frappe.throw(_("Une quantité ne peut pas être négative : {0}").format(value))
+	return qty
 
 
 def let_erpnext_pick_lots(doc, keep_given=False):
