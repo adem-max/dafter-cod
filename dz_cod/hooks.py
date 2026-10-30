@@ -61,6 +61,10 @@ doc_events = {
 		for event in ("on_submit", "on_cancel", "on_update_after_submit", "on_trash")
 	},
 }
+# Stock User and Accounts User get write on Sales Order (setup_all), narrowed
+# here to the order states their role owns (dz_cod/cod/permissions.py)
+has_permission = {"Sales Order": "dz_cod.cod.permissions.sales_order"}
+
 # Documents nobody may delete, not even a draft (dz_core setup/permissions.py)
 dz_no_delete = ["Courier Settlement"]
 
