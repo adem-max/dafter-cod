@@ -33,7 +33,9 @@ class TestRoles(IntegrationTestCase):
 		self.assertEqual(order.workflow_state, S.DELIVERED)
 		# the invoice and its payment are made, in the name of who marked it delivered
 		self.assertEqual(frappe.db.get_value("Sales Invoice", order.dz_sales_invoice, "docstatus"), 1)
-		self.assertEqual(frappe.db.get_value("Payment Entry", order.dz_payment_entry, "owner"), self.stock_user)
+		self.assertEqual(
+			frappe.db.get_value("Payment Entry", order.dz_payment_entry, "owner"), self.stock_user
+		)
 
 	def test_an_accounts_user_settles_with_a_versement(self):
 		order = h.act(h.make_order(), S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP, S.ACTION_DELIVER)
@@ -69,7 +71,10 @@ class TestRoles(IntegrationTestCase):
 				"delivery_date": str(row.delivery_date),
 			}
 		]
-		with self.set_user(self.stock_user), self.assertRaises((frappe.ValidationError, frappe.PermissionError)):
+		with (
+			self.set_user(self.stock_user),
+			self.assertRaises((frappe.ValidationError, frappe.PermissionError)),
+		):
 			update_child_qty_rate("Sales Order", json.dumps(items), order.name)
 		# (a request that fails is rolled back as a whole; a test is not, so no DB check here)
 

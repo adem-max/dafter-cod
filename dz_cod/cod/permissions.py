@@ -113,7 +113,11 @@ def check_limited_change(order):
 		return
 	for field in order.meta.fields:
 		name = field.fieldname
-		if field.fieldtype in ("Table", "Table MultiSelect") or name == "workflow_state" or name.startswith("dz_"):
+		if (
+			field.fieldtype in ("Table", "Table MultiSelect")
+			or name == "workflow_state"
+			or name.startswith("dz_")
+		):
 			continue
 		if field.allow_on_submit and order.get(name) != before.get(name):
 			frappe.throw(_("Vous ne pouvez pas modifier le champ {0} de la commande.").format(_(field.label)))
