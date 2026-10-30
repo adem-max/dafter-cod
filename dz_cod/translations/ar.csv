@@ -375,3 +375,7 @@ La commande {0} n'a pas de mouvement d'expédition.,الطلب {0} ليس له �
 Écart entre le compte {0} et les colis livrés non réglés : voyez les versements du transporteur.,فرق بين الحساب {0} والطرود المسلّمة غير المسوّاة: راجع تحويلات شركة التوصيل.
 {0} : frais retenus couverts par ses factures,{0}: الرسوم المقتطعة مغطاة بفواتيرها
 Saisissez la facture du transporteur pour ses frais retenus (6241 et la TVA).,أدخل فاتورة شركة التوصيل للرسوم التي اقتطعتها (6241 والرسم على القيمة المضافة).
+Vous ne pouvez pas modifier le champ {0} de la commande.,لا يمكنك تعديل الحقل {0} في الطلب.
+Vous ne pouvez pas modifier les articles de la commande.,لا يمكنك تعديل أصناف الطلب.
+Quantité invalide : {0},كمية غير صالحة: {0}
+Une quantité ne peut pas être négative : {0},لا يمكن أن تكون الكمية سالبة: {0}

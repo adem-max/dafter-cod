@@ -82,6 +82,33 @@ class TestFeatureGuards(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Report", "COD Return Rate", "disabled"), 0)
 		self.assertEqual(frappe.db.get_value("Print Format", "Bordereau COD", "disabled"), 0)
 
+	def test_a_switched_off_report_cannot_be_ticked_back_on(self):
+		"""Review of 27 October 2026, 4.5. Outside developer mode Frappe already
+		refuses any change to a standard report, but not to a print format:
+		there dz_core's keep_switched_off is the gate (found 30 October 2026).
+		It also holds in developer mode. Called directly first: saving a
+		standard report in developer mode would write its JSON into the app's
+		folder."""
+		from dz_core.features import keep_switched_off
+
+		with only():
+			F.apply_features()
+			for doctype, name in (("Report", "COD Return Rate"), ("Print Format", "Bordereau COD")):
+				doc = frappe.get_doc(doctype, name)
+				doc.disabled = 0
+				with self.subTest(doctype=doctype):
+					with self.assertRaises(F.FeatureNotEnabled):
+						keep_switched_off(doc)
+					with (
+						patch.dict(frappe.local.conf, {"developer_mode": 0}),
+						self.assertRaises((frappe.ValidationError, F.FeatureNotEnabled)),
+					):
+						doc.save()  # the report: Frappe refuses; the print format: dz_core
+		with only("labels_reports"):
+			doc = frappe.get_doc("Report", "COD Return Rate")
+			doc.disabled = 0
+			self.assertIsNone(keep_switched_off(doc))  # in the offer: allowed
+
 	def test_webhooks_are_switched_off_then_restored(self):
 		name = webhook_name(S.SHIPPED)
 		frappe.db.set_value("Webhook", name, "enabled", 1)

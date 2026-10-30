@@ -51,11 +51,16 @@ def invoice_delivered_order(order, posting_date=None):
 	(dz_payment_entry). Once per order. Returns the invoice's name."""
 	if not get_settings().invoice_on_delivery or not order.dz_delivery_note or order.dz_sales_invoice:
 		return None
-	invoice = frappe.get_doc(make_sales_invoice(order.dz_delivery_note))
+	# The workflow checked who may mark it delivered (a Stock User may, with no
+	# right on invoices): ERPNext's mapper checks "create" on the target it is
+	# given, and that check honours the target's ignore_permissions flag
+	target = frappe.new_doc("Sales Invoice")
+	target.flags.ignore_permissions = True
+	invoice = make_sales_invoice(order.dz_delivery_note, target_doc=target)
 	set_posting_date(invoice, posting_date)
 	invoice.due_date = invoice.posting_date  # paid to the courier on delivery
 	invoice.dz_payment_mode = PAYMENT_MODE
-	invoice.flags.ignore_permissions = True  # the workflow checked who may mark it delivered
+	invoice.flags.ignore_permissions = True
 	invoice.insert()
 	invoice.submit()
 	order.db_set("dz_sales_invoice", invoice.name)
@@ -66,7 +71,17 @@ def invoice_delivered_order(order, posting_date=None):
 def pay_to_courier(order, invoice):
 	"""The buyer paid the courier: the invoice is paid, into the courier's
 	account 4671n. Returns the Payment Entry's name."""
-	payment = get_payment_entry("Sales Invoice", invoice.name)
+	# ERPNext's builder refuses a user who may not create payments (a Stock
+	# User marking the order delivered), with no flag to skip it. Only the
+	# builder runs as Administrator: it returns an unsaved document, which is
+	# then inserted and submitted as the real user, so its owner and the audit
+	# trail name who marked the order delivered.
+	user = frappe.session.user
+	try:
+		frappe.set_user("Administrator")
+		payment = get_payment_entry("Sales Invoice", invoice.name)
+	finally:
+		frappe.set_user(user)
 	payment.paid_to = courier_account(order.dz_courier, order.company)
 	payment.paid_to_account_currency = frappe.get_cached_value("Account", payment.paid_to, "account_currency")
 	payment.mode_of_payment = None
@@ -165,14 +180,10 @@ def courier_claim(line, settlement):
 	)
 	if not order or not order.dz_payment_entry:
 		return None
-	collected_before = frappe.db.sql(
-		"""SELECT IFNULL(SUM(item.collected_amount), 0)
-		FROM `tabCourier Settlement Item` item
-		JOIN `tabCourier Settlement` cs ON cs.name = item.parent
-		WHERE item.sales_order = %s AND cs.docstatus = 1 AND cs.name != %s""",
-		(line.sales_order, settlement.name),
-	)[0][0]
-	return flt(order.dz_cod_amount) - flt(collected_before)
+	from dz_cod.cod.received import received
+
+	before = received([line.sales_order], exclude=settlement.name).get(line.sales_order)
+	return flt(order.dz_cod_amount) - (before.gross if before else 0)
 
 
 def cancel_settlement_entry(settlement):

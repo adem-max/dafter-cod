@@ -305,6 +305,7 @@ class YalidineAdapter(CourierAdapter):
 				statuses[parcel.get("tracking")] = map_status(parcel.get("last_status"))
 				update_order(
 					parcel.get("tracking"),
+					self.courier.name,  # the adapter holds the Supplier document
 					status=parcel.get("last_status"),
 					status_on=parcel.get("date_last_status"),
 					payment_status=parcel.get("payment_status"),
@@ -359,18 +360,26 @@ def product_list(order):
 	)
 
 
-def update_order(tracking, status=None, status_on=None, payment_status=None, payment_id=None):
-	"""Write what Yalidine says about a parcel on its order (sync or webhook).
+def order_of_parcel(tracking, courier, fields="name"):
+	"""The submitted order of this courier's parcel. Two couriers can number
+	their parcels the same way: a tracking number alone is not enough (review
+	of 27 October 2026, 2.4)."""
+	return frappe.db.get_value(
+		"Sales Order",
+		{"dz_tracking_number": tracking, "dz_courier": courier, "docstatus": 1},
+		fields,
+		as_dict=not isinstance(fields, str),
+	)
+
+
+def update_order(tracking, courier, status=None, status_on=None, payment_status=None, payment_id=None):
+	"""Write what Yalidine says about a parcel of this courier on its order
+	(sync or webhook).
 
 	A status older than the one already stored is ignored: webhook events can
 	arrive out of order. Returns the order name, or None if no order has this
 	tracking number or the status is older than the stored one."""
-	order = frappe.db.get_value(
-		"Sales Order",
-		{"dz_tracking_number": tracking, "docstatus": 1},
-		["name", "dz_courier_status_on"],
-		as_dict=True,
-	)
+	order = order_of_parcel(tracking, courier, ["name", "dz_courier_status_on"])
 	if not order:
 		return None
 

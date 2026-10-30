@@ -15,7 +15,7 @@ from dz_cod.couriers import get_adapter
 from dz_cod.couriers.base import DELIVERED, RETURNED
 from dz_cod.couriers.mock import set_mock_status
 from dz_cod.couriers.sync import sync_shipped_orders
-from dz_cod.setup.webhooks import webhook_name
+from dz_cod.setup.webhooks import setup_webhooks, webhook_name
 from dz_cod.tests import helpers as h
 
 
@@ -105,6 +105,47 @@ class TestWebhooks(IntegrationTestCase):
 		self.assertEqual(data["tracking_number"], order.dz_tracking_number)
 		self.assertEqual(data["items"][0]["item_code"], h.ITEM)
 		self.assertEqual(data["cod_amount"], order.dz_cod_amount)
+
+	def test_quotes_and_backslashes_stay_valid_json(self):
+		"""Review of 27 October 2026, 2.3: customer, phones, tracking number
+		and the rest were written raw, and a " broke the JSON."""
+		from frappe.integrations.doctype.webhook.webhook import get_webhook_data
+
+		setup_webhooks()  # this version's template on the test site
+		order = shipped_order()
+		order.customer = 'Boutique "El Baraka" \\ Kouba'  # in memory only
+		order.dz_tracking_number = 'YAL-"7"\\8'
+		data = get_webhook_data(order, frappe.get_doc("Webhook", webhook_name(S.SHIPPED)))
+		self.assertEqual(data["customer"], order.customer)
+		self.assertEqual(data["tracking_number"], order.dz_tracking_number)
+		self.assertEqual(data["order_date"], str(order.transaction_date))
+
+	def test_webhooks_are_signed_and_keep_their_secret(self):
+		setup_webhooks()
+		webhook = frappe.get_doc("Webhook", webhook_name(S.CONFIRMED))
+		secret = webhook.get_password("webhook_secret")
+		self.assertTrue(webhook.enable_security)
+		self.assertGreaterEqual(len(secret), 32)
+		setup_webhooks()  # a migrate later never replaces it
+		self.assertEqual(frappe.get_doc("Webhook", webhook.name).get_password("webhook_secret"), secret)
+
+
+class TestIndexes(IntegrationTestCase):
+	def test_the_fields_looked_up_on_every_order_are_indexed(self):
+		"""Review of 27 October 2026, 4.1 (setup/custom_fields.py INDEXED)."""
+		from dz_cod.setup.custom_fields import INDEXED
+
+		for doctype, fields in {**INDEXED, "Customer": {"dz_phone"}}.items():
+			indexed = {
+				row[0]
+				for row in frappe.db.sql(
+					"SELECT column_name FROM information_schema.statistics"
+					" WHERE table_schema = DATABASE() AND table_name = %s",
+					f"tab{doctype}",
+				)
+			}
+			with self.subTest(doctype=doctype):
+				self.assertLessEqual(fields, indexed)
 
 
 class TestReports(IntegrationTestCase):

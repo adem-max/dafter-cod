@@ -361,3 +361,7 @@ La commande {0} n'a pas de mouvement d'expédition.,Order {0} has no shipment mo
 Écart entre le compte {0} et les colis livrés non réglés : voyez les versements du transporteur.,"Difference between account {0} and the delivered, unsettled parcels: check the courier's settlements."
 {0} : frais retenus couverts par ses factures,{0}: fees withheld covered by its invoices
 Saisissez la facture du transporteur pour ses frais retenus (6241 et la TVA).,Enter the courier's invoice for the fees it withheld (6241 and the VAT).
+Vous ne pouvez pas modifier le champ {0} de la commande.,You cannot change the field {0} of the order.
+Vous ne pouvez pas modifier les articles de la commande.,You cannot change the items of the order.
+Quantité invalide : {0},Invalid quantity: {0}
+Une quantité ne peut pas être négative : {0},A quantity cannot be negative: {0}

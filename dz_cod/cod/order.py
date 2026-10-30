@@ -32,6 +32,7 @@ from frappe.utils import flt, today
 from dz_cod.cod import invoicing, stock
 from dz_cod.cod import states as S
 from dz_cod.cod.channel import default_channel, is_cod
+from dz_cod.cod.permissions import check_limited_change
 from dz_cod.cod.phone_checks import warn_refused_parcels
 from dz_cod.cod.shipping import apply_shipping_charge, get_rates, remove_shipping_row
 from dz_cod.couriers import get_adapter
@@ -128,6 +129,7 @@ def check_delivery_details(order):
 
 def before_update_after_submit(order, method=None):
 	"""Checks and dates, BEFORE a submitted order is saved in its new state."""
+	check_limited_change(order)
 	if not is_cod(order) or not order.has_value_changed("workflow_state"):
 		return
 

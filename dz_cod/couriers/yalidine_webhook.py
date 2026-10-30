@@ -34,7 +34,7 @@ from werkzeug.wrappers import Response
 
 from dz_cod.cod import states as S
 from dz_cod.couriers.base import DELIVERED, RETURNED
-from dz_cod.couriers.yalidine import map_status, update_order, with_reason
+from dz_cod.couriers.yalidine import map_status, order_of_parcel, update_order, with_reason
 from dz_cod.features import MESSAGE, is_enabled
 
 ACTIONS = {DELIVERED: S.ACTION_DELIVER, RETURNED: S.ACTION_RETURN}
@@ -154,7 +154,7 @@ def handle_event(event):
 
 	if event.event_type == "parcel_status_updated":
 		status = with_reason(data.get("status"), data.get("reason"))
-		order = update_order(tracking, status=status, status_on=event.occurred_at)
+		order = update_order(tracking, event.courier, status=status, status_on=event.occurred_at)
 		if not order:
 			return (
 				IGNORED,
@@ -165,11 +165,13 @@ def handle_event(event):
 		return DONE, order, None
 
 	if event.event_type == "parcel_payment_updated":
-		order = update_order(tracking, payment_status=data.get("status"), payment_id=data.get("payment_id"))
+		order = update_order(
+			tracking, event.courier, payment_status=data.get("status"), payment_id=data.get("payment_id")
+		)
 		return (DONE, order, None) if order else (IGNORED, None, "Aucune commande avec ce n° de suivi.")
 
 	if event.event_type in ("parcel_created", "parcel_edited") and data.get("label"):
-		order = frappe.db.get_value("Sales Order", {"dz_tracking_number": tracking, "docstatus": 1})
+		order = order_of_parcel(tracking, event.courier)
 		if order:
 			frappe.db.set_value("Sales Order", order, "dz_label_url", data["label"], update_modified=False)
 			return DONE, order, None

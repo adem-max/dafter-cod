@@ -57,7 +57,7 @@ it out for the base only. Change it later with `dz-features` (or from the hub).
 | 0:40 | Courier: Supplier → the courier made by `prepare`, *Connecteur* = Manuel (or Yalidine with the client's API keys, docs/COURIER_INTEGRATION.md §4). |
 | 0:50 | **Wilayas et tarifs**: list view → edit *Tarif domicile*, *Tarif stop desk* and the courier costs from the client's rate card; untick *Livrable* where the courier does not go. (Report view allows editing many rows quickly.) |
 | 1:05 | Products and opening stock: dz_core's import workbook (dafter-core README), into Produits finis. |
-| 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français (or English or Arabic: the whole COD app follows). |
+| 1:35 | Users: one per person, roles Sales User / Stock User / Accounts User; language Français (or English or Arabic: the whole COD app follows). Who presses what: **Sales User** confirms, calls back, cancels, validates direct sales; **Stock User** prepares, ships, marks delivered or returned, inspects returns; **Accounts User** records Versements (which mark orders Réglée). A Stock User or Accounts User changes an order only in their own steps, and never its lines (dz_cod/cod/permissions.py). |
 | 1:45 | Webhooks: if the client uses n8n, paste the URLs and enable (docs/WEBHOOKS.md). |
 | 1:50 | Smoke test with the client: one order Nouvelle → Confirmer → Préparer → Expédier → Marquer livrée, then cancel/delete it. Check the delivery note and stock. |
 | 1:55 | Backups are automatic (every site); the restore drill also compares orders and Versements on a COD site. Note the admin password in your password manager. |

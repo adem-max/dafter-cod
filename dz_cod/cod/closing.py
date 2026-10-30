@@ -53,21 +53,26 @@ def checks(company, start, end):
 
 
 def still_owed(courier, company, end):
-	"""What the courier owes for its parcels delivered up to `end`."""
+	"""What the courier owes for its parcels delivered up to `end`: their
+	amount to collect, less what Versements up to `end` booked against them
+	(cod/received.py), nothing for a parcel a Versement settled by then."""
+	from dz_cod.cod.received import received
+
+	orders = frappe.db.sql(
+		"""SELECT so.name, so.dz_cod_amount FROM `tabSales Order` so
+		WHERE so.company = %(company)s AND so.dz_courier = %(courier)s
+			AND IFNULL(so.dz_payment_entry, '') != '' AND so.dz_delivered_on <= %(end)s
+			AND NOT EXISTS (
+				SELECT 1 FROM `tabCourier Settlement` settled
+				WHERE settled.name = so.dz_settlement AND settled.docstatus = 1 AND settled.posting_date <= %(end)s
+			)""",
+		{"company": company, "courier": courier, "end": end},
+		as_dict=True,
+	)
+	before = received([order.name for order in orders], until=end)
 	return flt(
-		frappe.db.sql(
-			"""SELECT SUM(so.dz_cod_amount - IFNULL((
-				SELECT SUM(item.collected_amount) FROM `tabCourier Settlement Item` item
-				JOIN `tabCourier Settlement` cs ON cs.name = item.parent
-				WHERE item.sales_order = so.name AND cs.docstatus = 1 AND cs.posting_date <= %(end)s
-			), 0))
-			FROM `tabSales Order` so
-			WHERE so.company = %(company)s AND so.dz_courier = %(courier)s
-				AND IFNULL(so.dz_payment_entry, '') != '' AND so.dz_delivered_on <= %(end)s
-				AND NOT EXISTS (
-					SELECT 1 FROM `tabCourier Settlement` settled
-					WHERE settled.name = so.dz_settlement AND settled.docstatus = 1 AND settled.posting_date <= %(end)s
-				)""",
-			{"company": company, "courier": courier, "end": end},
-		)[0][0]
+		sum(
+			flt(order.dz_cod_amount) - (before[order.name].gross if order.name in before else 0)
+			for order in orders
+		)
 	)

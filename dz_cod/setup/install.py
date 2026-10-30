@@ -9,6 +9,7 @@ import os
 
 import frappe
 
+from dz_cod.cod.permissions import grant_write
 from dz_cod.features import apply_features
 from dz_cod.setup.custom_fields import setup_custom_fields
 from dz_cod.setup.webhooks import setup_webhooks
@@ -27,6 +28,7 @@ def after_migrate():
 def setup_all():
 	setup_custom_fields()
 	setup_workflow()
+	grant_write()  # Stock User and Accounts User move orders (cod/permissions.py)
 	setup_wilaya_rates()  # the wilayas themselves come from dz_core
 	setup_webhooks()
 	setup_selling_settings()
