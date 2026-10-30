@@ -43,6 +43,25 @@ class TestSettlement(IntegrationTestCase):
 		super().setUpClass()
 		h.setup_fixtures()
 
+	def test_a_tracking_number_is_looked_up_on_the_versements_courier_first(self):
+		"""Review of 27 October 2026, 2.4: two couriers can number parcels
+		alike; the lookup took whichever order came first."""
+		ours = delivered_order()
+		other = h.act(h.make_order(courier=h.MANUAL_COURIER), S.ACTION_CONFIRM)
+		# the other courier's parcel, same number, the most recently changed
+		frappe.db.set_value("Sales Order", other.name, "dz_tracking_number", ours.dz_tracking_number)
+		settlement = new_settlement(
+			[
+				{
+					"tracking_number": ours.dz_tracking_number,
+					"collected_amount": ours.dz_cod_amount,
+					"courier_fee": ours.dz_courier_fee,
+				}
+			]
+		)
+		self.assertEqual(settlement.items[0].sales_order, ours.name)
+		self.assertEqual(settlement.items[0].status, rules.OK)
+
 	def test_matching_statuses_and_summary(self):
 		ok = delivered_order()
 		short = delivered_order()

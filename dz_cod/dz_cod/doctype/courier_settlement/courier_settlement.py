@@ -135,16 +135,22 @@ class CourierSettlement(Document):
 			)
 
 	def find_order(self, line):
-		"""The line's order, by order name or else by tracking number."""
-		filters = None
+		"""The line's order, by order name or else by tracking number: on this
+		Versement's courier first, then on any courier, so another courier's
+		parcel still shows as "Invalide" instead of going unnoticed (two
+		couriers can number parcels alike; review of 27 October 2026, 2.4)."""
 		if line.sales_order:
-			filters = {"name": line.sales_order}
+			tries = [{"name": line.sales_order}]
 		elif line.tracking_number:
-			filters = {"dz_tracking_number": line.tracking_number.strip(), "docstatus": 1}
-		if not filters:
+			tracking = {"dz_tracking_number": line.tracking_number.strip(), "docstatus": 1}
+			tries = [{**tracking, "dz_courier": self.courier}, tracking]
+		else:
 			return None
-		orders = frappe.get_all("Sales Order", filters=filters, fields=ORDER_FIELDS, limit=1)
-		return orders[0] if orders else None
+		for filters in tries:
+			orders = frappe.get_all("Sales Order", filters=filters, fields=ORDER_FIELDS, limit=1)
+			if orders:
+				return orders[0]
+		return None
 
 	# ------------------------------------------------------------- summary
 

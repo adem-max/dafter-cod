@@ -96,7 +96,7 @@ Source: the advice doc "Daftar: SCF default accounts and compliance advice" (daf
 
 ## Settlement (Versement)
 
-- **One line per parcel, matched by order name or tracking number.**
+- **One line per parcel, matched by order name or tracking number.** A tracking number is looked up on the Versement's courier first, then on any courier (29 October 2026, review of 27 October, 2.4): two couriers can number parcels alike, and another courier's parcel must still show as Invalide rather than go unnoticed. Yalidine's sync and webhook look a parcel up on their own courier only.
 - **Net amount is what matters**: difference = (collected − courier fee) − (expected amount − expected fee).
 - **Line statuses**: OK, Écart, Inconnue, Déjà réglée, Invalide. Only OK lines (and Écart lines ticked "Accepter") move the order to Réglée on submit.
 - **Only "Livrée" orders can be settled**: an order still "Expédiée" is shown as Invalide; mark it delivered first (the list view allows bulk workflow actions).
