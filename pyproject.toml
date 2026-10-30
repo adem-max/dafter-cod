@@ -9,6 +9,9 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=16.0.0" # Installed and managed by bench.
+    # Frappe ships it today; declared so a Frappe that stops shipping it cannot
+    # break the courier connectors silently (review of 27 October 2026, 5.1)
+    "requests>=2.31",   # the Yalidine API (couriers/yalidine.py)
 ]
 
 [build-system]

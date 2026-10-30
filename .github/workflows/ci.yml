@@ -1,12 +1,16 @@
 # Lint and tests on every push. Based on the workflow `bench new-app` writes
 # (Frappe 16, frappe/utils/boilerplate.py), with Frappe and ERPNext on version-16.
-# dz_cod runs on dz_core: dafter-core is taken at the branch of the same name
-# when it exists (work that spans both repos), else at main.
+# dz_cod runs on dz_core: dafter-core is taken at the branch (or release tag)
+# of the same name when it exists (work that spans both repos), else at main.
+# Also weekly, so a change in Frappe's or ERPNext's version-16 branch shows
+# before it lands in the middle of a release (review of 27 October 2026, 5.3).
 name: CI
 
 on:
   push:
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1" # Mondays 03:00 UTC
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -73,9 +77,10 @@ jobs:
 
       - name: Bench with Frappe, ERPNext 16 and dafter-core
         run: |
+          # A branch, or a release tag (v0.4.1 needs dz_core v0.4.1), like dz_adm's CI
           BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
           CORE=main
-          if git ls-remote --exit-code --heads https://github.com/adem-max/dafter-core "$BRANCH" > /dev/null; then CORE="$BRANCH"; fi
+          if git ls-remote --exit-code --heads --tags https://github.com/adem-max/dafter-core "$BRANCH" > /dev/null; then CORE="$BRANCH"; fi
           echo "dafter-core at $CORE"
           pip install frappe-bench
           bench init --skip-redis-config-generation --skip-assets --frappe-branch version-16 --python "$(which python)" ~/frappe-bench
