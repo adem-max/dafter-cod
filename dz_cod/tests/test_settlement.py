@@ -43,6 +43,79 @@ class TestSettlement(IntegrationTestCase):
 		super().setUpClass()
 		h.setup_fixtures()
 
+	def test_the_courier_account_follows_the_parcels_whatever_the_versements(self):
+		"""Review of 27 October 2026, 4.2: three places computed "already
+		received" three ways and could drift apart. After each random step the
+		courier's 4671n account and still_owed (the month close) must move
+		together."""
+		import random
+
+		from dz_core.closing import balance
+
+		from dz_cod.cod.closing import still_owed
+
+		account = frappe.db.get_value("Supplier", h.MOCK_COURIER, "dz_cod_account")
+
+		def gap():
+			if not account:  # the courier's account is made at its first delivery
+				return 0
+			return balance(D.COMPANY, [account], today()) - still_owed(h.MOCK_COURIER, D.COMPANY, today())
+
+		pool = [delivered_order() for _ in range(3)]
+		account = frappe.db.get_value("Supplier", h.MOCK_COURIER, "dz_cod_account")
+		start = gap()
+		submitted = []
+		draw = random.Random(2026)
+		actions = ["deliver", "full", "short", "short_accepted", "over", "cancel", "paid_before_delivery"]
+		# the first step is the case that drifted: money for a parcel not yet
+		# delivered here (an Invalide line, booked to 4781), then the delivery
+		for step, action in enumerate(["paid_before_delivery"] + [draw.choice(actions) for _ in range(14)]):
+			unpaid = [
+				o for o in pool if frappe.db.get_value("Sales Order", o.name, "workflow_state") == S.DELIVERED
+			]
+			if action == "paid_before_delivery":
+				order = h.act(h.make_order(), S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP)
+				early = new_settlement([short_line(order, short=0)])
+				early.submit()
+				submitted.append(early.name)
+				pool.append(h.act(order, S.ACTION_DELIVER))
+			elif action == "deliver" or not unpaid:
+				pool.append(delivered_order())
+			elif action == "cancel" and submitted:
+				try:
+					frappe.get_doc("Courier Settlement", submitted[-1]).cancel()
+					submitted.pop()
+				except frappe.ValidationError:
+					pass  # refused while a later Versement counts it: nothing changed
+			else:
+				order = frappe.get_doc("Sales Order", draw.choice(unpaid).name)
+				due = order.dz_cod_amount - order.dz_courier_fee
+				already = sum(
+					frappe.get_all(
+						"Courier Settlement Item",
+						filters={
+							"sales_order": order.name,
+							"docstatus": 1,
+							"status": ["in", ["OK", "Écart"]],
+						},
+						pluck="net_amount",
+					)
+				)
+				short = {"full": 0, "short": 400, "short_accepted": 400, "over": -300, "cancel": 0}[action]
+				line = {
+					"sales_order": order.name,
+					"collected_amount": max(due - already - short, 0)
+					+ (order.dz_courier_fee if not already else 0),
+					"courier_fee": order.dz_courier_fee if not already else 0,
+				}
+				if action in ("short_accepted", "over"):
+					line["accept_difference"] = 1
+				settlement = new_settlement([line])
+				settlement.submit()
+				submitted.append(settlement.name)
+			with self.subTest(step=step, action=action):
+				self.assertAlmostEqual(gap(), start, 2)
+
 	def test_a_tracking_number_is_looked_up_on_the_versements_courier_first(self):
 		"""Review of 27 October 2026, 2.4: two couriers can number parcels
 		alike; the lookup took whichever order came first."""

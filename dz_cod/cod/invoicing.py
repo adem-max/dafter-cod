@@ -180,14 +180,10 @@ def courier_claim(line, settlement):
 	)
 	if not order or not order.dz_payment_entry:
 		return None
-	collected_before = frappe.db.sql(
-		"""SELECT IFNULL(SUM(item.collected_amount), 0)
-		FROM `tabCourier Settlement Item` item
-		JOIN `tabCourier Settlement` cs ON cs.name = item.parent
-		WHERE item.sales_order = %s AND cs.docstatus = 1 AND cs.name != %s""",
-		(line.sales_order, settlement.name),
-	)[0][0]
-	return flt(order.dz_cod_amount) - flt(collected_before)
+	from dz_cod.cod.received import received
+
+	before = received([line.sales_order], exclude=settlement.name).get(line.sales_order)
+	return flt(order.dz_cod_amount) - (before.gross if before else 0)
 
 
 def cancel_settlement_entry(settlement):

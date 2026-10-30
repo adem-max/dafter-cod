@@ -215,23 +215,7 @@ class CourierSettlement(Document):
 
 
 def get_amounts_received(orders, exclude_settlement=None):
-	"""{order: net already received}: the net of the order's lines in submitted
-	Versements of the order's own courier (rule in dz_cod.cod.settlement)."""
-	if not orders:
-		return {}
-	rows = frappe.db.sql(
-		"""
-		SELECT line.sales_order, SUM(line.net_amount) AS received
-		FROM `tabCourier Settlement Item` line
-		JOIN `tabCourier Settlement` settlement ON settlement.name = line.parent
-		JOIN `tabSales Order` so ON so.name = line.sales_order
-		WHERE settlement.docstatus = 1
-			AND settlement.courier = so.dz_courier
-			AND settlement.name != %(exclude)s
-			AND line.sales_order IN %(orders)s
-		GROUP BY line.sales_order
-		""",
-		{"orders": list(orders), "exclude": exclude_settlement or ""},
-		as_dict=True,
-	)
-	return {row.sales_order: flt(row.received) for row in rows}
+	"""{order: net already received} (dz_cod/cod/received.py)."""
+	from dz_cod.cod.received import received
+
+	return {order: amounts.net for order, amounts in received(orders, exclude=exclude_settlement).items()}
