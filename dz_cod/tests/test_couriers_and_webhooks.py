@@ -130,6 +130,24 @@ class TestWebhooks(IntegrationTestCase):
 		self.assertEqual(frappe.get_doc("Webhook", webhook.name).get_password("webhook_secret"), secret)
 
 
+class TestIndexes(IntegrationTestCase):
+	def test_the_fields_looked_up_on_every_order_are_indexed(self):
+		"""Review of 27 October 2026, 4.1 (setup/custom_fields.py INDEXED)."""
+		from dz_cod.setup.custom_fields import INDEXED
+
+		for doctype, fields in {**INDEXED, "Customer": {"dz_phone"}}.items():
+			indexed = {
+				row[0]
+				for row in frappe.db.sql(
+					"SELECT column_name FROM information_schema.statistics"
+					" WHERE table_schema = DATABASE() AND table_name = %s",
+					f"tab{doctype}",
+				)
+			}
+			with self.subTest(doctype=doctype):
+				self.assertLessEqual(fields, indexed)
+
+
 class TestReports(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):

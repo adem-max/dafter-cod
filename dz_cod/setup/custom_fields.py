@@ -414,16 +414,42 @@ SALES_ORDER_PROPERTIES = [
 ]
 
 
+# Looked up on every courier webhook, hourly sync, phone check and Versement:
+# indexed, so MariaDB does not read the whole table each time (review of 27
+# October 2026, 4.1). The migrate after a change adds the index.
+INDEXED = {
+	"Sales Order": {
+		"dz_tracking_number",
+		"dz_phone",
+		"dz_phone_2",
+		"dz_settlement",
+		"dz_payment_entry",
+		"dz_delivered_on",
+	},
+	"Stock Entry": {"dz_sales_order"},
+}
+
+
+def with_indexes(doctype, fields):
+	return [
+		{**field, "search_index": 1} if field.get("fieldname") in INDEXED.get(doctype, ()) else field
+		for field in fields
+	]
+
+
 def setup_custom_fields():
 	"""Create or update all custom fields. Safe to run many times."""
 	switch_commune_to_autocomplete()
 	create_custom_fields(
 		{
-			"Sales Order": SALES_ORDER_FIELDS,
-			"Customer": CUSTOMER_FIELDS,
-			"Supplier": SUPPLIER_FIELDS,
-			"Stock Entry": STOCK_ENTRY_FIELDS,
-			"DZ Wilaya": DZ_WILAYA_FIELDS,
+			doctype: with_indexes(doctype, fields)
+			for doctype, fields in {
+				"Sales Order": SALES_ORDER_FIELDS,
+				"Customer": CUSTOMER_FIELDS,
+				"Supplier": SUPPLIER_FIELDS,
+				"Stock Entry": STOCK_ENTRY_FIELDS,
+				"DZ Wilaya": DZ_WILAYA_FIELDS,
+			}.items()
 		},
 		update=True,
 	)
