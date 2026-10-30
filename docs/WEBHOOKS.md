@@ -26,10 +26,15 @@ They are created **disabled**, pointing to `https://n8n.example.com/webhook/dz-c
 3. Paste the n8n URL into **Request URL**, tick **Enabled**, save.
 4. Repeat for the other three (they can all use the same URL: the `event`
    field tells n8n which state it is).
-5. Optional but recommended: tick **Enable Security** and set a **Webhook
-   Secret**. ERPNext then signs each call (header `X-Frappe-Webhook-Signature`,
-   HMAC-SHA256 of the body, base64) so n8n can check the call really comes
-   from your ERPNext.
+5. Signing is on (29 October 2026): each webhook has **Enable Security**
+   ticked and a random **Webhook Secret**, set by dz_cod on install and
+   migrate (an existing secret is never replaced). ERPNext signs each call
+   (header `X-Frappe-Webhook-Signature`, HMAC-SHA256 of the body, base64). In
+   n8n, check it before trusting the call: compute the HMAC of the raw body
+   with the secret and compare. A Password field cannot be read back from the
+   form, so type a secret of your own in *Webhook Secret* (the same in the
+   four webhooks) and in n8n. The body carries customers' names, phones and
+   addresses.
 
 `bench migrate` never touches your URL, the Enabled tick or the headers.
 When a new version of dz_cod changes the JSON template or the condition, it

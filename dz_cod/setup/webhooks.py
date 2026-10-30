@@ -29,24 +29,26 @@ from dz_cod.cod import states as S
 
 PLACEHOLDER_URL = "https://n8n.example.com/webhook/dz-cod"
 
-# The JSON body sent to n8n (Jinja template, `doc` is the Sales Order)
+# The JSON body sent to n8n (Jinja template, `doc` is the Sales Order). Every
+# text goes through tojson: a " or \ in a customer's name or a tracking
+# number broke the JSON (review of 27 October 2026, 2.3)
 PAYLOAD = """{
-  "event": "{{ doc.workflow_state }}",
-  "order": "{{ doc.name }}",
-  "order_date": "{{ doc.transaction_date }}",
-  "customer": "{{ doc.customer }}",
+  "event": {{ (doc.workflow_state or '') | tojson }},
+  "order": {{ doc.name | tojson }},
+  "order_date": {{ (doc.transaction_date or '') | string | tojson }},
+  "customer": {{ (doc.customer or '') | tojson }},
   "customer_name": {{ doc.customer_name | tojson }},
-  "phone": "{{ doc.dz_phone or '' }}",
-  "phone_2": "{{ doc.dz_phone_2 or '' }}",
+  "phone": {{ (doc.dz_phone or '') | tojson }},
+  "phone_2": {{ (doc.dz_phone_2 or '') | tojson }},
   "wilaya": {{ (doc.dz_wilaya or '') | tojson }},
   "commune": {{ (doc.dz_commune or '') | tojson }},
   "address": {{ (doc.dz_address or '') | tojson }},
-  "delivery_type": "{{ doc.dz_delivery_type or '' }}",
-  "source": "{{ doc.dz_source or '' }}",
+  "delivery_type": {{ (doc.dz_delivery_type or '') | tojson }},
+  "source": {{ (doc.dz_source or '') | tojson }},
   "shipping_charge": {{ doc.dz_shipping_charge or 0 }},
   "cod_amount": {{ doc.dz_cod_amount or 0 }},
   "courier": {{ (doc.dz_courier or '') | tojson }},
-  "tracking_number": "{{ doc.dz_tracking_number or '' }}",
+  "tracking_number": {{ (doc.dz_tracking_number or '') | tojson }},
   "call_attempts": {{ doc.dz_call_attempts or 0 }},
   "items": [{% for row in doc["items"] %}
     {"item_code": {{ row.item_code | tojson }}, "item_name": {{ row.item_name | tojson }}, "qty": {{ row.qty }}, "rate": {{ row.rate }}}{% if not loop.last %},{% endif %}{% endfor %}
@@ -89,6 +91,7 @@ def setup_webhooks():
 		condition = webhook_condition(state, event)
 		if frappe.db.exists("Webhook", name):
 			refresh_template(name, condition)
+			sign(name)
 			continue
 
 		webhook = frappe.new_doc("Webhook")
@@ -102,11 +105,26 @@ def setup_webhooks():
 				"request_method": "POST",
 				"request_structure": "JSON",
 				"webhook_json": PAYLOAD,
+				"enable_security": 1,
+				"webhook_secret": frappe.generate_hash(length=32),
 			}
 		)
 		webhook.append("webhook_headers", {"key": "Content-Type", "value": "application/json"})
 		webhook.insert(ignore_permissions=True, set_name=name)
 		frappe.db.set_default(fingerprint_key(name), fingerprint(condition, PAYLOAD))
+
+
+def sign(name):
+	"""Frappe signs each call (header X-Frappe-Webhook-Signature, HMAC-SHA256
+	of the body, base64) once Enable Security has a secret, so n8n can tell a
+	real call from a forged one (review of 20 October 2026, 3.4). Turned on
+	where it is off; a secret already set is never replaced."""
+	webhook = frappe.get_doc("Webhook", name)
+	if webhook.enable_security and webhook.get_password("webhook_secret", raise_exception=False):
+		return
+	webhook.enable_security = 1
+	webhook.webhook_secret = frappe.generate_hash(length=32)
+	webhook.save(ignore_permissions=True)
 
 
 def refresh_template(name, condition):
