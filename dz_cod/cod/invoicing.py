@@ -18,6 +18,8 @@ An order returned before delivery is never invoiced: nothing to undo.
 Switched off with COD Settings' "Facturer à la livraison".
 """
 
+from contextlib import contextmanager
+
 import frappe
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_party_account
@@ -76,12 +78,8 @@ def pay_to_courier(order, invoice):
 	# builder runs as Administrator: it returns an unsaved document, which is
 	# then inserted and submitted as the real user, so its owner and the audit
 	# trail name who marked the order delivered.
-	user = frappe.session.user
-	try:
-		frappe.set_user("Administrator")
+	with as_administrator():
 		payment = get_payment_entry("Sales Invoice", invoice.name)
-	finally:
-		frappe.set_user(user)
 	payment.paid_to = courier_account(order.dz_courier, order.company)
 	payment.paid_to_account_currency = frappe.get_cached_value("Account", payment.paid_to, "account_currency")
 	payment.mode_of_payment = None
@@ -95,6 +93,28 @@ def pay_to_courier(order, invoice):
 	payment.insert()
 	payment.submit()
 	return payment.name
+
+
+@contextmanager
+def as_administrator():
+	"""Run a block as Administrator, then give the request back its own session.
+
+	frappe.set_user (Frappe 16) also gives the session the user's name as its
+	id, empties its data (the CSRF token among them), and replaces the
+	request's form_dict and cache; setting the user back restores none of
+	them, and the emptied session is what the request saves at its end
+	(review of 31 October 2026, A)."""
+	local = frappe.local
+	session = local.session
+	saved = (session.user, session.sid, session.data, local.form_dict, local.cache)
+	try:
+		frappe.set_user("Administrator")
+		yield
+	finally:
+		user, sid, data, form_dict, cache = saved
+		frappe.set_user(user)
+		session.sid, session.data = sid, data
+		local.form_dict, local.cache = form_dict, cache
 
 
 # ------------------------------------------------------------ the Versement

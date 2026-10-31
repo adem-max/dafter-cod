@@ -15,13 +15,16 @@ press "Préparer" or have a Versement mark orders "Réglée". So:
    whose state (as saved, before the step) their role owns in the workflow
    (setup/workflow.py STATES), so never submit a draft. Frappe's hooks can
    only narrow, never widen.
-3. `check_limited_change` refuses any change from those users beyond the
-   courier fields and the workflow, including ERPNext's "Update Items".
+3. `check_change_after_submit` refuses any change from those users beyond the
+   shipping fields and the workflow, including ERPNext's "Update Items"; and
+   from every user, a change to Daftar's read-only fields (review of 31
+   October 2026, C).
 """
 
 import frappe
 from frappe import _
 from frappe.permissions import setup_custom_perms, update_permission_property
+from frappe.utils import cstr, flt, get_datetime
 
 from dz_cod.setup.workflow import ACCOUNTS, STATES, STOCK
 
@@ -35,6 +38,13 @@ OWNED = {
 
 
 RIGHTS = ("write", "submit")
+# What a user may change on a submitted order: what "Expédier" asks for
+# (cod/order.set_shipping_details). Daftar's other dz_ fields there are
+# read-only: written by the code (db_set, or the order hooks that run after
+# the check), never by a user. "Read only" only hides a field in the form, the
+# API would take it: an Accounts User could point dz_settlement at another
+# Versement and hide an unpaid parcel from the month's courier check.
+EDITABLE = {"dz_courier", "dz_tracking_number", "dz_stopdesk_id"}
 # (doctype, role, rights given). "Marquer livrée" makes the delivery note,
 # the invoice and its payment to the courier (cod/invoicing.py). ERPNext
 # wants the user to at least select the customer's account (accounts/party.py
@@ -102,28 +112,45 @@ def sales_order(doc, ptype=None, user=None, debug=False):
 	return any(saved.workflow_state in OWNED[role] for role in GRANTED if role in roles)
 
 
-def check_limited_change(order):
-	"""before_update_after_submit: a limited user changes only the courier
-	fields (dz_...) and the workflow state, never ERPNext's own fields or the
-	lines (an edit through the API or "Update Items")."""
-	if not limited():
-		return
+def check_change_after_submit(order):
+	"""before_update_after_submit, before the order hooks set their dates.
+	Nobody changes Daftar's read-only fields; a limited user changes only
+	EDITABLE and the workflow state, never ERPNext's own fields or the lines
+	(an edit through the API or "Update Items")."""
 	before = order.get_doc_before_save()
-	if not before:
+	if not before or frappe.flags.in_patch or frappe.flags.in_migrate:
 		return
+	is_limited = limited()
 	for field in order.meta.fields:
 		name = field.fieldname
 		if (
-			field.fieldtype in ("Table", "Table MultiSelect")
+			not field.allow_on_submit
+			or field.fieldtype in ("Table", "Table MultiSelect")
+			or name in EDITABLE
 			or name == "workflow_state"
-			or name.startswith("dz_")
 		):
 			continue
-		if field.allow_on_submit and order.get(name) != before.get(name):
-			frappe.throw(_("Vous ne pouvez pas modifier le champ {0} de la commande.").format(_(field.label)))
+		if not is_limited and not (name.startswith("dz_") and field.read_only):
+			continue
+		if not same(field.fieldtype, order.get(name), before.get(name)):
+			frappe.throw(
+				_("Vous ne pouvez pas modifier le champ {0} de la commande.").format(_(field.label)),
+				frappe.PermissionError,
+			)
+	if not is_limited:
+		return
 
 	def lines(doc):
 		return [(row.item_code, row.qty, row.rate) for row in doc.get("items")]
 
 	if lines(order) != lines(before):
 		frappe.throw(_("Vous ne pouvez pas modifier les articles de la commande."), frappe.PermissionError)
+
+
+def same(fieldtype, value, saved):
+	"""The form sends dates and numbers back as text: compare them as values."""
+	if fieldtype in ("Date", "Datetime"):
+		return (get_datetime(value) if value else None) == (get_datetime(saved) if saved else None)
+	if fieldtype in ("Int", "Float", "Currency", "Percent", "Check"):
+		return flt(value) == flt(saved)
+	return cstr(value) == cstr(saved)

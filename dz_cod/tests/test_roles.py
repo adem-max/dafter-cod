@@ -78,6 +78,48 @@ class TestRoles(IntegrationTestCase):
 			update_child_qty_rate("Sales Order", json.dumps(items), order.name)
 		# (a request that fails is rolled back as a whole; a test is not, so no DB check here)
 
+	def test_nobody_changes_the_read_only_fields_of_an_order(self):
+		"""Review of 31 October 2026, C: only the shipping fields are typed in;
+		dz_settlement, the dates... are the code's, through the API too."""
+		order = h.act(h.make_order(), S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP)
+		with self.set_user(self.stock_user):
+			order = frappe.get_doc("Sales Order", order.name)
+			order.dz_tracking_number = f"{order.dz_tracking_number}-B"
+			order.save()  # a shipping field: allowed
+		order = h.act(order, S.ACTION_DELIVER)
+		for user in (self.accounts_user, self.sales_user):
+			with self.subTest(user=user), self.set_user(user), self.assertRaises(frappe.PermissionError):
+				order = frappe.get_doc("Sales Order", order.name)
+				order.dz_delivered_on = "2020-01-01 00:00:00"
+				order.save()
+
+	def test_a_suspended_site_moves_no_order(self):
+		"""Review of 31 October 2026, B: a workflow step on a submitted order is
+		an update after submit, which Frappe's before_validate does not see."""
+		from dz_core.suspension import KEY
+
+		order = h.act(h.make_order(), S.ACTION_CONFIRM)
+		frappe.local.conf[KEY] = 1
+		self.addCleanup(frappe.local.conf.pop, KEY, None)
+		with self.set_user(self.stock_user), self.assertRaises(frappe.ValidationError):
+			h.act(frappe.get_doc("Sales Order", order.name), S.ACTION_PREPARE)
+
+	def test_the_administrator_step_gives_the_session_back(self):
+		"""Review of 31 October 2026, A: frappe.set_user empties the session,
+		and a browser request saves its session at the end."""
+		from dz_cod.cod.invoicing import as_administrator
+
+		with self.set_user(self.stock_user):
+			session = frappe.local.session
+			session.sid, session.data = "sid-du-navigateur", frappe._dict(csrf_token="jeton")
+			form_dict, cache = frappe.local.form_dict, frappe.local.cache
+			with as_administrator():
+				self.assertEqual(frappe.session.user, "Administrator")
+			self.assertEqual(frappe.session.user, self.stock_user)
+			self.assertEqual((session.sid, session.data.csrf_token), ("sid-du-navigateur", "jeton"))
+			self.assertIs(frappe.local.form_dict, form_dict)
+			self.assertIs(frappe.local.cache, cache)
+
 	def test_a_sales_user_cannot_mark_an_order_settled(self):
 		order = h.act(h.make_order(), S.ACTION_CONFIRM, S.ACTION_PREPARE, S.ACTION_SHIP, S.ACTION_DELIVER)
 		with self.set_user(self.sales_user), self.assertRaises(frappe.ValidationError):

@@ -1,9 +1,9 @@
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 # The oldest dz_core this dz_cod works with: dz_cod imports dz_core's setup,
 # features, phone and wilaya code. Raise it in the commit that starts using
 # something new from dz_core, and release the two together (docs/DEPLOY.md).
-DZ_CORE_MIN = "0.4.1"
+DZ_CORE_MIN = "0.4.2"
 
 
 def version_tuple(version):
